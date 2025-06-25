@@ -59,12 +59,8 @@
     - [x] Display file tree with checkboxes for files and folders.
     - [x] Provide search box for filtering tree results.
     - [x] Write failing test for dialog to select root folder and remember path.
-<<<<<<< ins7rd-codex/process-task-list-as-instructed
     - [x] Implement dialog to select root folder and remember path.
-=======
-    - [ ] Implement dialog to select root folder and remember path.
->>>>>>> main
-    - [ ] Write failing test for preset dropdown and filter name field to save presets.
+    - [x] Write failing test for preset dropdown and filter name field to save presets.
     - [ ] Implement preset dropdown and filter name field to save presets.
     - [ ] Write failing test for include/exclude regex mode selectors.
     - [ ] Implement include/exclude regex mode selectors for folders and files.
