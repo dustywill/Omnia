@@ -37,10 +37,10 @@
     - [x] Merge plugin default settings on first run.
     - [x] Watch for configuration changes and notify plugins via event bus.
 
-  - [ ] 2.2 Plugin Manager (`src/core/plugin-manager.ts`)
-    - [ ] Load each plugin’s `plugin.json5` manifest and main module.
-    - [ ] Provide lifecycle hooks to initialize and stop plugins.
-    - [ ] Expose helper to retrieve and update plugin configuration.
+  - [x] 2.2 Plugin Manager (`src/core/plugin-manager.ts`)
+    - [x] Load each plugin’s `plugin.json5` manifest and main module.
+    - [x] Provide lifecycle hooks to initialize and stop plugins.
+    - [x] Expose helper to retrieve and update plugin configuration.
   - [x] 2.3 Logger (`src/core/logger.ts`)
     - [x] Create timestamped log entries with plugin identifiers.
     - [x] Support info, warning, and error levels written to console and file.
