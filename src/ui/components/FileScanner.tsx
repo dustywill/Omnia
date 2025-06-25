@@ -12,9 +12,13 @@ export type FileNode = {
 
 export type FileScannerProps = {
   tree: FileNode[];
+  selectRootFolder?: () => Promise<string>;
 };
 
-export const FileScanner: React.FC<FileScannerProps> = ({ tree }) => {
+export const FileScanner: React.FC<FileScannerProps> = ({
+  tree,
+  selectRootFolder,
+}) => {
 
   const [query, setQuery] = useState('');
 
@@ -32,6 +36,8 @@ export const FileScanner: React.FC<FileScannerProps> = ({ tree }) => {
       })
       .filter(Boolean) as FileNode[];
   };
+
+  const [rootPath, setRootPath] = useState<string | undefined>();
 
   const filtered = filterTree(tree);
 
@@ -55,6 +61,18 @@ export const FileScanner: React.FC<FileScannerProps> = ({ tree }) => {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
       />
+      {selectRootFolder && (
+        <button
+          type="button"
+          onClick={async () => {
+            const path = await selectRootFolder();
+            setRootPath(path);
+          }}
+        >
+          Select Root Folder
+        </button>
+      )}
+      {rootPath && <div>{rootPath}</div>}
       <ul className="file-scanner">{filtered.map(renderNode)}</ul>
     </div>
   );
