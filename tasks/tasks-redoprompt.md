@@ -32,27 +32,27 @@
   - [x] 1.2 Configure TypeScript strict mode via `tsconfig.json`.
   - [x] 1.3 Install and configure Jest and Playwright for testing.
 
-- [ ] 2.0 Core Modules Implementation
+- [x] 2.0 Core Modules Implementation
 
-  - [ ] 2.1 Configuration Manager (`src/core/config.ts`)
-    - [ ] Read and write `config/app-config.json5` using JSON5 parser.
-    - [ ] Merge plugin default settings on first run.
-    - [ ] Watch for configuration changes and notify plugins via event bus.
+  - [x] 2.1 Configuration Manager (`src/core/config.ts`)
+    - [x] Read and write `config/app-config.json5` using JSON5 parser.
+    - [x] Merge plugin default settings on first run.
+    - [x] Watch for configuration changes and notify plugins via event bus.
 
-  - [ ] 2.2 Plugin Manager (`src/core/plugin-manager.ts`)
-    - [ ] Load each plugin’s `plugin.json5` manifest and main module.
-    - [ ] Provide lifecycle hooks to initialize and stop plugins.
-    - [ ] Expose helper to retrieve and update plugin configuration.
-  - [ ] 2.3 Logger (`src/core/logger.ts`)
-    - [ ] Create timestamped log entries with plugin identifiers.
-    - [ ] Support info, warning, and error levels written to console and file.
-  - [ ] 2.4 Event Bus (`src/core/event-bus.ts`)
-    - [ ] Implement publish/subscribe for core and plugins.
-    - [ ] Ensure events are strongly typed and support payloads.
+  - [x] 2.2 Plugin Manager (`src/core/plugin-manager.ts`)
+    - [x] Load each plugin’s `plugin.json5` manifest and main module.
+    - [x] Provide lifecycle hooks to initialize and stop plugins.
+    - [x] Expose helper to retrieve and update plugin configuration.
+  - [x] 2.3 Logger (`src/core/logger.ts`)
+    - [x] Create timestamped log entries with plugin identifiers.
+    - [x] Support info, warning, and error levels written to console and file.
+  - [x] 2.4 Event Bus (`src/core/event-bus.ts`)
+    - [x] Implement publish/subscribe for core and plugins.
+    - [x] Ensure events are strongly typed and support payloads.
 
 - [ ] 3.0 Built-in Components
   - [ ] 3.1 FileScanner Component
-    - [ ] Display file tree with checkboxes for files and folders.
+    - [x] Display file tree with checkboxes for files and folders.
     - [ ] Provide search box for filtering tree results.
     - [ ] Include dialog to select root folder and remember path.
     - [ ] Offer preset dropdown and filter name field to save presets.
