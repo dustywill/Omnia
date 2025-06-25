@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import { parse as parseJson5 } from 'json5';
 import path from 'path';
+import { pathToFileURL } from 'url';
 import { type AppConfig, readConfig, writeConfig } from './config.js';
 import type { EventBus } from './event-bus.js';
 
@@ -46,18 +47,19 @@ export const createPluginManager = (opts: PluginManagerOptions) => {
       const manifestPath = path.join(opts.pluginsPath, entry.name, 'plugin.json5');
       try {
         const manifest = await readManifest(manifestPath);
-        const modPath = path.join(opts.pluginsPath, entry.name, manifest.main);
-        const mod = (await import(modPath)) as LoadedPlugin['module'];
-        loaded[manifest.id] = { manifest, module: mod };
         if (!config.plugins) config.plugins = {} as unknown as AppConfig['plugins'];
         if (!(config.plugins as any)[manifest.id]) {
           (config.plugins as any)[manifest.id] = manifest.configDefaults ?? {};
         }
+        const modPath = path.join(opts.pluginsPath, entry.name, manifest.main);
+        const mod = (await import(pathToFileURL(modPath).href)) as LoadedPlugin['module'];
+        loaded[manifest.id] = { manifest, module: mod };
       } catch {
         // skip invalid plugins
       }
     }
     await writeConfig(opts.configPath, config);
+    config = await readConfig(opts.configPath);
   };
 
   const initPlugins = async () => {

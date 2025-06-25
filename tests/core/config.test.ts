@@ -49,7 +49,7 @@ describe('config manager', () => {
   });
 
   it('emits event when config changes', async () => {
-    const bus = createEventBus<{ configChanged: unknown }>();
+    const bus = createEventBus<{ configChanged: Record<string, unknown> }>();
     const handler = jest.fn();
     bus.subscribe('configChanged', handler);
     const stop = watchConfig(tempConfigPath, bus);
