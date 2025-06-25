@@ -38,4 +38,5 @@ When working with task lists, the AI must:
 3. Add newly discovered tasks.
 4. Keep “Relevant Files” accurate and up to date.
 5. Before starting work, check which sub‑task is next.
-6. After implementing a sub‑task, update the file and then pause for user approval.
+6. Return for User aproval If instruction include a TDD directive then implement the behavior test for the task and
+7. After implementing a sub‑task, update the file and then pause for user approval.
