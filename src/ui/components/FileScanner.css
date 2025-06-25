@@ -1,0 +1,6 @@
+.file-scanner {
+  list-style: none;
+  padding-left: 0;
+  font-family: 'Nunito Sans', sans-serif;
+  color: var(--tt-color-text-primary-light);
+}
