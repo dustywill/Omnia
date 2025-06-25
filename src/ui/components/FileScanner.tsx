@@ -1,4 +1,6 @@
-import React from 'react';
+
+import React, { useState } from 'react';
+
 import './FileScanner.css';
 
 export type FileNode = {
@@ -13,6 +15,26 @@ export type FileScannerProps = {
 };
 
 export const FileScanner: React.FC<FileScannerProps> = ({ tree }) => {
+
+  const [query, setQuery] = useState('');
+
+  const filterTree = (nodes: FileNode[]): FileNode[] => {
+    if (!query) return nodes;
+    const q = query.toLowerCase();
+    return nodes
+      .map((n) => {
+        const children = n.children ? filterTree(n.children) : [];
+        const match = n.name.toLowerCase().includes(q);
+        if (match || children.length) {
+          return { ...n, children };
+        }
+        return null;
+      })
+      .filter(Boolean) as FileNode[];
+  };
+
+  const filtered = filterTree(tree);
+
   const renderNode = (node: FileNode) => (
     <li key={node.path}>
       <label>
@@ -25,5 +47,16 @@ export const FileScanner: React.FC<FileScannerProps> = ({ tree }) => {
     </li>
   );
 
-  return <ul className="file-scanner">{tree.map(renderNode)}</ul>;
+
+  return (
+    <div>
+      <input
+        placeholder="Search"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+      />
+      <ul className="file-scanner">{filtered.map(renderNode)}</ul>
+    </div>
+  );
+
 };

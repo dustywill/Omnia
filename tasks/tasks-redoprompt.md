@@ -7,6 +7,10 @@
 - `src/ui/renderer.ts` - Initialize the main UI.
 - `src/ui/plugin-ui-loader.ts` - Sandbox and display plugin UIs.
 - `src/ui/components/FileScanner.tsx` - Reusable file scanner/filter component.
+- `src/ui/components/FileScanner.css` - Styles for the FileScanner component.
+- `tests/ui/components/FileScanner.test.tsx` - Tests for FileScanner UI behavior.
+- `tests/setup.ts` - Jest setup including custom matchers.
+- `tests/style-mock.js` - Stub for imported CSS modules during tests.
 - `src/ui/components/JsonEditor.tsx` - JSON5 editor with schema enforcement.
 - `src/ui/components/MercurialCommit.ts` - Commit edited files to Mercurial.
 - `plugins/script-runner/index.ts` - PowerShell script discovery and execution plugin.
@@ -53,7 +57,7 @@
 - [ ] 3.0 Built-in Components
   - [ ] 3.1 FileScanner Component
     - [x] Display file tree with checkboxes for files and folders.
-    - [ ] Provide search box for filtering tree results.
+    - [x] Provide search box for filtering tree results.
     - [ ] Include dialog to select root folder and remember path.
     - [ ] Offer preset dropdown and filter name field to save presets.
     - [ ] Allow include/exclude regex for folders and files with mode selectors.
