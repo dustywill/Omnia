@@ -58,56 +58,96 @@
   - [ ] 3.1 FileScanner Component
     - [x] Display file tree with checkboxes for files and folders.
     - [x] Provide search box for filtering tree results.
-    - [ ] Include dialog to select root folder and remember path.
-    - [ ] Offer preset dropdown and filter name field to save presets.
-    - [ ] Allow include/exclude regex for folders and files with mode selectors.
-    - [ ] Support max depth setting for recursive scans.
-    - [ ] Apply filters button to rescan with current settings.
-    - [ ] Save Filter and Delete Filter actions for managing presets.
+    - [ ] Write failing test for dialog to select root folder and remember path.
+    - [ ] Implement dialog to select root folder and remember path.
+    - [ ] Write failing test for preset dropdown and filter name field to save presets.
+    - [ ] Implement preset dropdown and filter name field to save presets.
+    - [ ] Write failing test for include/exclude regex mode selectors.
+    - [ ] Implement include/exclude regex mode selectors for folders and files.
+    - [ ] Write failing test for max depth setting for recursive scans.
+    - [ ] Implement max depth setting for recursive scans.
+    - [ ] Write failing test for Apply filters button to rescan with current settings.
+    - [ ] Implement Apply filters button to rescan with current settings.
+    - [ ] Write failing test for Save Filter and Delete Filter actions.
+    - [ ] Implement Save Filter and Delete Filter actions for managing presets.
   - [ ] 3.2 JsonEditor Component
-    - [ ] Open and edit JSON or JSON5 files with optional schema enforcement.
-    - [ ] Allow adding and deleting entries within a file.
-    - [ ] Provide API for plugins to open a file with its schema.
-    - [ ] Expose function to compact nested data beyond a chosen depth.
-    - [ ] Commit changes via Mercurial revision control.
+    - [ ] Write failing test for opening and editing JSON or JSON5 files with optional schema enforcement.
+    - [ ] Implement opening and editing JSON or JSON5 files with optional schema enforcement.
+    - [ ] Write failing test for adding and deleting entries within a file.
+    - [ ] Implement adding and deleting entries within a file.
+    - [ ] Write failing test for API allowing plugins to open a file with its schema.
+    - [ ] Implement API allowing plugins to open a file with its schema.
+    - [ ] Write failing test for function to compact nested data beyond a chosen depth.
+    - [ ] Implement function to compact nested data beyond a chosen depth.
+    - [ ] Write failing test for committing changes via Mercurial revision control.
+    - [ ] Implement committing changes via Mercurial revision control.
   - [ ] 3.3 MercurialCommit Module
-    - [ ] Create commit whenever a file is saved.
-    - [ ] Show popup prompting for commit message, defaulting when empty.
+    - [ ] Write failing test for creating a commit whenever a file is saved.
+    - [ ] Implement creating a commit whenever a file is saved.
+    - [ ] Write failing test for popup prompting for commit message with default.
+    - [ ] Implement popup prompting for commit message, defaulting when empty.
 
 - [ ] 4.0 Plugin Development
   - [ ] 4.1 Script Runner Plugin
-    - [ ] Discover PowerShell scripts and list them with filter by ID, name, or description.
-    - [ ] Run scripts with default parameters and show status indicator.
-    - [ ] Provide Customize dialog for overriding parameters and saving defaults.
-    - [ ] Offer Edit and Remove actions for script configurations.
-    - [ ] Configure newly discovered scripts through a setup dialog.
-    - [ ] Clear Output and Copy Output actions for the output panel.
+    - [ ] Write failing test to discover PowerShell scripts and list them with filter by ID, name, or description.
+    - [ ] Implement discovery of PowerShell scripts and list them with filter by ID, name, or description.
+    - [ ] Write failing test for running scripts with default parameters and showing status indicator.
+    - [ ] Implement running scripts with default parameters and showing status indicator.
+    - [ ] Write failing test for Customize dialog to override parameters and save defaults.
+    - [ ] Implement Customize dialog to override parameters and save defaults.
+    - [ ] Write failing test for Edit and Remove actions for script configurations.
+    - [ ] Implement Edit and Remove actions for script configurations.
+    - [ ] Write failing test for setup dialog when new scripts are discovered.
+    - [ ] Implement setup dialog for newly discovered scripts.
+    - [ ] Write failing test for Clear Output and Copy Output actions.
+    - [ ] Implement Clear Output and Copy Output actions for the output panel.
   - [ ] 4.2 Context Generator Plugin
-    - [ ] Use File Scanner filter component to choose files.
-    - [ ] Generate Context button shows progress and character count.
-    - [ ] Copy to Clipboard action with confirmation message.
-    - [ ] Display output area with progress message and character count.
+    - [ ] Write failing test for using File Scanner filter component to choose files.
+    - [ ] Implement using File Scanner filter component to choose files.
+    - [ ] Write failing test for Generate Context button showing progress and character count.
+    - [ ] Implement Generate Context button showing progress and character count.
+    - [ ] Write failing test for Copy to Clipboard action with confirmation message.
+    - [ ] Implement Copy to Clipboard action with confirmation message.
+    - [ ] Write failing test for output area displaying progress and character count.
+    - [ ] Implement output area displaying progress and character count.
   - [ ] 4.3 As-Built Documenter Plugin
-    - [ ] Template File dropdown lists Markdown templates and allows clearing.
-    - [ ] Load button opens any `.md` file.
-    - [ ] Provide toolbar for formatting and inserting `{{#each}}` snippets.
-    - [ ] Embed CodeMirror editor for editing templates.
-    - [ ] Save button writes templates to `templates/as-built`.
-    - [ ] Data Source dropdown populated from configuration.
-    - [ ] Load sample data via IPC.
-    - [ ] Sample Data Table supports copying loops or field names.
-    - [ ] Prev/Next buttons page through sample data.
-    - [ ] Configuration Editor for plugin settings with Save Config button.
-    - [ ] Add Data Source button prompts for ID and URL and saves immediately.
+    - [ ] Write failing test for Template File dropdown listing Markdown templates and allowing clearing.
+    - [ ] Implement Template File dropdown listing Markdown templates and allowing clearing.
+    - [ ] Write failing test for Load button opening any `.md` file.
+    - [ ] Implement Load button opening any `.md` file.
+    - [ ] Write failing test for toolbar to format and insert `{{#each}}` snippets.
+    - [ ] Implement toolbar to format and insert `{{#each}}` snippets.
+    - [ ] Write failing test for embedding CodeMirror editor for editing templates.
+    - [ ] Implement embedding CodeMirror editor for editing templates.
+    - [ ] Write failing test for Save button writing templates to `templates/as-built`.
+    - [ ] Implement Save button writing templates to `templates/as-built`.
+    - [ ] Write failing test for Data Source dropdown populated from configuration.
+    - [ ] Implement Data Source dropdown populated from configuration.
+    - [ ] Write failing test for loading sample data via IPC.
+    - [ ] Implement loading sample data via IPC.
+    - [ ] Write failing test for Sample Data Table supporting copying loops or field names.
+    - [ ] Implement Sample Data Table supporting copying loops or field names.
+    - [ ] Write failing test for Prev/Next buttons paging through sample data.
+    - [ ] Implement Prev/Next buttons paging through sample data.
+    - [ ] Write failing test for Configuration Editor with Save Config button.
+    - [ ] Implement Configuration Editor with Save Config button.
+    - [ ] Write failing test for Add Data Source button prompting for ID and URL and saving immediately.
+    - [ ] Implement Add Data Source button prompting for ID and URL and saving immediately.
   - [ ] 4.4 Customer Links Plugin
-    - [ ] Scan configurable JSON or JSON5 file for customer sites.
-    - [ ] Generate standalone HTML and render it inside the plugin.
-    - [ ] Save generated HTML, CSS, and JavaScript to configured output path.
-    - [ ] Launch JsonEditor to modify `Customers.json` and update locations.
+    - [ ] Write failing test for scanning configurable JSON or JSON5 file for customer sites.
+    - [ ] Implement scanning configurable JSON or JSON5 file for customer sites.
+    - [ ] Write failing test for generating standalone HTML and rendering it inside the plugin.
+    - [ ] Implement generating standalone HTML and rendering it inside the plugin.
+    - [ ] Write failing test for saving generated HTML, CSS, and JavaScript to configured output path.
+    - [ ] Implement saving generated HTML, CSS, and JavaScript to configured output path.
+    - [ ] Write failing test for launching JsonEditor to modify `Customers.json` and update locations.
+    - [ ] Implement launching JsonEditor to modify `Customers.json` and update locations.
 
 - [ ] 5.0 UI and Testing
-  - [ ] 5.1 Create responsive card-based UI using palette colors and Nunito Sans.
-  - [ ] 5.2 Load plugin interfaces via `plugin-ui-loader.ts`.
+  - [ ] Write failing test for creating responsive card-based UI using palette colors and Nunito Sans.
+  - [ ] Implement responsive card-based UI using palette colors and Nunito Sans.
+  - [ ] Write failing test for loading plugin interfaces via `plugin-ui-loader.ts`.
+  - [ ] Implement loading plugin interfaces via `plugin-ui-loader.ts`.
   - [ ] 5.3 Write unit tests for core modules and components.
   - [ ] 5.4 Write end-to-end tests covering plugin workflows.
   - [ ] 5.5 Ensure full test coverage before merging changes.
