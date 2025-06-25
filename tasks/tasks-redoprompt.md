@@ -31,10 +31,12 @@
   - [x] 1.3 Install and configure Jest and Playwright for testing.
 
 - [ ] 2.0 Core Modules Implementation
+
   - [x] 2.1 Configuration Manager (`src/core/config.ts`)
     - [x] Read and write `config/app-config.json5` using JSON5 parser.
     - [x] Merge plugin default settings on first run.
     - [x] Watch for configuration changes and notify plugins via event bus.
+
   - [ ] 2.2 Plugin Manager (`src/core/plugin-manager.ts`)
     - [ ] Load each plugin’s `plugin.json5` manifest and main module.
     - [ ] Provide lifecycle hooks to initialize and stop plugins.
