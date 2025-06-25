@@ -1,5 +1,8 @@
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
+
 import { FileScanner, type FileNode } from '../../../src/ui/components/FileScanner.js';
 
 describe('FileScanner component', () => {
@@ -17,6 +20,7 @@ describe('FileScanner component', () => {
     expect(screen.getByLabelText('file.txt')).toBeInTheDocument();
     expect(screen.getByLabelText('rootfile.txt')).toBeInTheDocument();
   });
+
 
   it('filters tree results when searching', async () => {
     const tree: FileNode[] = [

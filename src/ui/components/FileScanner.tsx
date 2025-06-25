@@ -1,4 +1,6 @@
+
 import React, { useState } from 'react';
+
 import './FileScanner.css';
 
 export type FileNode = {
@@ -13,6 +15,7 @@ export type FileScannerProps = {
 };
 
 export const FileScanner: React.FC<FileScannerProps> = ({ tree }) => {
+
   const [query, setQuery] = useState('');
 
   const filterTree = (nodes: FileNode[]): FileNode[] => {
@@ -44,6 +47,7 @@ export const FileScanner: React.FC<FileScannerProps> = ({ tree }) => {
     </li>
   );
 
+
   return (
     <div>
       <input
@@ -54,4 +58,5 @@ export const FileScanner: React.FC<FileScannerProps> = ({ tree }) => {
       <ul className="file-scanner">{filtered.map(renderNode)}</ul>
     </div>
   );
+
 };
