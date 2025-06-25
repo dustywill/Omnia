@@ -1,6 +1,6 @@
 ## Relevant Files
 
-- `src/core/config.ts` - Handle reading and writing `config/app-config.json5` and plugin defaults.
+- `src/core/config.ts` - Handle reading/writing `config/app-config.json5`, merging defaults, and watching for changes.
 - `src/core/plugin-manager.ts` - Load plugin manifests and manage lifecycle.
 - `src/core/logger.ts` - Provide timestamped logging with plugin identifiers.
 - `src/core/event-bus.ts` - Dispatch events between core and plugins.
@@ -14,7 +14,7 @@
 - `plugins/as-built-documenter/index.ts` - Documentation generation plugin.
 - `plugins/customer-links/index.ts` - Customer links viewer and exporter.
 - `config/app-config.json5` - Main application configuration file.
-- `src/**/*.test.ts` - Jest unit tests for core modules and components.
+- `tests/unit/**/*.ts` - Jest unit tests for core modules and components.
 - `tests/e2e/**/*.spec.ts` - Playwright end-to-end tests for plugin flows.
 
 ### Notes
@@ -31,10 +31,12 @@
   - [x] 1.3 Install and configure Jest and Playwright for testing.
 
 - [ ] 2.0 Core Modules Implementation
-  - [ ] 2.1 Configuration Manager (`src/core/config.ts`)
+
+  - [x] 2.1 Configuration Manager (`src/core/config.ts`)
     - [x] Read and write `config/app-config.json5` using JSON5 parser.
-    - [ ] Merge plugin default settings on first run.
-    - [ ] Watch for configuration changes and notify plugins via event bus.
+    - [x] Merge plugin default settings on first run.
+    - [x] Watch for configuration changes and notify plugins via event bus.
+
   - [ ] 2.2 Plugin Manager (`src/core/plugin-manager.ts`)
     - [ ] Load each plugin’s `plugin.json5` manifest and main module.
     - [ ] Provide lifecycle hooks to initialize and stop plugins.
