@@ -26,7 +26,7 @@
 ## Tasks
 
 - [ ] 1.0 Environment Setup
-  - [ ] 1.1 Create base folder structure (`src/core`, `src/ui`, `plugins`, `config`).
+  - [x] 1.1 Create base folder structure (`src/core`, `src/ui`, `plugins`, `config`).
   - [ ] 1.2 Configure TypeScript strict mode via `tsconfig.json`.
   - [ ] 1.3 Install and configure Jest and Playwright for testing.
 
