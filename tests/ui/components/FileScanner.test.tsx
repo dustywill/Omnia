@@ -49,4 +49,22 @@ describe('FileScanner component', () => {
     expect(selectRootFolder).toHaveBeenCalled();
     expect(await screen.findByText('/workspace')).toBeInTheDocument();
   });
+
+  it('saves a filter preset with name and shows in dropdown', async () => {
+    const onSavePreset = jest.fn();
+    render(
+      <FileScanner tree={[]} presets={[]} onSavePreset={onSavePreset} />,
+    );
+
+    await userEvent.type(
+      screen.getByPlaceholderText(/filter name/i),
+      'My Filter',
+    );
+    await userEvent.click(
+      screen.getByRole('button', { name: /save preset/i }),
+    );
+
+    expect(onSavePreset).toHaveBeenCalledWith('My Filter');
+    expect(screen.getByRole('combobox')).toHaveTextContent('My Filter');
+  });
 });
