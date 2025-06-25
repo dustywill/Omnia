@@ -31,21 +31,71 @@
   - [ ] 1.3 Install and configure Jest and Playwright for testing.
 
 - [ ] 2.0 Core Modules Implementation
-  - [ ] 2.1 Implement configuration handling in `src/core/config.ts`.
-  - [ ] 2.2 Implement plugin loader in `src/core/plugin-manager.ts`.
-  - [ ] 2.3 Add logging utilities in `src/core/logger.ts` with plugin IDs and timestamps.
-  - [ ] 2.4 Provide event bus in `src/core/event-bus.ts` for core <-> plugin communication.
+  - [ ] 2.1 Configuration Manager (`src/core/config.ts`)
+    - [ ] Read and write `config/app-config.json5` using JSON5 parser.
+    - [ ] Merge plugin default settings on first run.
+    - [ ] Watch for configuration changes and notify plugins via event bus.
+  - [ ] 2.2 Plugin Manager (`src/core/plugin-manager.ts`)
+    - [ ] Load each plugin’s `plugin.json5` manifest and main module.
+    - [ ] Provide lifecycle hooks to initialize and stop plugins.
+    - [ ] Expose helper to retrieve and update plugin configuration.
+  - [ ] 2.3 Logger (`src/core/logger.ts`)
+    - [ ] Create timestamped log entries with plugin identifiers.
+    - [ ] Support info, warning, and error levels written to console and file.
+  - [ ] 2.4 Event Bus (`src/core/event-bus.ts`)
+    - [ ] Implement publish/subscribe for core and plugins.
+    - [ ] Ensure events are strongly typed and support payloads.
 
 - [ ] 3.0 Built-in Components
-  - [ ] 3.1 Build `FileScanner` component with tree view, search, and filter presets.
-  - [ ] 3.2 Build `JsonEditor` component with file open, schema support, and compaction controls.
-  - [ ] 3.3 Implement Mercurial commit functionality in `MercurialCommit` module.
+  - [ ] 3.1 FileScanner Component
+    - [ ] Display file tree with checkboxes for files and folders.
+    - [ ] Provide search box for filtering tree results.
+    - [ ] Include dialog to select root folder and remember path.
+    - [ ] Offer preset dropdown and filter name field to save presets.
+    - [ ] Allow include/exclude regex for folders and files with mode selectors.
+    - [ ] Support max depth setting for recursive scans.
+    - [ ] Apply filters button to rescan with current settings.
+    - [ ] Save Filter and Delete Filter actions for managing presets.
+  - [ ] 3.2 JsonEditor Component
+    - [ ] Open and edit JSON or JSON5 files with optional schema enforcement.
+    - [ ] Allow adding and deleting entries within a file.
+    - [ ] Provide API for plugins to open a file with its schema.
+    - [ ] Expose function to compact nested data beyond a chosen depth.
+    - [ ] Commit changes via Mercurial revision control.
+  - [ ] 3.3 MercurialCommit Module
+    - [ ] Create commit whenever a file is saved.
+    - [ ] Show popup prompting for commit message, defaulting when empty.
 
 - [ ] 4.0 Plugin Development
-  - [ ] 4.1 Implement Script Runner plugin features.
-  - [ ] 4.2 Implement Context Generator plugin features.
-  - [ ] 4.3 Implement As-Built Documenter plugin features.
-  - [ ] 4.4 Implement Customer Links plugin features.
+  - [ ] 4.1 Script Runner Plugin
+    - [ ] Discover PowerShell scripts and list them with filter by ID, name, or description.
+    - [ ] Run scripts with default parameters and show status indicator.
+    - [ ] Provide Customize dialog for overriding parameters and saving defaults.
+    - [ ] Offer Edit and Remove actions for script configurations.
+    - [ ] Configure newly discovered scripts through a setup dialog.
+    - [ ] Clear Output and Copy Output actions for the output panel.
+  - [ ] 4.2 Context Generator Plugin
+    - [ ] Use File Scanner filter component to choose files.
+    - [ ] Generate Context button shows progress and character count.
+    - [ ] Copy to Clipboard action with confirmation message.
+    - [ ] Display output area with progress message and character count.
+  - [ ] 4.3 As-Built Documenter Plugin
+    - [ ] Template File dropdown lists Markdown templates and allows clearing.
+    - [ ] Load button opens any `.md` file.
+    - [ ] Provide toolbar for formatting and inserting `{{#each}}` snippets.
+    - [ ] Embed CodeMirror editor for editing templates.
+    - [ ] Save button writes templates to `templates/as-built`.
+    - [ ] Data Source dropdown populated from configuration.
+    - [ ] Load sample data via IPC.
+    - [ ] Sample Data Table supports copying loops or field names.
+    - [ ] Prev/Next buttons page through sample data.
+    - [ ] Configuration Editor for plugin settings with Save Config button.
+    - [ ] Add Data Source button prompts for ID and URL and saves immediately.
+  - [ ] 4.4 Customer Links Plugin
+    - [ ] Scan configurable JSON or JSON5 file for customer sites.
+    - [ ] Generate standalone HTML and render it inside the plugin.
+    - [ ] Save generated HTML, CSS, and JavaScript to configured output path.
+    - [ ] Launch JsonEditor to modify `Customers.json` and update locations.
 
 - [ ] 5.0 UI and Testing
   - [ ] 5.1 Create responsive card-based UI using palette colors and Nunito Sans.
