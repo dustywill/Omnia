@@ -58,8 +58,8 @@
   - [ ] 3.1 FileScanner Component
     - [x] Display file tree with checkboxes for files and folders.
     - [x] Provide search box for filtering tree results.
-    - [ ] Write failing test for dialog to select root folder and remember path.
-    - [ ] Implement dialog to select root folder and remember path.
+    - [x] Write failing test for dialog to select root folder and remember path.
+    - [x] Implement dialog to select root folder and remember path.
     - [ ] Write failing test for preset dropdown and filter name field to save presets.
     - [ ] Implement preset dropdown and filter name field to save presets.
     - [ ] Write failing test for include/exclude regex mode selectors.

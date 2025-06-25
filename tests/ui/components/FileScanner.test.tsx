@@ -37,4 +37,16 @@ describe('FileScanner component', () => {
     expect(screen.queryByLabelText('src')).not.toBeInTheDocument();
     expect(screen.getByLabelText('README.md')).toBeInTheDocument();
   });
+
+  it('opens dialog to select root folder and remembers path', async () => {
+    const selectRootFolder = jest.fn().mockResolvedValue('/workspace');
+    render(<FileScanner tree={[]} selectRootFolder={selectRootFolder} />);
+
+    await userEvent.click(
+      screen.getByRole('button', { name: /select root folder/i }),
+    );
+
+    expect(selectRootFolder).toHaveBeenCalled();
+    expect(await screen.findByText('/workspace')).toBeInTheDocument();
+  });
 });
