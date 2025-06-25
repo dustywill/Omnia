@@ -14,7 +14,7 @@
 - `plugins/as-built-documenter/index.ts` - Documentation generation plugin.
 - `plugins/customer-links/index.ts` - Customer links viewer and exporter.
 - `config/app-config.json5` - Main application configuration file.
-- `tests/unit/**/*.ts` - Jest unit tests for core modules and components.
+- `tests/core/**/*.ts` - Jest unit tests for core modules and components.
 - `tests/e2e/**/*.spec.ts` - Playwright end-to-end tests for plugin flows.
 
 ### Notes
