@@ -4,6 +4,10 @@ import { parse as parseJson5, stringify as stringifyJson5 } from 'json5';
 import { z } from 'zod';
 import type { EventBus } from './event-bus.js';
 
+const isErrnoException = (value: unknown): value is NodeJS.ErrnoException => {
+  return typeof value === 'object' && value !== null && 'code' in value;
+};
+
 export const AppConfigSchema = z.record(z.unknown());
 
 export type AppConfig = z.infer<typeof AppConfigSchema>;
@@ -34,7 +38,7 @@ export const loadConfig = async (
     }
     return merged;
   } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
+    if (isErrnoException(err) && err.code === 'ENOENT') {
       await writeConfig(path, defaults);
       return defaults;
     }
