@@ -62,7 +62,7 @@
     - [x] Implement dialog to select root folder and remember path.
     - [x] Write failing test for preset dropdown and filter name field to save presets.
     - [x] Implement preset dropdown and filter name field to save presets.
-    - [ ] Write failing test for include/exclude regex mode selectors.
+    - [x] Write failing test for include/exclude regex mode selectors.
     - [ ] Implement include/exclude regex mode selectors for folders and files.
     - [ ] Write failing test for max depth setting for recursive scans.
     - [ ] Implement max depth setting for recursive scans.

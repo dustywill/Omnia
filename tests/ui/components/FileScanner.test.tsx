@@ -67,4 +67,24 @@ describe('FileScanner component', () => {
     expect(onSavePreset).toHaveBeenCalledWith('My Filter');
     expect(screen.getByRole('combobox')).toHaveTextContent('My Filter');
   });
+
+  it('allows toggling include/exclude regex modes for folders and files', async () => {
+    render(<FileScanner tree={[]} />);
+
+    const includeFolders = screen.getByRole('radio', { name: /include folders/i });
+    const excludeFolders = screen.getByRole('radio', { name: /exclude folders/i });
+    const includeFiles = screen.getByRole('radio', { name: /include files/i });
+    const excludeFiles = screen.getByRole('radio', { name: /exclude files/i });
+
+    expect(includeFolders).toBeInTheDocument();
+    expect(excludeFolders).toBeInTheDocument();
+    expect(includeFiles).toBeInTheDocument();
+    expect(excludeFiles).toBeInTheDocument();
+
+    await userEvent.click(excludeFolders);
+    expect(excludeFolders).toBeChecked();
+
+    await userEvent.click(excludeFiles);
+    expect(excludeFiles).toBeChecked();
+  });
 });
