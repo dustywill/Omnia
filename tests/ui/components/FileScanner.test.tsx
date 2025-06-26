@@ -87,4 +87,33 @@ describe('FileScanner component', () => {
     await userEvent.click(excludeFiles);
     expect(excludeFiles).toBeChecked();
   });
+
+  it('limits displayed depth based on max depth setting', async () => {
+    const tree: FileNode[] = [
+      {
+        name: 'folder',
+        path: '/folder',
+        isDirectory: true,
+        children: [
+          {
+            name: 'sub',
+            path: '/folder/sub',
+            isDirectory: true,
+            children: [
+              { name: 'deep.txt', path: '/folder/sub/deep.txt', isDirectory: false },
+            ],
+          },
+        ],
+      },
+    ];
+
+    render(<FileScanner tree={tree} />);
+
+    const depthInput = screen.getByLabelText(/max depth/i);
+    await userEvent.clear(depthInput);
+    await userEvent.type(depthInput, '1');
+
+    expect(screen.getByLabelText('sub')).toBeInTheDocument();
+    expect(screen.queryByLabelText('deep.txt')).not.toBeInTheDocument();
+  });
 });
