@@ -41,20 +41,20 @@
 
   - [x] 2.1 Configuration Manager (`src/core/config.ts`)
 
-    - [x] Read and write `config/app-config.json5` using JSON5 parser.
-    - [x] Merge plugin default settings on first run.
-    - [x] Watch for configuration changes and notify plugins via event bus.
+    - [x] 2.1.1 Read and write `config/app-config.json5` using JSON5 parser.
+    - [x] 2.1.2 Merge plugin default settings on first run.
+    - [x] 2.1.3 Watch for configuration changes and notify plugins via event bus.
 
   - [x] 2.2 Plugin Manager (`src/core/plugin-manager.ts`)
-    - [x] Load each plugin’s `plugin.json5` manifest and main module.
-    - [x] Provide lifecycle hooks to initialize and stop plugins.
-    - [x] Expose helper to retrieve and update plugin configuration.
+    - [x] 2.2.1 Load each plugin’s `plugin.json5` manifest and main module.
+    - [x] 2.2.2 Provide lifecycle hooks to initialize and stop plugins.
+    - [x] 2.2.3 Expose helper to retrieve and update plugin configuration.
   - [x] 2.3 Logger (`src/core/logger.ts`)
-    - [x] Create timestamped log entries with plugin identifiers.
-    - [x] Support info, warning, and error levels written to console and file.
+    - [x] 2.3.1 Create timestamped log entries with plugin identifiers.
+    - [x] 2.3.2 Support info, warning, and error levels written to console and file.
   - [x] 2.4 Event Bus (`src/core/event-bus.ts`)
-    - [x] Implement publish/subscribe for core and plugins.
-    - [x] Ensure events are strongly typed and support payloads.
+    - [x] 2.4.1 Implement publish/subscribe for core and plugins.
+    - [x] 2.4.2 Ensure events are strongly typed and support payloads.
 
 - [ ] 3.0 Built-in Components
 
@@ -86,73 +86,73 @@
     - [ ] 3.2.9 Write failing test for committing changes via Mercurial revision control.
     - [ ] 3.2.10 Implement committing changes via Mercurial revision control.
   - [ ] 3.3 MercurialCommit Module
-    - [ ] Write failing test for creating a commit whenever a file is saved.
-    - [ ] Implement creating a commit whenever a file is saved.
-    - [ ] Write failing test for popup prompting for commit message with default.
-    - [ ] Implement popup prompting for commit message, defaulting when empty.
+    - [ ] 3.3.1 Write failing test for creating a commit whenever a file is saved.
+    - [ ] 3.3.2 Implement creating a commit whenever a file is saved.
+    - [ ] 3.3.3 Write failing test for popup prompting for commit message with default.
+    - [ ] 3.3.4 Implement popup prompting for commit message, defaulting when empty.
 
 - [ ] 4.0 Plugin Development
 
   - [ ] 4.1 Script Runner Plugin
-    - [ ] Write failing test to discover PowerShell scripts and list them with filter by ID, name, or description.
-    - [ ] Implement discovery of PowerShell scripts and list them with filter by ID, name, or description.
-    - [ ] Write failing test for running scripts with default parameters and showing status indicator.
-    - [ ] Implement running scripts with default parameters and showing status indicator.
-    - [ ] Write failing test for Customize dialog to override parameters and save defaults.
-    - [ ] Implement Customize dialog to override parameters and save defaults.
-    - [ ] Write failing test for Edit and Remove actions for script configurations.
-    - [ ] Implement Edit and Remove actions for script configurations.
-    - [ ] Write failing test for setup dialog when new scripts are discovered.
-    - [ ] Implement setup dialog for newly discovered scripts.
-    - [ ] Write failing test for Clear Output and Copy Output actions.
-    - [ ] Implement Clear Output and Copy Output actions for the output panel.
+    - [ ] 4.1.1 Write failing test to discover PowerShell scripts and list them with filter by ID, name, or description.
+    - [ ] 4.1.2 Implement discovery of PowerShell scripts and list them with filter by ID, name, or description.
+    - [ ] 4.1.3 Write failing test for running scripts with default parameters and showing status indicator.
+    - [ ] 4.1.4 Implement running scripts with default parameters and showing status indicator.
+    - [ ] 4.1.5 Write failing test for Customize dialog to override parameters and save defaults.
+    - [ ] 4.1.6 Implement Customize dialog to override parameters and save defaults.
+    - [ ] 4.1.7 Write failing test for Edit and Remove actions for script configurations.
+    - [ ] 4.1.8 Implement Edit and Remove actions for script configurations.
+    - [ ] 4.1.9 Write failing test for setup dialog when new scripts are discovered.
+    - [ ] 4.1.10 Implement setup dialog for newly discovered scripts.
+    - [ ] 4.1.11 Write failing test for Clear Output and Copy Output actions.
+    - [ ] 4.1.12 Implement Clear Output and Copy Output actions for the output panel.
   - [ ] 4.2 Context Generator Plugin
-    - [ ] Write failing test for using File Scanner filter component to choose files.
-    - [ ] Implement using File Scanner filter component to choose files.
-    - [ ] Write failing test for Generate Context button showing progress and character count.
-    - [ ] Implement Generate Context button showing progress and character count.
-    - [ ] Write failing test for Copy to Clipboard action with confirmation message.
-    - [ ] Implement Copy to Clipboard action with confirmation message.
-    - [ ] Write failing test for output area displaying progress and character count.
-    - [ ] Implement output area displaying progress and character count.
+    - [ ] 4.2.1 Write failing test for using File Scanner filter component to choose files.
+    - [ ] 4.2.2 Implement using File Scanner filter component to choose files.
+    - [ ] 4.2.3 Write failing test for Generate Context button showing progress and character count.
+    - [ ] 4.2.4 Implement Generate Context button showing progress and character count.
+    - [ ] 4.2.5 Write failing test for Copy to Clipboard action with confirmation message.
+    - [ ] 4.2.6 Implement Copy to Clipboard action with confirmation message.
+    - [ ] 4.2.7 Write failing test for output area displaying progress and character count.
+    - [ ] 4.2.8 Implement output area displaying progress and character count.
   - [ ] 4.3 As-Built Documenter Plugin
-    - [ ] Write failing test for Template File dropdown listing Markdown templates and allowing clearing.
-    - [ ] Implement Template File dropdown listing Markdown templates and allowing clearing.
-    - [ ] Write failing test for Load button opening any `.md` file.
-    - [ ] Implement Load button opening any `.md` file.
-    - [ ] Write failing test for toolbar to format and insert `{{#each}}` snippets.
-    - [ ] Implement toolbar to format and insert `{{#each}}` snippets.
-    - [ ] Write failing test for embedding CodeMirror editor for editing templates.
-    - [ ] Implement embedding CodeMirror editor for editing templates.
-    - [ ] Write failing test for Save button writing templates to `templates/as-built`.
-    - [ ] Implement Save button writing templates to `templates/as-built`.
-    - [ ] Write failing test for Data Source dropdown populated from configuration.
-    - [ ] Implement Data Source dropdown populated from configuration.
-    - [ ] Write failing test for loading sample data via IPC.
-    - [ ] Implement loading sample data via IPC.
-    - [ ] Write failing test for Sample Data Table supporting copying loops or field names.
-    - [ ] Implement Sample Data Table supporting copying loops or field names.
-    - [ ] Write failing test for Prev/Next buttons paging through sample data.
-    - [ ] Implement Prev/Next buttons paging through sample data.
-    - [ ] Write failing test for Configuration Editor with Save Config button.
-    - [ ] Implement Configuration Editor with Save Config button.
-    - [ ] Write failing test for Add Data Source button prompting for ID and URL and saving immediately.
-    - [ ] Implement Add Data Source button prompting for ID and URL and saving immediately.
+    - [ ] 4.3.1 Write failing test for Template File dropdown listing Markdown templates and allowing clearing.
+    - [ ] 4.3.2 Implement Template File dropdown listing Markdown templates and allowing clearing.
+    - [ ] 4.3.3 Write failing test for Load button opening any `.md` file.
+    - [ ] 4.3.4 Implement Load button opening any `.md` file.
+    - [ ] 4.3.5 Write failing test for toolbar to format and insert `{{#each}}` snippets.
+    - [ ] 4.3.6 Implement toolbar to format and insert `{{#each}}` snippets.
+    - [ ] 4.3.7 Write failing test for embedding CodeMirror editor for editing templates.
+    - [ ] 4.3.8 Implement embedding CodeMirror editor for editing templates.
+    - [ ] 4.3.9 Write failing test for Save button writing templates to `templates/as-built`.
+    - [ ] 4.3.10 Implement Save button writing templates to `templates/as-built`.
+    - [ ] 4.3.11 Write failing test for Data Source dropdown populated from configuration.
+    - [ ] 4.3.12 Implement Data Source dropdown populated from configuration.
+    - [ ] 4.3.13 Write failing test for loading sample data via IPC.
+    - [ ] 4.3.14 Implement loading sample data via IPC.
+    - [ ] 4.3.15 Write failing test for Sample Data Table supporting copying loops or field names.
+    - [ ] 4.3.16 Implement Sample Data Table supporting copying loops or field names.
+    - [ ] 4.3.17 Write failing test for Prev/Next buttons paging through sample data.
+    - [ ] 4.3.18 Implement Prev/Next buttons paging through sample data.
+    - [ ] 4.3.19 Write failing test for Configuration Editor with Save Config button.
+    - [ ] 4.3.20 Implement Configuration Editor with Save Config button.
+    - [ ] 4.3.21 Write failing test for Add Data Source button prompting for ID and URL and saving immediately.
+    - [ ] 4.3.22 Implement Add Data Source button prompting for ID and URL and saving immediately.
   - [ ] 4.4 Customer Links Plugin
-    - [ ] Write failing test for scanning configurable JSON or JSON5 file for customer sites.
-    - [ ] Implement scanning configurable JSON or JSON5 file for customer sites.
-    - [ ] Write failing test for generating standalone HTML and rendering it inside the plugin.
-    - [ ] Implement generating standalone HTML and rendering it inside the plugin.
-    - [ ] Write failing test for saving generated HTML, CSS, and JavaScript to configured output path.
-    - [ ] Implement saving generated HTML, CSS, and JavaScript to configured output path.
-    - [ ] Write failing test for launching JsonEditor to modify `Customers.json` and update locations.
-    - [ ] Implement launching JsonEditor to modify `Customers.json` and update locations.
+    - [ ] 4.4.1 Write failing test for scanning configurable JSON or JSON5 file for customer sites.
+    - [ ] 4.4.2 Implement scanning configurable JSON or JSON5 file for customer sites.
+    - [ ] 4.4.3 Write failing test for generating standalone HTML and rendering it inside the plugin.
+    - [ ] 4.4.4 Implement generating standalone HTML and rendering it inside the plugin.
+    - [ ] 4.4.5 Write failing test for saving generated HTML, CSS, and JavaScript to configured output path.
+    - [ ] 4.4.6 Implement saving generated HTML, CSS, and JavaScript to configured output path.
+    - [ ] 4.4.7 Write failing test for launching JsonEditor to modify `Customers.json` and update locations.
+    - [ ] 4.4.8 Implement launching JsonEditor to modify `Customers.json` and update locations.
 
 - [ ] 5.0 UI and Testing
-  - [ ] Write failing test for creating responsive card-based UI using palette colors and Nunito Sans.
-  - [ ] Implement responsive card-based UI using palette colors and Nunito Sans.
-  - [ ] Write failing test for loading plugin interfaces via `plugin-ui-loader.ts`.
-  - [ ] Implement loading plugin interfaces via `plugin-ui-loader.ts`.
-  - [ ] 5.3 Write unit tests for core modules and components.
-  - [ ] 5.4 Write end-to-end tests covering plugin workflows.
-  - [ ] 5.5 Ensure full test coverage before merging changes.
+  - [ ] 5.1 Write failing test for creating responsive card-based UI using palette colors and Nunito Sans.
+  - [ ] 5.2 Implement responsive card-based UI using palette colors and Nunito Sans.
+  - [ ] 5.3 Write failing test for loading plugin interfaces via `plugin-ui-loader.ts`.
+  - [ ] 5.4 Implement loading plugin interfaces via `plugin-ui-loader.ts`.
+  - [ ] 5.5 Write unit tests for core modules and components.
+  - [ ] 5.6 Write end-to-end tests covering plugin workflows.
+  - [ ] 5.7 Ensure full test coverage before merging changes.
