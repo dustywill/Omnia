@@ -54,4 +54,36 @@ describe('context generator plugin', () => {
 
     await fs.rm(dir, { recursive: true, force: true });
   });
+
+  it('copies context to clipboard and shows confirmation', async () => {
+    const dir = path.join(__dirname, 'tmpcopy');
+    await fs.rm(dir, { recursive: true, force: true });
+    await fs.mkdir(dir, { recursive: true });
+    const file = path.join(dir, 'c.txt');
+    await fs.writeFile(file, 'hello');
+
+    const tree: FileNode[] = [
+      { name: 'c.txt', path: file, isDirectory: false },
+    ];
+
+    const writeText = jest.fn();
+    Object.assign(navigator, { clipboard: { writeText } });
+
+    render(<ContextGenerator tree={tree} />);
+
+    await userEvent.click(screen.getByLabelText('c.txt'));
+    await userEvent.click(
+      screen.getByRole('button', { name: /generate context/i }),
+    );
+    await screen.findByText(/progress: 1\/1/i);
+
+    await userEvent.click(
+      screen.getByRole('button', { name: /copy to clipboard/i }),
+    );
+
+    expect(writeText).toHaveBeenCalledWith('hello');
+    expect(screen.getByText(/copied/i)).toBeInTheDocument();
+
+    await fs.rm(dir, { recursive: true, force: true });
+  });
 });
