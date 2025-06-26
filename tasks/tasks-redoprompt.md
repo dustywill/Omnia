@@ -22,6 +22,7 @@
 - `tests/ui/components/CommitPrompt.test.tsx` - Tests for prompting commit message.
 - `src/ui/components/MercurialCommit.ts` - Commit edited files to Mercurial.
 - `plugins/script-runner/index.ts` - PowerShell script discovery and execution plugin.
+- `tests/plugins/script-runner.test.ts` - Tests for Script Runner plugin behavior.
 - `plugins/context-generator/index.ts` - Folder scanning and text bundling plugin.
 - `plugins/as-built-documenter/index.ts` - Documentation generation plugin.
 - `plugins/customer-links/index.ts` - Customer links viewer and exporter.
@@ -103,7 +104,7 @@
 - [ ] 4.0 Plugin Development
 
   - [ ] 4.1 Script Runner Plugin
-    - [ ] 4.1.1 Write failing test to discover PowerShell scripts and list them with filter by ID, name, or description.
+    - [x] 4.1.1 Write failing test to discover PowerShell scripts and list them with filter by ID, name, or description.
     - [ ] 4.1.2 Implement discovery of PowerShell scripts and list them with filter by ID, name, or description.
     - [ ] 4.1.3 Write failing test for running scripts with default parameters and showing status indicator.
     - [ ] 4.1.4 Implement running scripts with default parameters and showing status indicator.
