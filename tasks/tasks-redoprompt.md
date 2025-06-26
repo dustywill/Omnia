@@ -105,7 +105,7 @@
 
   - [ ] 4.1 Script Runner Plugin
     - [x] 4.1.1 Write failing test to discover PowerShell scripts and list them with filter by ID, name, or description.
-    - [ ] 4.1.2 Implement discovery of PowerShell scripts and list them with filter by ID, name, or description.
+    - [x] 4.1.2 Implement discovery of PowerShell scripts and list them with filter by ID, name, or description.
     - [ ] 4.1.3 Write failing test for running scripts with default parameters and showing status indicator.
     - [ ] 4.1.4 Implement running scripts with default parameters and showing status indicator.
     - [ ] 4.1.5 Write failing test for Customize dialog to override parameters and save defaults.
