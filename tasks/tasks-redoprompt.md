@@ -80,7 +80,7 @@
     - [x] 3.2.1 Write failing test for opening and editing JSON or JSON5 files with optional schema enforcement.
     - [x] 3.2.2 Implement opening and editing JSON or JSON5 files with optional schema enforcement.
     - [x] 3.2.3 Write failing test for adding and deleting entries within a file.
-    - [ ] 3.2.4 Implement adding and deleting entries within a file.
+    - [x] 3.2.4 Implement adding and deleting entries within a file.
     - [ ] 3.2.5 Write failing test for API allowing plugins to open a file with its schema.
     - [ ] 3.2.6 Implement API allowing plugins to open a file with its schema.
     - [ ] 3.2.7 Write failing test for function to compact nested data beyond a chosen depth.
