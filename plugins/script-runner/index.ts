@@ -164,3 +164,34 @@ export const setupNewScripts = async <T extends Record<string, string[]>>(
 
   return updated;
 };
+
+export type OutputManagerOptions = {
+  copy: (text: string) => Promise<void> | void;
+};
+
+export type OutputManager = {
+  append: (text: string) => void;
+  clear: () => void;
+  copy: () => Promise<void> | void;
+  get: () => string;
+};
+
+export const createOutputManager = (
+  options: OutputManagerOptions,
+): OutputManager => {
+  let output = '';
+
+  const append = (text: string) => {
+    output += text;
+  };
+
+  const clear = () => {
+    output = '';
+  };
+
+  const copy = () => options.copy(output);
+
+  const get = () => output;
+
+  return { append, clear, copy, get };
+};

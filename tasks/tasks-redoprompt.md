@@ -114,8 +114,8 @@
     - [x] 4.1.8 Implement Edit and Remove actions for script configurations.
     - [x] 4.1.9 Write failing test for setup dialog when new scripts are discovered.
     - [x] 4.1.10 Implement setup dialog for newly discovered scripts.
-    - [ ] 4.1.11 Write failing test for Clear Output and Copy Output actions.
-    - [ ] 4.1.12 Implement Clear Output and Copy Output actions for the output panel.
+    - [x] 4.1.11 Write failing test for Clear Output and Copy Output actions.
+    - [x] 4.1.12 Implement Clear Output and Copy Output actions for the output panel.
   - [ ] 4.2 Context Generator Plugin
     - [ ] 4.2.1 Write failing test for using File Scanner filter component to choose files.
     - [ ] 4.2.2 Implement using File Scanner filter component to choose files.
