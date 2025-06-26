@@ -66,7 +66,7 @@
     - [x] 3.1.5 Write failing test for preset dropdown and filter name field to save presets.
     - [x] 3.1.6 Implement preset dropdown and filter name field to save presets.
     - [x] 3.1.7 Write failing test for include/exclude regex mode selectors.
-    - [ ] 3.1.8 Implement include/exclude regex mode selectors for folders and files.
+    - [x] 3.1.8 Implement include/exclude regex mode selectors for folders and files.
     - [ ] 3.1.9 Write failing test for max depth setting for recursive scans.
     - [ ] 3.1.10 Implement max depth setting for recursive scans.
     - [ ] 3.1.11 Write failing test for Apply filters button to rescan with current settings.
