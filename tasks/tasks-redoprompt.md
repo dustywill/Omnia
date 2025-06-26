@@ -25,7 +25,8 @@
 - `tests/plugins/script-runner.test.ts` - Tests for Script Runner plugin behavior, including customizing parameters.
 - `tests/plugins/context-generator.test.tsx` - Tests for Context Generator plugin UI behavior.
   - `plugins/context-generator/index.tsx` - Folder scanning and text bundling plugin.
-- `plugins/as-built-documenter/index.ts` - Documentation generation plugin.
+  - `plugins/as-built-documenter/index.tsx` - Documentation generation plugin UI.
+  - `tests/plugins/as-built-documenter.test.tsx` - Tests for As-Built Documenter plugin behavior.
 - `plugins/customer-links/index.ts` - Customer links viewer and exporter.
 - `config/app-config.json5` - Main application configuration file.
 - `tests/core/**/*.ts` - Jest unit tests for core modules and components.
@@ -127,8 +128,8 @@
     - [x] 4.2.7 Write failing test for output area displaying progress and character count.
     - [x] 4.2.8 Implement output area displaying progress and character count.
   - [ ] 4.3 As-Built Documenter Plugin
-    - [ ] 4.3.1 Write failing test for Template File dropdown listing Markdown templates and allowing clearing.
-    - [ ] 4.3.2 Implement Template File dropdown listing Markdown templates and allowing clearing.
+    - [x] 4.3.1 Write failing test for Template File dropdown listing Markdown templates and allowing clearing.
+    - [x] 4.3.2 Implement Template File dropdown listing Markdown templates and allowing clearing.
     - [ ] 4.3.3 Write failing test for Load button opening any `.md` file.
     - [ ] 4.3.4 Implement Load button opening any `.md` file.
     - [ ] 4.3.5 Write failing test for toolbar to format and insert `{{#each}}` snippets.
