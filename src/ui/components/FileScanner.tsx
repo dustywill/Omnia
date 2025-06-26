@@ -13,11 +13,15 @@ export type FileNode = {
 export type FileScannerProps = {
   tree: FileNode[];
   selectRootFolder?: () => Promise<string>;
+  presets?: string[];
+  onSavePreset?: (name: string) => void;
 };
 
 export const FileScanner: React.FC<FileScannerProps> = ({
   tree,
   selectRootFolder,
+  presets = [],
+  onSavePreset,
 }) => {
 
   const [query, setQuery] = useState('');
@@ -38,6 +42,9 @@ export const FileScanner: React.FC<FileScannerProps> = ({
   };
 
   const [rootPath, setRootPath] = useState<string | undefined>();
+  const [presetName, setPresetName] = useState('');
+  const [presetList, setPresetList] = useState<string[]>(presets);
+  const [selectedPreset, setSelectedPreset] = useState<string | undefined>();
 
   const filtered = filterTree(tree);
 
@@ -73,6 +80,34 @@ export const FileScanner: React.FC<FileScannerProps> = ({
         </button>
       )}
       {rootPath && <div>{rootPath}</div>}
+      <select
+        value={selectedPreset}
+        onChange={(e) => setSelectedPreset(e.target.value)}
+        aria-label="Preset Selector"
+      >
+        {presetList.map((p) => (
+          <option key={p} value={p}>
+            {p}
+          </option>
+        ))}
+      </select>
+      <input
+        placeholder="Filter Name"
+        value={presetName}
+        onChange={(e) => setPresetName(e.target.value)}
+      />
+      <button
+        type="button"
+        onClick={() => {
+          if (!presetName) return;
+          setPresetList([...presetList, presetName]);
+          setSelectedPreset(presetName);
+          onSavePreset?.(presetName);
+          setPresetName('');
+        }}
+      >
+        Save Preset
+      </button>
       <ul className="file-scanner">{filtered.map(renderNode)}</ul>
     </div>
   );
