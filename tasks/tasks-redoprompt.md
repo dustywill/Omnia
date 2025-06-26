@@ -58,9 +58,9 @@
     - [x] 2.4.1 Implement publish/subscribe for core and plugins.
     - [x] 2.4.2 Ensure events are strongly typed and support payloads.
 
-- [ ] 3.0 Built-in Components
+- [x] 3.0 Built-in Components
 
-  - [ ] 3.1 FileScanner Component
+  - [x] 3.1 FileScanner Component
     - [x] 3.1.1 Display file tree with checkboxes for files and folders.
     - [x] 3.1.2 Provide search box for filtering tree results.
     - [x] 3.1.3 Write failing test for dialog to select root folder and remember path.
@@ -77,9 +77,9 @@
     - [x] 3.1.14 Implement Save Filter and Delete Filter actions for managing presets.
 
   - [ ] 3.2 JsonEditor Component
-  - [x] 3.2.1 Write failing test for opening and editing JSON or JSON5 files with optional schema enforcement.
+    - [x] 3.2.1 Write failing test for opening and editing JSON or JSON5 files with optional schema enforcement.
     - [x] 3.2.2 Implement opening and editing JSON or JSON5 files with optional schema enforcement.
-    - [ ] 3.2.3 Write failing test for adding and deleting entries within a file.
+    - [x] 3.2.3 Write failing test for adding and deleting entries within a file.
     - [ ] 3.2.4 Implement adding and deleting entries within a file.
     - [ ] 3.2.5 Write failing test for API allowing plugins to open a file with its schema.
     - [ ] 3.2.6 Implement API allowing plugins to open a file with its schema.
