@@ -114,4 +114,41 @@ describe('script runner plugin', () => {
     expect(updateConfig).toHaveBeenCalledWith({});
     expect(config).toEqual({});
   });
+
+  it('opens setup dialog when new scripts are discovered', async () => {
+    const { setupNewScripts } = await import(
+      '../../plugins/script-runner/index.js'
+    );
+    const prompt = jest.fn().mockResolvedValue(['-Default']);
+    const updateConfig = jest.fn();
+
+    const scripts = [
+      {
+        id: 'build',
+        name: 'Build',
+        description: 'build project',
+        path: path.join(tmpDir, 'build.ps1'),
+      },
+      {
+        id: 'deploy',
+        name: 'Deploy',
+        description: 'deploy project',
+        path: path.join(tmpDir, 'deploy.ps1'),
+      },
+    ];
+
+    const config = await setupNewScripts(
+      scripts,
+      { build: ['-Foo'] },
+      { prompt, updateConfig },
+    );
+
+    expect(prompt).toHaveBeenCalledTimes(1);
+    expect(prompt).toHaveBeenCalledWith(scripts[1]);
+    expect(updateConfig).toHaveBeenCalledWith({
+      build: ['-Foo'],
+      deploy: ['-Default'],
+    });
+    expect(config).toEqual({ build: ['-Foo'], deploy: ['-Default'] });
+  });
 });
