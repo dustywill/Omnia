@@ -22,4 +22,16 @@ describe('as-built documenter plugin', () => {
     await userEvent.selectOptions(select, '');
     expect(select.value).toBe('');
   });
+
+  it('loads a markdown file using the Load button', async () => {
+    const onLoad = jest.fn();
+    render(<AsBuiltDocumenter templates={[]} onLoad={onLoad} />);
+
+    const input = screen.getByLabelText(/load template/i) as HTMLInputElement;
+    const file = new File(['# Heading'], 'test.md', { type: 'text/markdown' });
+
+    await userEvent.upload(input, file);
+
+    expect(onLoad).toHaveBeenCalledWith(file);
+  });
 });

@@ -130,8 +130,8 @@
   - [ ] 4.3 As-Built Documenter Plugin
     - [x] 4.3.1 Write failing test for Template File dropdown listing Markdown templates and allowing clearing.
     - [x] 4.3.2 Implement Template File dropdown listing Markdown templates and allowing clearing.
-    - [ ] 4.3.3 Write failing test for Load button opening any `.md` file.
-    - [ ] 4.3.4 Implement Load button opening any `.md` file.
+    - [x] 4.3.3 Write failing test for Load button opening any `.md` file.
+    - [x] 4.3.4 Implement Load button opening any `.md` file.
     - [ ] 4.3.5 Write failing test for toolbar to format and insert `{{#each}}` snippets.
     - [ ] 4.3.6 Implement toolbar to format and insert `{{#each}}` snippets.
     - [ ] 4.3.7 Write failing test for embedding CodeMirror editor for editing templates.
