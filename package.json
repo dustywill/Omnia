@@ -21,6 +21,8 @@
     "playwright": "^1.41.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "@uiw/react-codemirror": "^4.23.13",
+    "@codemirror/lang-markdown": "^6.1.1",
     "ts-jest": "^29.1.1",
     "typescript": "^5.2.2",
     "zod": "^3.22.4"

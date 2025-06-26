@@ -132,14 +132,14 @@
     - [x] 4.3.2 Implement Template File dropdown listing Markdown templates and allowing clearing.
     - [x] 4.3.3 Write failing test for Load button opening any `.md` file.
     - [x] 4.3.4 Implement Load button opening any `.md` file.
-    - [ ] 4.3.5 Write failing test for toolbar to format and insert `{{#each}}` snippets.
-    - [ ] 4.3.6 Implement toolbar to format and insert `{{#each}}` snippets.
-    - [ ] 4.3.7 Write failing test for embedding CodeMirror editor for editing templates.
-    - [ ] 4.3.8 Implement embedding CodeMirror editor for editing templates.
-    - [ ] 4.3.9 Write failing test for Save button writing templates to `templates/as-built`.
-    - [ ] 4.3.10 Implement Save button writing templates to `templates/as-built`.
-    - [ ] 4.3.11 Write failing test for Data Source dropdown populated from configuration.
-    - [ ] 4.3.12 Implement Data Source dropdown populated from configuration.
+    - [x] 4.3.5 Write failing test for toolbar to format and insert `{{#each}}` snippets.
+    - [x] 4.3.6 Implement toolbar to format and insert `{{#each}}` snippets.
+    - [x] 4.3.7 Write failing test for embedding CodeMirror editor for editing templates.
+    - [x] 4.3.8 Implement embedding CodeMirror editor for editing templates.
+    - [x] 4.3.9 Write failing test for Save button writing templates to `templates/as-built`.
+    - [x] 4.3.10 Implement Save button writing templates to `templates/as-built`.
+    - [x] 4.3.11 Write failing test for Data Source dropdown populated from configuration.
+    - [x] 4.3.12 Implement Data Source dropdown populated from configuration.
     - [ ] 4.3.13 Write failing test for loading sample data via IPC.
     - [ ] 4.3.14 Implement loading sample data via IPC.
     - [ ] 4.3.15 Write failing test for Sample Data Table supporting copying loops or field names.
