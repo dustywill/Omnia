@@ -151,4 +151,21 @@ describe('script runner plugin', () => {
     });
     expect(config).toEqual({ build: ['-Foo'], deploy: ['-Default'] });
   });
+
+  it('clears output and copies it', async () => {
+    const { createOutputManager } = await import(
+      '../../plugins/script-runner/index.js'
+    );
+    const copy = jest.fn();
+    const output = createOutputManager({ copy });
+
+    output.append('foo');
+    output.append('bar');
+
+    await output.copy();
+    expect(copy).toHaveBeenCalledWith('foobar');
+
+    output.clear();
+    expect(output.get()).toBe('');
+  });
 });
