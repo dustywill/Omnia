@@ -1,5 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { spawn } from 'child_process';
 
 export type Script = {
   id: string;
@@ -62,8 +63,21 @@ export const runScript = (
   params: string[],
   onStatus: (status: ScriptStatus) => void,
 ): Promise<void> => {
-  void script;
-  void params;
-  void onStatus;
-  throw new Error('not implemented');
+  onStatus('running');
+  return new Promise((resolve, reject) => {
+    const child = spawn('pwsh', ['-File', script.path, ...params]);
+    child.on('exit', (code) => {
+      if (code === 0) {
+        onStatus('success');
+        resolve();
+      } else {
+        onStatus('error');
+        reject(new Error(`exit code ${code}`));
+      }
+    });
+    child.on('error', (err) => {
+      onStatus('error');
+      reject(err);
+    });
+  });
 };
