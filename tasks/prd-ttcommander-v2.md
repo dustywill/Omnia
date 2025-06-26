@@ -2,7 +2,7 @@
 
 ## Introduction / Overview
 
-The goal of ttCommander Version 2 is to rearchitect and modernize the original application while retaining all existing capabilities. The project will be guided by the architecture described in `prompts/redoprompt.md`, maintaining a modular plugin system with configuration handling, logging, and utilities in the core modules. The UI should be redesigned with a modern, card-based style and must remain responsive on all screen sizes.
+The goal of ttCommander Version 2 is to rearchitect and modernize the original application while retaining all existing capabilities. The project will be guided by the architecture described in `prompts/redoprompt.md`, maintaining a modular plugin system with configuration handling, logging, and utilities in the core modules. The UI should be redesigned with a modern, card-based style and must remain responsive on all screen sizes, but should be developed as a PC first interface.
 
 ## Goals
 
@@ -56,4 +56,3 @@ The goal of ttCommander Version 2 is to rearchitect and modernize the original a
 
 - Are there additional plugins from Version 1 not covered in `redoprompt.md` that must be supported?
 - Are there specific performance targets (load time, memory usage) for the new architecture?
-
