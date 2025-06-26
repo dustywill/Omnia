@@ -112,8 +112,8 @@
     - [x] 4.1.6 Implement Customize dialog to override parameters and save defaults.
     - [x] 4.1.7 Write failing test for Edit and Remove actions for script configurations.
     - [x] 4.1.8 Implement Edit and Remove actions for script configurations.
-    - [ ] 4.1.9 Write failing test for setup dialog when new scripts are discovered.
-    - [ ] 4.1.10 Implement setup dialog for newly discovered scripts.
+    - [x] 4.1.9 Write failing test for setup dialog when new scripts are discovered.
+    - [x] 4.1.10 Implement setup dialog for newly discovered scripts.
     - [ ] 4.1.11 Write failing test for Clear Output and Copy Output actions.
     - [ ] 4.1.12 Implement Clear Output and Copy Output actions for the output panel.
   - [ ] 4.2 Context Generator Plugin

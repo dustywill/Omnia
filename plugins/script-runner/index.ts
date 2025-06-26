@@ -135,3 +135,32 @@ export const removeScriptConfig = async <T extends Record<string, string[]>, K e
   await options.updateConfig(updated);
   return updated;
 };
+
+export type SetupNewScriptsOptions<T extends Record<string, string[]>> = {
+  prompt: (script: Script) => Promise<string[]> | string[];
+  updateConfig: (config: T) => Promise<void> | void;
+};
+
+export const setupNewScripts = async <T extends Record<string, string[]>>(
+  scripts: Script[],
+  config: T,
+  options: SetupNewScriptsOptions<T>,
+): Promise<T> => {
+  let updated = { ...config } as T;
+  let changed = false;
+
+  for (const script of scripts) {
+    if (Object.prototype.hasOwnProperty.call(updated, script.id)) {
+      continue;
+    }
+    const params = await options.prompt(script);
+    updated = { ...updated, [script.id]: params } as T;
+    changed = true;
+  }
+
+  if (changed) {
+    await options.updateConfig(updated);
+  }
+
+  return updated;
+};
