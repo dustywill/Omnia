@@ -7,25 +7,51 @@ import { JsonEditor } from '../../../src/ui/components/JsonEditor.js';
 describe('JsonEditor component', () => {
   it('opens and edits JSON files without schema', async () => {
     const onChange = jest.fn();
+    const user = userEvent.setup();
     render(<JsonEditor initialContent='{"foo": "bar"}' onChange={onChange} />);
 
     const textbox = screen.getByRole('textbox');
     expect(textbox).toHaveValue('{"foo": "bar"}');
 
-    await userEvent.clear(textbox);
-    await userEvent.type(textbox, '{"foo": "baz"}');
+    await user.clear(textbox);
+    await user.click(textbox);
+    await user.paste('{"foo": "baz"}');
 
     expect(onChange).toHaveBeenLastCalledWith('{"foo": "baz"}');
   });
 
   it('validates against schema when provided', async () => {
     const schema = z.object({ foo: z.string() });
+    const user = userEvent.setup();
     render(<JsonEditor initialContent='{"foo": "bar"}' schema={schema} />);
 
     const textbox = screen.getByRole('textbox');
-    await userEvent.clear(textbox);
-    await userEvent.type(textbox, '{"foo": 123}');
+    await user.clear(textbox);
+    await user.click(textbox);
+    await user.paste('{"foo": 123}');
 
     expect(await screen.findByText(/invalid/i)).toBeInTheDocument();
+  });
+
+  it('adds a new entry', async () => {
+    const onChange = jest.fn();
+    const user = userEvent.setup();
+    render(<JsonEditor initialContent='{"foo": "bar"}' onChange={onChange} />);
+
+    await user.click(screen.getByRole('button', { name: /add entry/i }));
+
+    expect(onChange).toHaveBeenLastCalledWith('{"foo": "bar", "new": ""}');
+  });
+
+  it('deletes an entry', async () => {
+    const onChange = jest.fn();
+    const user = userEvent.setup();
+    render(
+      <JsonEditor initialContent='{"foo": "bar", "baz": 1}' onChange={onChange} />, 
+    );
+
+    await user.click(screen.getByRole('button', { name: /delete foo/i }));
+
+    expect(onChange).toHaveBeenLastCalledWith('{"baz": 1}');
   });
 });

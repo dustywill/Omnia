@@ -12,6 +12,7 @@
 - `tests/setup.ts` - Jest setup including custom matchers.
 - `tests/style-mock.js` - Stub for imported CSS modules during tests.
 - `src/ui/components/JsonEditor.tsx` - JSON5 editor with schema enforcement.
+- `src/ui/components/JsonEditor.css` - Styles for the JsonEditor component.
 - `tests/ui/components/JsonEditor.test.tsx` - Tests for JsonEditor UI behavior.
 - `src/ui/components/MercurialCommit.ts` - Commit edited files to Mercurial.
 - `plugins/script-runner/index.ts` - PowerShell script discovery and execution plugin.
@@ -77,8 +78,8 @@
 
   - [ ] 3.2 JsonEditor Component
   - [x] 3.2.1 Write failing test for opening and editing JSON or JSON5 files with optional schema enforcement.
-    - [ ] 3.2.2 Implement opening and editing JSON or JSON5 files with optional schema enforcement.
-    - [ ] 3.2.3 Write failing test for adding and deleting entries within a file.
+    - [x] 3.2.2 Implement opening and editing JSON or JSON5 files with optional schema enforcement.
+    - [x] 3.2.3 Write failing test for adding and deleting entries within a file.
     - [ ] 3.2.4 Implement adding and deleting entries within a file.
     - [ ] 3.2.5 Write failing test for API allowing plugins to open a file with its schema.
     - [ ] 3.2.6 Implement API allowing plugins to open a file with its schema.
