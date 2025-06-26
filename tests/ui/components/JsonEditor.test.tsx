@@ -1,5 +1,4 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { z } from 'zod';
 
 import { JsonEditor } from '../../../src/ui/components/JsonEditor.js';
@@ -13,9 +12,11 @@ describe('JsonEditor component', () => {
     const textbox = screen.getByRole('textbox');
     expect(textbox).toHaveValue('{"foo": "bar"}');
 
+
     await user.clear(textbox);
     await user.click(textbox);
     await user.paste('{"foo": "baz"}');
+
 
     expect(onChange).toHaveBeenLastCalledWith('{"foo": "baz"}');
   });
@@ -26,10 +27,10 @@ describe('JsonEditor component', () => {
     render(<JsonEditor initialContent='{"foo": "bar"}' schema={schema} />);
 
     const textbox = screen.getByRole('textbox');
+
     await user.clear(textbox);
     await user.click(textbox);
     await user.paste('{"foo": 123}');
-
     expect(await screen.findByText(/invalid/i)).toBeInTheDocument();
   });
 
