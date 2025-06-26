@@ -1,5 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import fs from 'fs/promises';
+import path from 'path';
 import { AsBuiltDocumenter } from '../../plugins/as-built-documenter/index.js';
 
 describe('as-built documenter plugin', () => {
@@ -33,5 +35,63 @@ describe('as-built documenter plugin', () => {
     await userEvent.upload(input, file);
 
     expect(onLoad).toHaveBeenCalledWith(file);
+  });
+
+  it('inserts an {{#each}} snippet using the toolbar', async () => {
+    render(<AsBuiltDocumenter templates={[]} />);
+
+    const editor = screen.getByRole('textbox');
+    expect(editor).toHaveTextContent('');
+
+    await userEvent.click(screen.getByRole('button', { name: /insert each/i }));
+
+    expect(editor).toHaveTextContent('{{#each items}}{{/each}}');
+  });
+
+  it('embeds a CodeMirror editor for editing templates', () => {
+    render(<AsBuiltDocumenter templates={[]} />);
+
+    const cm = document.querySelector('.cm-editor');
+    expect(cm).toBeInTheDocument();
+  });
+
+  it('saves templates to templates/as-built folder', async () => {
+    const dir = path.join(__dirname, 'tmp-save');
+    const saveDir = path.join(dir, 'templates', 'as-built');
+    await fs.rm(dir, { recursive: true, force: true });
+    await fs.mkdir(saveDir, { recursive: true });
+
+    render(
+      <AsBuiltDocumenter
+        templates={[]}
+        saveDir={saveDir}
+        initialContent="hello"
+      />,
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: /save/i }));
+
+    const text = await fs.readFile(path.join(saveDir, 'template.md'), 'utf8');
+    expect(text).toBe('hello');
+
+    await fs.rm(dir, { recursive: true, force: true });
+  });
+
+  it('populates Data Source dropdown from configuration', () => {
+    const dataSources = {
+      foo: { url: 'http://foo' },
+      bar: { url: 'http://bar' },
+    };
+    render(
+      <AsBuiltDocumenter templates={[]} dataSources={dataSources} />,
+    );
+
+    const select = screen.getByLabelText(/data source/i) as HTMLSelectElement;
+    expect(select.options).toHaveLength(3);
+    expect(Array.from(select.options).map((o) => o.value)).toEqual([
+      '',
+      'foo',
+      'bar',
+    ]);
   });
 });
