@@ -16,6 +16,7 @@ export type FileScannerProps = {
   presets?: string[];
   onSavePreset?: (name: string) => void;
   onDeletePreset?: (name: string) => void;
+  onToggleFile?: (path: string, checked: boolean) => void;
   onApplyFilters?: (settings: {
     query: string;
     maxDepth?: number;
@@ -30,6 +31,7 @@ export const FileScanner: React.FC<FileScannerProps> = ({
   presets = [],
   onSavePreset,
   onDeletePreset,
+  onToggleFile,
   onApplyFilters,
 }) => {
 
@@ -74,7 +76,11 @@ export const FileScanner: React.FC<FileScannerProps> = ({
   const renderNode = (node: FileNode) => (
     <li key={node.path}>
       <label>
-        <input type="checkbox" aria-label={node.name} />
+        <input
+          type="checkbox"
+          aria-label={node.name}
+          onChange={(e) => onToggleFile?.(node.path, e.target.checked)}
+        />
         {node.name}
       </label>
       {node.isDirectory && node.children && (
