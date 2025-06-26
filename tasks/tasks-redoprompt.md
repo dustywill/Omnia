@@ -23,7 +23,8 @@
 - `src/ui/components/MercurialCommit.ts` - Commit edited files to Mercurial.
 - `plugins/script-runner/index.ts` - PowerShell script discovery and execution plugin.
 - `tests/plugins/script-runner.test.ts` - Tests for Script Runner plugin behavior, including customizing parameters.
-- `plugins/context-generator/index.ts` - Folder scanning and text bundling plugin.
+- `tests/plugins/context-generator.test.tsx` - Tests for Context Generator plugin UI behavior.
+  - `plugins/context-generator/index.tsx` - Folder scanning and text bundling plugin.
 - `plugins/as-built-documenter/index.ts` - Documentation generation plugin.
 - `plugins/customer-links/index.ts` - Customer links viewer and exporter.
 - `config/app-config.json5` - Main application configuration file.
@@ -117,8 +118,8 @@
     - [x] 4.1.11 Write failing test for Clear Output and Copy Output actions.
     - [x] 4.1.12 Implement Clear Output and Copy Output actions for the output panel.
   - [ ] 4.2 Context Generator Plugin
-    - [ ] 4.2.1 Write failing test for using File Scanner filter component to choose files.
-    - [ ] 4.2.2 Implement using File Scanner filter component to choose files.
+    - [x] 4.2.1 Write failing test for using File Scanner filter component to choose files.
+    - [x] 4.2.2 Implement using File Scanner filter component to choose files.
     - [ ] 4.2.3 Write failing test for Generate Context button showing progress and character count.
     - [ ] 4.2.4 Implement Generate Context button showing progress and character count.
     - [ ] 4.2.5 Write failing test for Copy to Clipboard action with confirmation message.
