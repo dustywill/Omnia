@@ -124,8 +124,8 @@
     - [x] 4.2.4 Implement Generate Context button showing progress and character count.
     - [x] 4.2.5 Write failing test for Copy to Clipboard action with confirmation message.
     - [x] 4.2.6 Implement Copy to Clipboard action with confirmation message.
-    - [ ] 4.2.7 Write failing test for output area displaying progress and character count.
-    - [ ] 4.2.8 Implement output area displaying progress and character count.
+    - [x] 4.2.7 Write failing test for output area displaying progress and character count.
+    - [x] 4.2.8 Implement output area displaying progress and character count.
   - [ ] 4.3 As-Built Documenter Plugin
     - [ ] 4.3.1 Write failing test for Template File dropdown listing Markdown templates and allowing clearing.
     - [ ] 4.3.2 Implement Template File dropdown listing Markdown templates and allowing clearing.

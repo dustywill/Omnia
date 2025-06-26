@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import fs from 'fs/promises';
 import path from 'path';
@@ -51,6 +51,36 @@ describe('context generator plugin', () => {
     const charCount = 3 + 4;
     expect(await screen.findByText(/progress: 2\/2/i)).toBeInTheDocument();
     expect(screen.getByText(new RegExp(`characters: ${charCount}`, 'i'))).toBeInTheDocument();
+
+    await fs.rm(dir, { recursive: true, force: true });
+  });
+
+  it('displays progress in output area with character count', async () => {
+    const dir = path.join(__dirname, 'tmpout');
+    await fs.rm(dir, { recursive: true, force: true });
+    await fs.mkdir(dir, { recursive: true });
+    const file1 = path.join(dir, 'one.txt');
+    const file2 = path.join(dir, 'two.txt');
+    await fs.writeFile(file1, 'foo');
+    await fs.writeFile(file2, 'bar');
+
+    const tree: FileNode[] = [
+      { name: 'one.txt', path: file1, isDirectory: false },
+      { name: 'two.txt', path: file2, isDirectory: false },
+    ];
+
+    render(<ContextGenerator tree={tree} />);
+
+    await userEvent.click(screen.getByLabelText('one.txt'));
+    await userEvent.click(screen.getByLabelText('two.txt'));
+    await userEvent.click(screen.getByRole('button', { name: /generate context/i }));
+
+    const output = (await screen.findByRole('textbox', {
+      name: /context output/i,
+    })) as HTMLTextAreaElement;
+    const charCount = 3 + 3;
+    await waitFor(() => expect(output.value).toContain('Step 2/2'));
+    expect(output.value).toContain(`Chars: ${charCount}`);
 
     await fs.rm(dir, { recursive: true, force: true });
   });

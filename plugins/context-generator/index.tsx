@@ -11,6 +11,7 @@ export const ContextGenerator: React.FC<ContextGeneratorProps> = ({ tree }) => {
   const [progress, setProgress] = useState<{ index: number; total: number; chars: number } | null>(null);
   const [context, setContext] = useState('');
   const [copied, setCopied] = useState(false);
+  const [output, setOutput] = useState('');
 
   const handleToggle = (path: string, checked: boolean) => {
     setSelected((prev) =>
@@ -22,11 +23,14 @@ export const ContextGenerator: React.FC<ContextGeneratorProps> = ({ tree }) => {
     const total = selected.length;
     let chars = 0;
     let ctx = '';
+    setOutput('');
     for (let i = 0; i < selected.length; i++) {
       const content = await fs.readFile(selected[i], 'utf8');
       chars += content.length;
       ctx += content;
+      const progressText = `Step ${i + 1}/${total} Chars: ${chars}`;
       setProgress({ index: i + 1, total, chars });
+      setOutput((prev) => prev + progressText + '\n');
     }
     setContext(ctx);
     setCopied(false);
@@ -45,6 +49,9 @@ export const ContextGenerator: React.FC<ContextGeneratorProps> = ({ tree }) => {
         <div>
           Progress: {progress.index}/{progress.total} Characters: {progress.chars}
         </div>
+      )}
+      {output && (
+        <textarea aria-label="Context Output" readOnly value={output} />
       )}
       {context && (
         <button type="button" onClick={handleCopy}>
