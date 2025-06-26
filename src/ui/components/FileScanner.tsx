@@ -15,6 +15,12 @@ export type FileScannerProps = {
   selectRootFolder?: () => Promise<string>;
   presets?: string[];
   onSavePreset?: (name: string) => void;
+  onApplyFilters?: (settings: {
+    query: string;
+    maxDepth?: number;
+    folderRegexMode: 'include' | 'exclude';
+    fileRegexMode: 'include' | 'exclude';
+  }) => void;
 };
 
 export const FileScanner: React.FC<FileScannerProps> = ({
@@ -22,6 +28,7 @@ export const FileScanner: React.FC<FileScannerProps> = ({
   selectRootFolder,
   presets = [],
   onSavePreset,
+  onApplyFilters,
 }) => {
 
   const [query, setQuery] = useState('');
@@ -180,6 +187,19 @@ export const FileScanner: React.FC<FileScannerProps> = ({
           }}
         />
       </label>
+      <button
+        type="button"
+        onClick={() =>
+          onApplyFilters?.({
+            query,
+            maxDepth,
+            folderRegexMode,
+            fileRegexMode,
+          })
+        }
+      >
+        Apply Filters
+      </button>
       <ul className="file-scanner">{filtered.map(renderNode)}</ul>
     </div>
   );

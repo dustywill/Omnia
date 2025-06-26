@@ -116,4 +116,15 @@ describe('FileScanner component', () => {
     expect(screen.getByLabelText('sub')).toBeInTheDocument();
     expect(screen.queryByLabelText('deep.txt')).not.toBeInTheDocument();
   });
+  it("rescans when clicking Apply Filters", async () => {
+    const onApply = jest.fn();
+    render(<FileScanner tree={[]} onApplyFilters={onApply} />);
+    await userEvent.type(screen.getByPlaceholderText("Search"), "foo");
+    const depthInput = screen.getByLabelText(/max depth/i);
+    await userEvent.clear(depthInput);
+    await userEvent.type(depthInput, "2");
+    await userEvent.click(screen.getByRole("button", { name: /apply filters/i }));
+    expect(onApply).toHaveBeenCalledWith(expect.objectContaining({ query: "foo", maxDepth: 2 }));
+  });
+
 });
