@@ -96,3 +96,42 @@ export const customizeScript = async (
   await options.saveDefaults(script.id, params);
   return params;
 };
+
+export type EditConfigOptions = {
+  prompt: (current: string[]) => Promise<string[]> | string[];
+  updateConfig: (
+    config: Record<string, string[]>,
+  ) => Promise<void> | void;
+};
+
+export const editScriptConfig = async <
+  T extends Record<string, string[]>,
+  K extends keyof T & string,
+>(
+  scriptId: K,
+  config: T,
+  options: EditConfigOptions,
+): Promise<T> => {
+  const current = config[scriptId] ?? [];
+  const params = await options.prompt(current);
+  const updated = { ...config, [scriptId]: params } as T;
+  await options.updateConfig(updated);
+  return updated;
+};
+
+export type RemoveConfigOptions = {
+  updateConfig: (
+    config: Record<string, string[]>,
+  ) => Promise<void> | void;
+};
+
+export const removeScriptConfig = async <T extends Record<string, string[]>, K extends keyof T & string>(
+  scriptId: K,
+  config: T,
+  options: RemoveConfigOptions,
+): Promise<T> => {
+  const { [scriptId]: _removed, ...rest } = config;
+  const updated = rest as unknown as T;
+  await options.updateConfig(updated);
+  return updated;
+};
