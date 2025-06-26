@@ -1,8 +1,11 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { z } from 'zod';
+import fs from 'fs/promises';
+import path from 'path';
 
 import { JsonEditor } from '../../../src/ui/components/JsonEditor.js';
+import { openJsonEditor } from '../../../src/ui/json-editor-api.js';
 
 describe('JsonEditor component', () => {
   it('opens and edits JSON files without schema', async () => {
@@ -50,5 +53,20 @@ describe('JsonEditor component', () => {
     await user.click(screen.getByRole('button', { name: /delete foo/i }));
 
     expect(onChange).toHaveBeenLastCalledWith('{"baz": 1}');
+  });
+
+  it('opens a file with schema via API', async () => {
+    const tempPath = path.join(__dirname, 'temp.json');
+    await fs.writeFile(tempPath, '{"foo":"bar"}', 'utf8');
+    const schema = z.object({ foo: z.string() });
+    const element = await openJsonEditor(tempPath, schema);
+    const user = userEvent.setup();
+    render(element);
+    const textbox = screen.getByRole('textbox');
+    expect(textbox).toHaveValue('{"foo":"bar"}');
+    await user.clear(textbox);
+    await user.paste('{"foo":123}');
+    expect(await screen.findByText(/invalid/i)).toBeInTheDocument();
+    await fs.rm(tempPath);
   });
 });
