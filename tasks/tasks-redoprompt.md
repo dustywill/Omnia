@@ -109,8 +109,8 @@
     - [x] 4.1.3 Write failing test for running scripts with default parameters and showing status indicator.
     - [x] 4.1.4 Implement running scripts with default parameters and showing status indicator.
     - [x] 4.1.5 Write failing test for Customize dialog to override parameters and save defaults.
-    - [ ] 4.1.6 Implement Customize dialog to override parameters and save defaults.
-    - [ ] 4.1.7 Write failing test for Edit and Remove actions for script configurations.
+    - [x] 4.1.6 Implement Customize dialog to override parameters and save defaults.
+    - [x] 4.1.7 Write failing test for Edit and Remove actions for script configurations.
     - [ ] 4.1.8 Implement Edit and Remove actions for script configurations.
     - [ ] 4.1.9 Write failing test for setup dialog when new scripts are discovered.
     - [ ] 4.1.10 Implement setup dialog for newly discovered scripts.

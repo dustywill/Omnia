@@ -81,3 +81,18 @@ export const runScript = (
     });
   });
 };
+
+export type CustomizeOptions = {
+  prompt: (current: string[]) => Promise<string[]> | string[];
+  saveDefaults: (scriptId: string, params: string[]) => Promise<void> | void;
+};
+
+export const customizeScript = async (
+  script: Script,
+  currentParams: string[],
+  options: CustomizeOptions,
+): Promise<string[]> => {
+  const params = await options.prompt(currentParams);
+  await options.saveDefaults(script.id, params);
+  return params;
+};

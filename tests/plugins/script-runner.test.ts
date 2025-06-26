@@ -95,4 +95,23 @@ describe('script runner plugin', () => {
     expect(saveDefaults).toHaveBeenCalledWith(script.id, ['-Foo', 'Baz']);
     expect(result).toEqual(['-Foo', 'Baz']);
   });
+
+  it('edits and removes script configurations', async () => {
+    const { editScriptConfig, removeScriptConfig } = await import(
+      '../../plugins/script-runner/index.js'
+    );
+    const updateConfig = jest.fn();
+    const prompt = jest.fn().mockResolvedValue(['-Foo', 'Baz']);
+
+    let config = { build: ['-Foo', 'Bar'] };
+    config = await editScriptConfig('build', config, { prompt, updateConfig });
+
+    expect(prompt).toHaveBeenCalledWith(['-Foo', 'Bar']);
+    expect(updateConfig).toHaveBeenCalledWith({ build: ['-Foo', 'Baz'] });
+    expect(config).toEqual({ build: ['-Foo', 'Baz'] });
+
+    config = await removeScriptConfig('build', config, { updateConfig });
+    expect(updateConfig).toHaveBeenCalledWith({});
+    expect(config).toEqual({});
+  });
 });
