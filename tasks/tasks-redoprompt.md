@@ -71,8 +71,8 @@
     - [x] 3.1.10 Implement max depth setting for recursive scans.
     - [x] 3.1.11 Write failing test for Apply filters button to rescan with current settings.
     - [x] 3.1.12 Implement Apply filters button to rescan with current settings.
-    - [ ] 3.1.13 Write failing test for Save Filter and Delete Filter actions.
-    - [ ] 3.1.14 Implement Save Filter and Delete Filter actions for managing presets.
+    - [x] 3.1.13 Write failing test for Save Filter and Delete Filter actions.
+    - [x] 3.1.14 Implement Save Filter and Delete Filter actions for managing presets.
 
   - [ ] 3.2 JsonEditor Component
     - [ ] 3.2.1 Write failing test for opening and editing JSON or JSON5 files with optional schema enforcement.

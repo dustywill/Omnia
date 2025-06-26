@@ -15,6 +15,7 @@ export type FileScannerProps = {
   selectRootFolder?: () => Promise<string>;
   presets?: string[];
   onSavePreset?: (name: string) => void;
+  onDeletePreset?: (name: string) => void;
   onApplyFilters?: (settings: {
     query: string;
     maxDepth?: number;
@@ -28,6 +29,7 @@ export const FileScanner: React.FC<FileScannerProps> = ({
   selectRootFolder,
   presets = [],
   onSavePreset,
+  onDeletePreset,
   onApplyFilters,
 }) => {
 
@@ -128,6 +130,28 @@ export const FileScanner: React.FC<FileScannerProps> = ({
         }}
       >
         Save Preset
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          if (!selectedPreset) return;
+          onSavePreset?.(selectedPreset);
+        }}
+        disabled={!selectedPreset}
+      >
+        Save Filter
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          if (!selectedPreset) return;
+          setPresetList(presetList.filter((p) => p !== selectedPreset));
+          onDeletePreset?.(selectedPreset);
+          setSelectedPreset(undefined);
+        }}
+        disabled={!selectedPreset}
+      >
+        Delete Filter
       </button>
       <fieldset>
         <legend>Folder Regex Mode</legend>

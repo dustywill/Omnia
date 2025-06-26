@@ -127,4 +127,39 @@ describe('FileScanner component', () => {
     expect(onApply).toHaveBeenCalledWith(expect.objectContaining({ query: "foo", maxDepth: 2 }));
   });
 
+  it('saves current filter for selected preset', async () => {
+    const onSavePreset = jest.fn();
+    render(
+      <FileScanner tree={[]} presets={["Default"]} onSavePreset={onSavePreset} />,
+    );
+
+    await userEvent.selectOptions(
+      screen.getByLabelText('Preset Selector'),
+      'Default',
+    );
+    await userEvent.click(screen.getByRole('button', { name: /save filter/i }));
+
+    expect(onSavePreset).toHaveBeenCalledWith('Default');
+  });
+
+  it('deletes selected preset from list', async () => {
+    const onDeletePreset = jest.fn();
+    render(
+      <FileScanner
+        tree={[]}
+        presets={["One", "Two"]}
+        onDeletePreset={onDeletePreset}
+      />,
+    );
+
+    await userEvent.selectOptions(
+      screen.getByLabelText('Preset Selector'),
+      'One',
+    );
+    await userEvent.click(screen.getByRole('button', { name: /delete filter/i }));
+
+    expect(onDeletePreset).toHaveBeenCalledWith('One');
+    expect(screen.getByLabelText('Preset Selector')).not.toHaveTextContent('One');
+  });
+
 });
