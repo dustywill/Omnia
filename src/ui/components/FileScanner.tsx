@@ -45,6 +45,12 @@ export const FileScanner: React.FC<FileScannerProps> = ({
   const [presetName, setPresetName] = useState('');
   const [presetList, setPresetList] = useState<string[]>(presets);
   const [selectedPreset, setSelectedPreset] = useState<string | undefined>();
+  const [folderRegexMode, setFolderRegexMode] = useState<'include' | 'exclude'>(
+    'include',
+  );
+  const [fileRegexMode, setFileRegexMode] = useState<'include' | 'exclude'>(
+    'include',
+  );
 
   const filtered = filterTree(tree);
 
@@ -108,6 +114,52 @@ export const FileScanner: React.FC<FileScannerProps> = ({
       >
         Save Preset
       </button>
+      <fieldset>
+        <legend>Folder Regex Mode</legend>
+        <label>
+          <input
+            type="radio"
+            name="folder-mode"
+            value="include"
+            checked={folderRegexMode === 'include'}
+            onChange={() => setFolderRegexMode('include')}
+          />
+          Include Folders
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="folder-mode"
+            value="exclude"
+            checked={folderRegexMode === 'exclude'}
+            onChange={() => setFolderRegexMode('exclude')}
+          />
+          Exclude Folders
+        </label>
+      </fieldset>
+      <fieldset>
+        <legend>File Regex Mode</legend>
+        <label>
+          <input
+            type="radio"
+            name="file-mode"
+            value="include"
+            checked={fileRegexMode === 'include'}
+            onChange={() => setFileRegexMode('include')}
+          />
+          Include Files
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="file-mode"
+            value="exclude"
+            checked={fileRegexMode === 'exclude'}
+            onChange={() => setFileRegexMode('exclude')}
+          />
+          Exclude Files
+        </label>
+      </fieldset>
       <ul className="file-scanner">{filtered.map(renderNode)}</ul>
     </div>
   );
