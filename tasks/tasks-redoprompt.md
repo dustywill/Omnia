@@ -65,7 +65,7 @@
     - [x] 3.1.4 Implement dialog to select root folder and remember path.
     - [x] 3.1.5 Write failing test for preset dropdown and filter name field to save presets.
     - [x] 3.1.6 Implement preset dropdown and filter name field to save presets.
-    - [ ] 3.1.7 Write failing test for include/exclude regex mode selectors.
+    - [x] 3.1.7 Write failing test for include/exclude regex mode selectors.
     - [ ] 3.1.8 Implement include/exclude regex mode selectors for folders and files.
     - [ ] 3.1.9 Write failing test for max depth setting for recursive scans.
     - [ ] 3.1.10 Implement max depth setting for recursive scans.
@@ -73,6 +73,7 @@
     - [ ] 3.1.12 Implement Apply filters button to rescan with current settings.
     - [ ] 3.1.13 Write failing test for Save Filter and Delete Filter actions.
     - [ ] 3.1.14 Implement Save Filter and Delete Filter actions for managing presets.
+
   - [ ] 3.2 JsonEditor Component
     - [ ] 3.2.1 Write failing test for opening and editing JSON or JSON5 files with optional schema enforcement.
     - [ ] 3.2.2 Implement opening and editing JSON or JSON5 files with optional schema enforcement.
