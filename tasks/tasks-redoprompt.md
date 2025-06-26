@@ -32,6 +32,7 @@
 ## Tasks
 
 - [x] 1.0 Environment Setup
+
   - [x] 1.1 Create base folder structure (`src/core`, `src/ui`, `plugins`, `config`).
   - [x] 1.2 Configure TypeScript strict mode via `tsconfig.json`.
   - [x] 1.3 Install and configure Jest and Playwright for testing.
@@ -39,6 +40,7 @@
 - [x] 2.0 Core Modules Implementation
 
   - [x] 2.1 Configuration Manager (`src/core/config.ts`)
+
     - [x] Read and write `config/app-config.json5` using JSON5 parser.
     - [x] Merge plugin default settings on first run.
     - [x] Watch for configuration changes and notify plugins via event bus.
@@ -55,32 +57,33 @@
     - [x] Ensure events are strongly typed and support payloads.
 
 - [ ] 3.0 Built-in Components
+
   - [ ] 3.1 FileScanner Component
-    - [x] Display file tree with checkboxes for files and folders.
-    - [x] Provide search box for filtering tree results.
-    - [x] Write failing test for dialog to select root folder and remember path.
-    - [x] Implement dialog to select root folder and remember path.
-    - [x] Write failing test for preset dropdown and filter name field to save presets.
-    - [x] Implement preset dropdown and filter name field to save presets.
-    - [ ] Write failing test for include/exclude regex mode selectors.
-    - [ ] Implement include/exclude regex mode selectors for folders and files.
-    - [ ] Write failing test for max depth setting for recursive scans.
-    - [ ] Implement max depth setting for recursive scans.
-    - [ ] Write failing test for Apply filters button to rescan with current settings.
-    - [ ] Implement Apply filters button to rescan with current settings.
-    - [ ] Write failing test for Save Filter and Delete Filter actions.
-    - [ ] Implement Save Filter and Delete Filter actions for managing presets.
+    - [x] 3.1.1 Display file tree with checkboxes for files and folders.
+    - [x] 3.1.2 Provide search box for filtering tree results.
+    - [x] 3.1.3 Write failing test for dialog to select root folder and remember path.
+    - [x] 3.1.4 Implement dialog to select root folder and remember path.
+    - [x] 3.1.5 Write failing test for preset dropdown and filter name field to save presets.
+    - [x] 3.1.6 Implement preset dropdown and filter name field to save presets.
+    - [ ] 3.1.7 Write failing test for include/exclude regex mode selectors.
+    - [ ] 3.1.8 Implement include/exclude regex mode selectors for folders and files.
+    - [ ] 3.1.9 Write failing test for max depth setting for recursive scans.
+    - [ ] 3.1.10 Implement max depth setting for recursive scans.
+    - [ ] 3.1.11 Write failing test for Apply filters button to rescan with current settings.
+    - [ ] 3.1.12 Implement Apply filters button to rescan with current settings.
+    - [ ] 3.1.13 Write failing test for Save Filter and Delete Filter actions.
+    - [ ] 3.1.14 Implement Save Filter and Delete Filter actions for managing presets.
   - [ ] 3.2 JsonEditor Component
-    - [ ] Write failing test for opening and editing JSON or JSON5 files with optional schema enforcement.
-    - [ ] Implement opening and editing JSON or JSON5 files with optional schema enforcement.
-    - [ ] Write failing test for adding and deleting entries within a file.
-    - [ ] Implement adding and deleting entries within a file.
-    - [ ] Write failing test for API allowing plugins to open a file with its schema.
-    - [ ] Implement API allowing plugins to open a file with its schema.
-    - [ ] Write failing test for function to compact nested data beyond a chosen depth.
-    - [ ] Implement function to compact nested data beyond a chosen depth.
-    - [ ] Write failing test for committing changes via Mercurial revision control.
-    - [ ] Implement committing changes via Mercurial revision control.
+    - [ ] 3.2.1 Write failing test for opening and editing JSON or JSON5 files with optional schema enforcement.
+    - [ ] 3.2.2 Implement opening and editing JSON or JSON5 files with optional schema enforcement.
+    - [ ] 3.2.3 Write failing test for adding and deleting entries within a file.
+    - [ ] 3.2.4 Implement adding and deleting entries within a file.
+    - [ ] 3.2.5 Write failing test for API allowing plugins to open a file with its schema.
+    - [ ] 3.2.6 Implement API allowing plugins to open a file with its schema.
+    - [ ] 3.2.7 Write failing test for function to compact nested data beyond a chosen depth.
+    - [ ] 3.2.8 Implement function to compact nested data beyond a chosen depth.
+    - [ ] 3.2.9 Write failing test for committing changes via Mercurial revision control.
+    - [ ] 3.2.10 Implement committing changes via Mercurial revision control.
   - [ ] 3.3 MercurialCommit Module
     - [ ] Write failing test for creating a commit whenever a file is saved.
     - [ ] Implement creating a commit whenever a file is saved.
@@ -88,6 +91,7 @@
     - [ ] Implement popup prompting for commit message, defaulting when empty.
 
 - [ ] 4.0 Plugin Development
+
   - [ ] 4.1 Script Runner Plugin
     - [ ] Write failing test to discover PowerShell scripts and list them with filter by ID, name, or description.
     - [ ] Implement discovery of PowerShell scripts and list them with filter by ID, name, or description.
