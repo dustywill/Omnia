@@ -25,20 +25,28 @@ export const FileScanner: React.FC<FileScannerProps> = ({
 }) => {
 
   const [query, setQuery] = useState('');
+  const [maxDepth, setMaxDepth] = useState<number | undefined>();
 
-  const filterTree = (nodes: FileNode[]): FileNode[] => {
-    if (!query) return nodes;
-    const q = query.toLowerCase();
-    return nodes
+  const filterTree = (nodes: FileNode[], depth = 0): FileNode[] => {
+    const withinDepth =
+      maxDepth === undefined ? true : depth <= maxDepth;
+    const filteredNodes = nodes
       .map((n) => {
-        const children = n.children ? filterTree(n.children) : [];
-        const match = n.name.toLowerCase().includes(q);
-        if (match || children.length) {
+        const children =
+          n.children && withinDepth ? filterTree(n.children, depth + 1) : [];
+        const match = query
+          ? n.name.toLowerCase().includes(query.toLowerCase())
+          : true;
+        if (match && withinDepth) {
+          return { ...n, children };
+        }
+        if (children.length) {
           return { ...n, children };
         }
         return null;
       })
       .filter(Boolean) as FileNode[];
+    return filteredNodes;
   };
 
   const [rootPath, setRootPath] = useState<string | undefined>();
@@ -160,6 +168,18 @@ export const FileScanner: React.FC<FileScannerProps> = ({
           Exclude Files
         </label>
       </fieldset>
+      <label>
+        Max Depth
+        <input
+          type="number"
+          aria-label="Max Depth"
+          value={maxDepth ?? ''}
+          onChange={(e) => {
+            const value = e.target.value;
+            setMaxDepth(value === '' ? undefined : Number(value));
+          }}
+        />
+      </label>
       <ul className="file-scanner">{filtered.map(renderNode)}</ul>
     </div>
   );

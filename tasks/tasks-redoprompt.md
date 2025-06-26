@@ -68,7 +68,7 @@
     - [x] 3.1.7 Write failing test for include/exclude regex mode selectors.
     - [x] 3.1.8 Implement include/exclude regex mode selectors for folders and files.
     - [x] 3.1.9 Write failing test for max depth setting for recursive scans.
-    - [ ] 3.1.10 Implement max depth setting for recursive scans.
+    - [x] 3.1.10 Implement max depth setting for recursive scans.
     - [ ] 3.1.11 Write failing test for Apply filters button to rescan with current settings.
     - [ ] 3.1.12 Implement Apply filters button to rescan with current settings.
     - [ ] 3.1.13 Write failing test for Save Filter and Delete Filter actions.
