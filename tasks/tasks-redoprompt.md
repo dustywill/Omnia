@@ -140,8 +140,8 @@
     - [x] 4.3.10 Implement Save button writing templates to `templates/as-built`.
     - [x] 4.3.11 Write failing test for Data Source dropdown populated from configuration.
     - [x] 4.3.12 Implement Data Source dropdown populated from configuration.
-    - [ ] 4.3.13 Write failing test for loading sample data via IPC.
-    - [ ] 4.3.14 Implement loading sample data via IPC.
+    - [x] 4.3.13 Write failing test for loading sample data via IPC.
+    - [x] 4.3.14 Implement loading sample data via IPC.
     - [ ] 4.3.15 Write failing test for Sample Data Table supporting copying loops or field names.
     - [ ] 4.3.16 Implement Sample Data Table supporting copying loops or field names.
     - [ ] 4.3.17 Write failing test for Prev/Next buttons paging through sample data.
