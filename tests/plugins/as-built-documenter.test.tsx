@@ -94,4 +94,28 @@ describe('as-built documenter plugin', () => {
       'bar',
     ]);
   });
+
+  it('loads sample data via IPC', async () => {
+    const invoke = jest.fn().mockResolvedValue([{ id: 1 }]);
+    (window as any).ipcRenderer = { invoke };
+
+    render(
+      <AsBuiltDocumenter
+        templates={[]}
+        dataSources={{ foo: { url: 'http://foo' } }}
+      />,
+    );
+
+    await userEvent.selectOptions(screen.getByLabelText(/data source/i), 'foo');
+    await userEvent.click(
+      screen.getByRole('button', { name: /load sample data/i }),
+    );
+
+    expect(invoke).toHaveBeenCalledWith('load-sample-data', {
+      id: 'foo',
+      url: 'http://foo',
+    });
+
+    expect(await screen.findByText(/"id": 1/)).toBeInTheDocument();
+  });
 });

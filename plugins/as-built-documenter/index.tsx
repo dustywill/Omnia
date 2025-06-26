@@ -21,6 +21,8 @@ export const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({
 }) => {
   const [template, setTemplate] = useState('');
   const [content, setContent] = useState(initialContent ?? '');
+  const [sourceId, setSourceId] = useState('');
+  const [sample, setSample] = useState<unknown>(null);
 
   const insertEach = () => {
     setContent((c: string) => `${c}{{#each items}}\n{{/each}}`);
@@ -61,7 +63,11 @@ export const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({
           Each
         </button>
       </div>
-      <select aria-label="Data Source" value="" onChange={() => {}}>
+      <select
+        aria-label="Data Source"
+        value={sourceId}
+        onChange={(e) => setSourceId(e.target.value)}
+      >
         <option value="">(none)</option>
         {Object.keys(dataSources).map((id) => (
           <option key={id} value={id}>
@@ -69,6 +75,20 @@ export const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({
           </option>
         ))}
       </select>
+      <button
+        type="button"
+        onClick={async () => {
+          if (!sourceId) return;
+          const data = await (window as any).ipcRenderer.invoke(
+            'load-sample-data',
+            { id: sourceId, ...dataSources[sourceId] },
+          );
+          setSample(data);
+        }}
+      >
+        Load Sample Data
+      </button>
+      {sample && <pre>{JSON.stringify(sample, null, 2)}</pre>}
       <CodeMirror
         aria-label="Template Editor"
         value={content}
