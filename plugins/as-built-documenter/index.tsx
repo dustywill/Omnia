@@ -23,6 +23,7 @@ export const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({
   const [content, setContent] = useState(initialContent ?? '');
   const [sourceId, setSourceId] = useState('');
   const [sample, setSample] = useState<unknown>(null);
+  const [copied, setCopied] = useState(false);
 
   const insertEach = () => {
     setContent((c: string) => `${c}{{#each items}}\n{{/each}}`);
@@ -32,6 +33,16 @@ export const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({
     await fs.mkdir(saveDir, { recursive: true });
     const file = path.join(saveDir, template || 'template.md');
     await fs.writeFile(file, content);
+  };
+
+  const handleCopyField = async (field: string) => {
+    await navigator.clipboard.writeText(field);
+    setCopied(true);
+  };
+
+  const handleCopyLoop = async () => {
+    await navigator.clipboard.writeText('{{#each items}}');
+    setCopied(true);
   };
   return (
     <>
@@ -84,11 +95,44 @@ export const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({
             { id: sourceId, ...dataSources[sourceId] },
           );
           setSample(data);
+          setCopied(false);
         }}
       >
         Load Sample Data
       </button>
-      {sample && <pre>{JSON.stringify(sample, null, 2)}</pre>}
+      {Array.isArray(sample) && sample.length > 0 && (
+        <>
+          <table>
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.keys((sample as any)[0]).map((key: string) => (
+                <tr key={key}>
+                  <td>{key}</td>
+                  <td>
+                    <button
+                      type="button"
+                      aria-label={`Copy Field ${key}`}
+                      onClick={() => handleCopyField(key)}
+                    >
+                      Copy Field
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <button type="button" aria-label="Copy Loop" onClick={handleCopyLoop}>
+            Copy Loop
+          </button>
+        </>
+      )}
+      {sample && !Array.isArray(sample) && <pre>{JSON.stringify(sample, null, 2)}</pre>}
+      {copied && <div>Copied to clipboard</div>}
       <CodeMirror
         aria-label="Template Editor"
         value={content}

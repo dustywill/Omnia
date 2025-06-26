@@ -116,6 +116,40 @@ describe('as-built documenter plugin', () => {
       url: 'http://foo',
     });
 
-    expect(await screen.findByText(/"id": 1/)).toBeInTheDocument();
+    expect(await screen.findByRole('table')).toBeInTheDocument();
+  });
+
+  it('displays sample data table and copies loops or field names', async () => {
+    const invoke = jest
+      .fn()
+      .mockResolvedValue([{ id: 1, name: 'Alice' }]);
+    (window as any).ipcRenderer = { invoke };
+    const writeText = jest.fn();
+    Object.assign(navigator, { clipboard: { writeText } });
+
+    render(
+      <AsBuiltDocumenter
+        templates={[]}
+        dataSources={{ foo: { url: 'http://foo' } }}
+      />,
+    );
+
+    await userEvent.selectOptions(screen.getByLabelText(/data source/i), 'foo');
+    await userEvent.click(
+      screen.getByRole('button', { name: /load sample data/i }),
+    );
+
+    expect(await screen.findByRole('table')).toBeInTheDocument();
+    expect(screen.getByText('id')).toBeInTheDocument();
+    expect(screen.getByText('name')).toBeInTheDocument();
+
+    await userEvent.click(
+      screen.getByRole('button', { name: /copy field id/i }),
+    );
+    await userEvent.click(screen.getByRole('button', { name: /copy loop/i }));
+
+    expect(writeText).toHaveBeenNthCalledWith(1, 'id');
+    expect(writeText).toHaveBeenNthCalledWith(2, '{{#each items}}');
+    expect(screen.getByText(/copied/i)).toBeInTheDocument();
   });
 });
