@@ -120,10 +120,10 @@
   - [ ] 4.2 Context Generator Plugin
     - [x] 4.2.1 Write failing test for using File Scanner filter component to choose files.
     - [x] 4.2.2 Implement using File Scanner filter component to choose files.
-    - [ ] 4.2.3 Write failing test for Generate Context button showing progress and character count.
-    - [ ] 4.2.4 Implement Generate Context button showing progress and character count.
-    - [ ] 4.2.5 Write failing test for Copy to Clipboard action with confirmation message.
-    - [ ] 4.2.6 Implement Copy to Clipboard action with confirmation message.
+    - [x] 4.2.3 Write failing test for Generate Context button showing progress and character count.
+    - [x] 4.2.4 Implement Generate Context button showing progress and character count.
+    - [x] 4.2.5 Write failing test for Copy to Clipboard action with confirmation message.
+    - [x] 4.2.6 Implement Copy to Clipboard action with confirmation message.
     - [ ] 4.2.7 Write failing test for output area displaying progress and character count.
     - [ ] 4.2.8 Implement output area displaying progress and character count.
   - [ ] 4.3 As-Built Documenter Plugin
