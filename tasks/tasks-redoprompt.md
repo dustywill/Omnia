@@ -87,6 +87,7 @@
     - [ ] 3.2.8 Implement function to compact nested data beyond a chosen depth.
     - [ ] 3.2.9 Write failing test for committing changes via Mercurial revision control.
     - [ ] 3.2.10 Implement committing changes via Mercurial revision control.
+
   - [ ] 3.3 MercurialCommit Module
     - [ ] 3.3.1 Write failing test for creating a commit whenever a file is saved.
     - [ ] 3.3.2 Implement creating a commit whenever a file is saved.
