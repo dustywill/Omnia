@@ -54,3 +54,16 @@ export const filterScripts = (scripts: Script[], query: string): Script[] => {
       s.description.toLowerCase().includes(q),
   );
 };
+
+export type ScriptStatus = 'running' | 'success' | 'error';
+
+export const runScript = (
+  script: Script,
+  params: string[],
+  onStatus: (status: ScriptStatus) => void,
+): Promise<void> => {
+  void script;
+  void params;
+  void onStatus;
+  throw new Error('not implemented');
+};
