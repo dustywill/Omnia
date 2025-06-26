@@ -1,5 +1,4 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { z } from 'zod';
 
 import { JsonEditor } from '../../../src/ui/components/JsonEditor.js';
@@ -12,8 +11,7 @@ describe('JsonEditor component', () => {
     const textbox = screen.getByRole('textbox');
     expect(textbox).toHaveValue('{"foo": "bar"}');
 
-    await userEvent.clear(textbox);
-    await userEvent.type(textbox, '{"foo": "baz"}');
+    fireEvent.change(textbox, { target: { value: '{"foo": "baz"}' } });
 
     expect(onChange).toHaveBeenLastCalledWith('{"foo": "baz"}');
   });
@@ -23,8 +21,7 @@ describe('JsonEditor component', () => {
     render(<JsonEditor initialContent='{"foo": "bar"}' schema={schema} />);
 
     const textbox = screen.getByRole('textbox');
-    await userEvent.clear(textbox);
-    await userEvent.type(textbox, '{"foo": 123}');
+    fireEvent.change(textbox, { target: { value: '{"foo": 123}' } });
 
     expect(await screen.findByText(/invalid/i)).toBeInTheDocument();
   });
