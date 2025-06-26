@@ -74,4 +74,25 @@ describe('script runner plugin', () => {
 
     spawnMock.mockRestore();
   });
+
+  it('opens Customize dialog to override parameters and save defaults', async () => {
+    const { customizeScript } = await import('../../plugins/script-runner/index.js');
+    const saveDefaults = jest.fn();
+    const prompt = jest.fn().mockResolvedValue(['-Foo', 'Baz']);
+    const script = {
+      id: 'build',
+      name: 'Build',
+      description: 'build project',
+      path: path.join(tmpDir, 'build.ps1'),
+    } as const;
+
+    const result = await customizeScript(script, ['-Foo', 'Bar'], {
+      prompt,
+      saveDefaults,
+    });
+
+    expect(prompt).toHaveBeenCalledWith(['-Foo', 'Bar']);
+    expect(saveDefaults).toHaveBeenCalledWith(script.id, ['-Foo', 'Baz']);
+    expect(result).toEqual(['-Foo', 'Baz']);
+  });
 });
