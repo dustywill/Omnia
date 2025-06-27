@@ -144,12 +144,12 @@
     - [x] 4.3.14 Implement loading sample data via IPC.
     - [x] 4.3.15 Write failing test for Sample Data Table supporting copying loops or field names.
     - [x] 4.3.16 Implement Sample Data Table supporting copying loops or field names.
-    - [ ] 4.3.17 Write failing test for Prev/Next buttons paging through sample data.
-    - [ ] 4.3.18 Implement Prev/Next buttons paging through sample data.
-    - [ ] 4.3.19 Write failing test for Configuration Editor with Save Config button.
-    - [ ] 4.3.20 Implement Configuration Editor with Save Config button.
-    - [ ] 4.3.21 Write failing test for Add Data Source button prompting for ID and URL and saving immediately.
-    - [ ] 4.3.22 Implement Add Data Source button prompting for ID and URL and saving immediately.
+    - [x] 4.3.17 Write failing test for Prev/Next buttons paging through sample data.
+    - [x] 4.3.18 Implement Prev/Next buttons paging through sample data.
+    - [x] 4.3.19 Write failing test for Configuration Editor with Save Config button.
+    - [x] 4.3.20 Implement Configuration Editor with Save Config button.
+    - [x] 4.3.21 Write failing test for Add Data Source button prompting for ID and URL and saving immediately.
+    - [x] 4.3.22 Implement Add Data Source button prompting for ID and URL and saving immediately.
   - [ ] 4.4 Customer Links Plugin
     - [ ] 4.4.1 Write failing test for scanning configurable JSON or JSON5 file for customer sites.
     - [ ] 4.4.2 Implement scanning configurable JSON or JSON5 file for customer sites.
