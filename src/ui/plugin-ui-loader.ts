@@ -1,4 +1,5 @@
-import path from 'path';
+import { loadNodeModule } from './node-module-loader.js';
+const path = loadNodeModule<typeof import('path')>('path');
 import React from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 

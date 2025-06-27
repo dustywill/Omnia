@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { parse as parseJson5 } from 'json5';
 import type { ZodType } from 'zod';
 
-import './JsonEditor.css';
 
 export type JsonEditorProps = {
   initialContent: string;
