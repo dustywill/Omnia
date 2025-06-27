@@ -1,7 +1,13 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { describe, it, beforeEach, afterEach, expect } from '@jest/globals';
-import { scanCustomerSites } from '../../plugins/customer-links/index.js';
+import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import {
+  scanCustomerSites,
+  generateCustomerLinksHtml,
+  CustomerLinks,
+} from '../../plugins/customer-links/index.js';
 
 describe('customer links plugin', () => {
   const dir = path.join(__dirname, 'data');
@@ -28,5 +34,19 @@ describe('customer links plugin', () => {
       { id: 'acme', name: 'Acme Corp', url: 'https://acme.com' },
       { id: 'foo', name: 'Foo Inc', url: 'https://foo.example.com' },
     ]);
+  });
+  it('generates standalone HTML and renders it', () => {
+    const sites = [
+      { id: 'acme', name: 'Acme Corp', url: 'https://acme.com' },
+      { id: 'foo', name: 'Foo Inc', url: 'https://foo.example.com' },
+    ];
+
+    const html = generateCustomerLinksHtml(sites);
+    expect(html).toContain('<a href="https://acme.com">Acme Corp</a>');
+    expect(html).toContain('<a href="https://foo.example.com">Foo Inc</a>');
+
+    render(<CustomerLinks sites={sites} />);
+    expect(screen.getByText('Acme Corp').getAttribute('href')).toBe('https://acme.com');
+    expect(screen.getByText('Foo Inc').getAttribute('href')).toBe('https://foo.example.com');
   });
 });
