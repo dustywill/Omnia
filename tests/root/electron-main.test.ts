@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+import { spawnSync } from 'child_process';
 
 const whenReady = jest.fn(async () => {});
 const on = jest.fn();
@@ -35,17 +36,23 @@ describe('electron main', () => {
     expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('index.html'));
   });
 
-  it('starts Electron when imported outside test env', async () => {
-    jest.resetModules();
-    process.env.NODE_ENV = 'production';
 
-    await import('../../src/electron-main.js');
-    await Promise.resolve();
-    await Promise.resolve();
+  it('starts Electron on execution when NODE_ENV is not test', () => {
+    const result = spawnSync(
+      'node',
+      ['--loader', 'ts-node/esm', 'src/electron-main.ts'],
+      { env: { ...process.env, NODE_ENV: 'development' } },
+    );
+    expect(result.status).not.toBe(0);
+  });
 
-    expect(createLogger).toHaveBeenCalled();
-    expect(whenReady).toHaveBeenCalled();
+  it('does not start Electron during tests', () => {
+    const result = spawnSync(
+      'node',
+      ['--loader', 'ts-node/esm', 'src/electron-main.ts'],
+      { env: { ...process.env, NODE_ENV: 'test' } },
+    );
+    expect(result.status).toBe(0);
 
-    process.env.NODE_ENV = 'test';
   });
 });

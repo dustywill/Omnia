@@ -60,5 +60,6 @@ if (process.env.NODE_ENV !== 'test') {
   const logPath = path.join(process.cwd(), 'app.log');
   const logger = createLogger('electron-main', logPath);
   startElectron(undefined, logger);
+
 }
 
