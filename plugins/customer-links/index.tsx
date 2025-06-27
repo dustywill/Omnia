@@ -1,6 +1,7 @@
 import React from 'react';
-import fs from 'fs/promises';
-import path from 'path';
+import { loadNodeModule } from '../../src/ui/node-module-loader.js';
+const fs = loadNodeModule<typeof import('fs/promises')>('fs/promises');
+const path = loadNodeModule<typeof import('path')>('path');
 import { openJsonEditor } from '../../src/ui/json-editor-api';
 import { parse as parseJson5 } from 'json5';
 import { z } from 'zod';

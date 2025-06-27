@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 
-import './FileScanner.css';
 
 export type FileNode = {
   name: string;
