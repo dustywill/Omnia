@@ -27,7 +27,7 @@
   - `plugins/context-generator/index.tsx` - Folder scanning and text bundling plugin.
   - `plugins/as-built-documenter/index.tsx` - Documentation generation plugin UI.
   - `tests/plugins/as-built-documenter.test.tsx` - Tests for As-Built Documenter plugin behavior.
-- `plugins/customer-links/index.ts` - Customer links viewer and exporter.
+  - `plugins/customer-links/index.tsx` - Customer links viewer and exporter.
 - `tests/plugins/customer-links.test.tsx` - Tests for Customer Links plugin behavior.
 - `config/app-config.json5` - Main application configuration file.
 - `tests/core/**/*.ts` - Jest unit tests for core modules and components.
@@ -155,7 +155,7 @@
     - [x] 4.4.1 Write failing test for scanning configurable JSON or JSON5 file for customer sites.
     - [x] 4.4.2 Implement scanning configurable JSON or JSON5 file for customer sites.
     - [x] 4.4.3 Write failing test for generating standalone HTML and rendering it inside the plugin.
-    - [ ] 4.4.4 Implement generating standalone HTML and rendering it inside the plugin.
+    - [x] 4.4.4 Implement generating standalone HTML and rendering it inside the plugin.
     - [ ] 4.4.5 Write failing test for saving generated HTML, CSS, and JavaScript to configured output path.
     - [ ] 4.4.6 Implement saving generated HTML, CSS, and JavaScript to configured output path.
     - [ ] 4.4.7 Write failing test for launching JsonEditor to modify `Customers.json` and update locations.
