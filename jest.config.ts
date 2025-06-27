@@ -10,11 +10,13 @@ const config: Config = {
   },
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
   testPathIgnorePatterns: ['<rootDir>/tests/e2e/', '<rootDir>/dist/'],
+
   globals: {
     'ts-jest': {
       tsconfig: './tsconfig.json',
     },
   },
+
 };
 
 export default config;
