@@ -1,5 +1,6 @@
 import path from 'path';
 import type { BrowserWindow as ElectronBrowserWindow, App } from 'electron';
+import type { Logger } from './core/logger.js';
 
 let electron: { BrowserWindow: typeof ElectronBrowserWindow; app: App } | undefined;
 
@@ -12,33 +13,41 @@ const getElectron = async () => {
 
 export const createWindow = async (
   Window?: typeof ElectronBrowserWindow,
+  logger?: Logger,
 ): Promise<ElectronBrowserWindow> => {
-  const Win =
-    Window ?? (await getElectron()).BrowserWindow;
+  const Win = Window ?? (await getElectron()).BrowserWindow;
+  logger?.info('Creating browser window');
   const win = new Win({
     webPreferences: { nodeIntegration: true },
   });
   const indexPath = path.join(process.cwd(), 'index.html');
+  logger?.info(`Loading file: ${indexPath}`);
   win.loadFile(indexPath);
   return win;
 };
 
-export const startElectron = (Window?: typeof ElectronBrowserWindow): void => {
+export const startElectron = (
+  Window?: typeof ElectronBrowserWindow,
+  logger?: Logger,
+): void => {
   const start = async () => {
     const { app } = await getElectron();
-    await createWindow(Window);
+    logger?.info('Electron app ready');
+    await createWindow(Window, logger);
     app.on('activate', async () => {
       const { BrowserWindow } = await getElectron();
       const Win = Window ?? BrowserWindow;
       if (Win.getAllWindows().length === 0) {
-        await createWindow(Window);
+        await createWindow(Window, logger);
       }
     });
   };
 
   getElectron().then(({ app }) => {
+    logger?.info('Starting Electron');
     app.whenReady().then(start);
     app.on('window-all-closed', () => {
+      logger?.info('Window all closed');
       if (process.platform !== 'darwin') {
         app.quit();
       }
