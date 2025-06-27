@@ -153,7 +153,7 @@
     - [x] 4.3.22 Implement Add Data Source button prompting for ID and URL and saving immediately.
   - [ ] 4.4 Customer Links Plugin
     - [x] 4.4.1 Write failing test for scanning configurable JSON or JSON5 file for customer sites.
-    - [ ] 4.4.2 Implement scanning configurable JSON or JSON5 file for customer sites.
+    - [x] 4.4.2 Implement scanning configurable JSON or JSON5 file for customer sites.
     - [ ] 4.4.3 Write failing test for generating standalone HTML and rendering it inside the plugin.
     - [ ] 4.4.4 Implement generating standalone HTML and rendering it inside the plugin.
     - [ ] 4.4.5 Write failing test for saving generated HTML, CSS, and JavaScript to configured output path.
