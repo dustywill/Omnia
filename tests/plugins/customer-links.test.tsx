@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { describe, it, beforeEach, afterEach, expect } from '@jest/globals';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import {
@@ -93,8 +93,9 @@ describe('customer links plugin', () => {
     await user.clear(textbox);
     await user.paste('[{"id":"foo","name":"Foo","url":"https://foo.com"}]');
 
-    await new Promise((r) => setTimeout(r, 0));
-    const text = await fs.readFile(customersPath, 'utf8');
-    expect(text).toBe('[{"id":"foo","name":"Foo","url":"https://foo.com"}]');
+    await waitFor(async () => {
+      const text = await fs.readFile(customersPath, 'utf8');
+      expect(text).toBe('[{"id":"foo","name":"Foo","url":"https://foo.com"}]');
+    });
   });
 });
