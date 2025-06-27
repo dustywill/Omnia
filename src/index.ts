@@ -1,5 +1,6 @@
-import fs from 'fs/promises';
-import path from 'path';
+import { loadNodeModule } from './ui/node-module-loader.js';
+const fs = loadNodeModule<typeof import('fs/promises')>('fs/promises');
+const path = loadNodeModule<typeof import('path')>('path');
 import { initRenderer } from './ui/renderer.js';
 
 export type StartOptions = {

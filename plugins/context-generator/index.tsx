@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import fs from 'fs/promises';
+import { loadNodeModule } from '../../src/ui/node-module-loader.js';
+const fs = loadNodeModule<typeof import('fs/promises')>('fs/promises');
 import { FileScanner, type FileNode } from '../../src/ui/components/FileScanner.js';
 
 export type ContextGeneratorProps = {
