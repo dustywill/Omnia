@@ -21,6 +21,9 @@
 - `tests/ui/components/MercurialAutoCommit.test.ts` - Tests for committing on file save.
 - `tests/ui/components/CommitPrompt.test.tsx` - Tests for prompting commit message.
 - `src/ui/components/MercurialCommit.ts` - Commit edited files to Mercurial.
+- `src/ui/components/CardGrid.tsx` - Responsive card-based layout component.
+- `src/ui/components/CardGrid.css` - Styles for CardGrid component.
+- `tests/ui/components/CardGrid.test.tsx` - Tests for CardGrid UI behavior.
 - `plugins/script-runner/index.ts` - PowerShell script discovery and execution plugin.
 - `tests/plugins/script-runner.test.ts` - Tests for Script Runner plugin behavior, including customizing parameters.
 - `tests/plugins/context-generator.test.tsx` - Tests for Context Generator plugin UI behavior.
@@ -162,8 +165,8 @@
     - [x] 4.4.8 Implement launching JsonEditor to modify `Customers.json` and update locations.
 
 - [ ] 5.0 UI and Testing
-  - [ ] 5.1 Write failing test for creating responsive card-based UI using palette colors and Nunito Sans.
-  - [ ] 5.2 Implement responsive card-based UI using palette colors and Nunito Sans.
+  - [x] 5.1 Write failing test for creating responsive card-based UI using palette colors and Nunito Sans.
+  - [x] 5.2 Implement responsive card-based UI using palette colors and Nunito Sans.
   - [ ] 5.3 Write failing test for loading plugin interfaces via `plugin-ui-loader.ts`.
   - [ ] 5.4 Implement loading plugin interfaces via `plugin-ui-loader.ts`.
   - [ ] 5.5 Write unit tests for core modules and components.
