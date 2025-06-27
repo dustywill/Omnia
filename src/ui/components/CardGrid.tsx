@@ -1,5 +1,4 @@
 import React from 'react';
-import './CardGrid.css';
 
 export type CardGridItem = {
   title: string;
