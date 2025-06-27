@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { describe, it, beforeEach, afterEach, expect } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import {
   scanCustomerSites,
@@ -48,5 +49,52 @@ describe('customer links plugin', () => {
     render(<CustomerLinks sites={sites} />);
     expect(screen.getByText('Acme Corp').getAttribute('href')).toBe('https://acme.com');
     expect(screen.getByText('Foo Inc').getAttribute('href')).toBe('https://foo.example.com');
+  });
+
+  it('saves generated HTML, CSS, and JS to output path', async () => {
+    const { saveCustomerLinksFiles } = await import(
+      '../../plugins/customer-links/index.js'
+    );
+    const outDir = path.join(dir, 'out');
+    await fs.mkdir(outDir, { recursive: true });
+
+    await saveCustomerLinksFiles(
+      '<html></html>',
+      'body{}',
+      'console.log(1);',
+      outDir,
+    );
+
+    const html = await fs.readFile(path.join(outDir, 'index.html'), 'utf8');
+    const css = await fs.readFile(path.join(outDir, 'style.css'), 'utf8');
+    const js = await fs.readFile(path.join(outDir, 'script.js'), 'utf8');
+
+    expect(html).toBe('<html></html>');
+    expect(css).toBe('body{}');
+    expect(js).toBe('console.log(1);');
+  });
+
+  it('launches JsonEditor to modify Customers.json and update locations', async () => {
+    const customersPath = path.join(dir, 'Customers.json');
+    await fs.writeFile(
+      customersPath,
+      '[{"id":"acme","name":"Acme","url":"https://acme.com"}]',
+      'utf8',
+    );
+
+    const { openCustomerLocationsEditor } = await import(
+      '../../plugins/customer-links/index.js'
+    );
+
+    const element = await openCustomerLocationsEditor(customersPath);
+    const user = userEvent.setup();
+    render(element);
+    const textbox = screen.getByRole('textbox');
+    await user.clear(textbox);
+    await user.paste('[{"id":"foo","name":"Foo","url":"https://foo.com"}]');
+
+    await new Promise((r) => setTimeout(r, 0));
+    const text = await fs.readFile(customersPath, 'utf8');
+    expect(text).toBe('[{"id":"foo","name":"Foo","url":"https://foo.com"}]');
   });
 });
