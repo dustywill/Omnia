@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import fs from 'fs/promises';
 import path from 'path';
@@ -71,8 +71,10 @@ describe('as-built documenter plugin', () => {
 
     await userEvent.click(screen.getByRole('button', { name: /save/i }));
 
-    const text = await fs.readFile(path.join(saveDir, 'template.md'), 'utf8');
-    expect(text).toBe('hello');
+    await waitFor(async () => {
+      const text = await fs.readFile(path.join(saveDir, 'template.md'), 'utf8');
+      expect(text).toBe('hello');
+    });
 
     await fs.rm(dir, { recursive: true, force: true });
   });
