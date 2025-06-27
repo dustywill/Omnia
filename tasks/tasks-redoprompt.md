@@ -107,9 +107,9 @@
     - [x] 3.3.3 Write failing test for popup prompting for commit message with default.
     - [x] 3.3.4 Implement popup prompting for commit message, defaulting when empty.
 
-- [ ] 4.0 Plugin Development
+- [x] 4.0 Plugin Development
 
-  - [ ] 4.1 Script Runner Plugin
+  - [x] 4.1 Script Runner Plugin
     - [x] 4.1.1 Write failing test to discover PowerShell scripts and list them with filter by ID, name, or description.
     - [x] 4.1.2 Implement discovery of PowerShell scripts and list them with filter by ID, name, or description.
     - [x] 4.1.3 Write failing test for running scripts with default parameters and showing status indicator.
@@ -122,7 +122,7 @@
     - [x] 4.1.10 Implement setup dialog for newly discovered scripts.
     - [x] 4.1.11 Write failing test for Clear Output and Copy Output actions.
     - [x] 4.1.12 Implement Clear Output and Copy Output actions for the output panel.
-  - [ ] 4.2 Context Generator Plugin
+  - [x] 4.2 Context Generator Plugin
     - [x] 4.2.1 Write failing test for using File Scanner filter component to choose files.
     - [x] 4.2.2 Implement using File Scanner filter component to choose files.
     - [x] 4.2.3 Write failing test for Generate Context button showing progress and character count.
@@ -131,7 +131,7 @@
     - [x] 4.2.6 Implement Copy to Clipboard action with confirmation message.
     - [x] 4.2.7 Write failing test for output area displaying progress and character count.
     - [x] 4.2.8 Implement output area displaying progress and character count.
-  - [ ] 4.3 As-Built Documenter Plugin
+  - [x] 4.3 As-Built Documenter Plugin
     - [x] 4.3.1 Write failing test for Template File dropdown listing Markdown templates and allowing clearing.
     - [x] 4.3.2 Implement Template File dropdown listing Markdown templates and allowing clearing.
     - [x] 4.3.3 Write failing test for Load button opening any `.md` file.
@@ -154,7 +154,7 @@
     - [x] 4.3.20 Implement Configuration Editor with Save Config button.
     - [x] 4.3.21 Write failing test for Add Data Source button prompting for ID and URL and saving immediately.
     - [x] 4.3.22 Implement Add Data Source button prompting for ID and URL and saving immediately.
-  - [ ] 4.4 Customer Links Plugin
+  - [x] 4.4 Customer Links Plugin
     - [x] 4.4.1 Write failing test for scanning configurable JSON or JSON5 file for customer sites.
     - [x] 4.4.2 Implement scanning configurable JSON or JSON5 file for customer sites.
     - [x] 4.4.3 Write failing test for generating standalone HTML and rendering it inside the plugin.
@@ -167,8 +167,8 @@
 - [ ] 5.0 UI and Testing
   - [x] 5.1 Write failing test for creating responsive card-based UI using palette colors and Nunito Sans.
   - [x] 5.2 Implement responsive card-based UI using palette colors and Nunito Sans.
-  - [ ] 5.3 Write failing test for loading plugin interfaces via `plugin-ui-loader.ts`.
-  - [ ] 5.4 Implement loading plugin interfaces via `plugin-ui-loader.ts`.
+  - [x] 5.3 Write failing test for loading plugin interfaces via `plugin-ui-loader.ts`.
+  - [x] 5.4 Implement loading plugin interfaces via `plugin-ui-loader.ts`.
   - [ ] 5.5 Write unit tests for core modules and components.
   - [ ] 5.6 Write end-to-end tests covering plugin workflows.
   - [ ] 5.7 Ensure full test coverage before merging changes.
