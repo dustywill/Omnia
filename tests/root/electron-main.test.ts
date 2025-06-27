@@ -1,6 +1,21 @@
 import { jest } from '@jest/globals';
 import { spawnSync } from 'child_process';
 
+const whenReady = jest.fn(async () => {});
+const on = jest.fn();
+const quit = jest.fn();
+const BrowserWindow = jest.fn(() => ({ loadFile: jest.fn() }));
+(BrowserWindow as any).getAllWindows = jest.fn(() => []);
+
+jest.mock('electron', () => ({
+  BrowserWindow,
+  app: { whenReady, on, quit },
+}));
+
+const logger = { info: jest.fn(), warn: jest.fn(), error: jest.fn() };
+const createLogger = jest.fn(() => logger);
+jest.mock('../../src/core/logger.js', () => ({ createLogger }));
+
 describe('electron main', () => {
   it('loads index.html in BrowserWindow', async () => {
     const loadFile = jest.fn();
@@ -21,6 +36,7 @@ describe('electron main', () => {
     expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('index.html'));
   });
 
+
   it('starts Electron on execution when NODE_ENV is not test', () => {
     const result = spawnSync(
       'node',
@@ -37,5 +53,6 @@ describe('electron main', () => {
       { env: { ...process.env, NODE_ENV: 'test' } },
     );
     expect(result.status).toBe(0);
+
   });
 });

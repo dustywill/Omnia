@@ -1,6 +1,7 @@
 import path from 'path';
 import type { BrowserWindow as ElectronBrowserWindow, App } from 'electron';
 import type { Logger } from './core/logger.js';
+import { createLogger } from './core/logger.js';
 
 let electron: { BrowserWindow: typeof ElectronBrowserWindow; app: App } | undefined;
 
@@ -56,6 +57,9 @@ export const startElectron = (
 };
 
 if (process.env.NODE_ENV !== 'test') {
-  startElectron();
+  const logPath = path.join(process.cwd(), 'app.log');
+  const logger = createLogger('electron-main', logPath);
+  startElectron(undefined, logger);
+
 }
 
