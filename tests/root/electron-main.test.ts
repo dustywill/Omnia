@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+import { spawnSync } from 'child_process';
 
 describe('electron main', () => {
   it('loads index.html in BrowserWindow', async () => {
@@ -18,5 +19,23 @@ describe('electron main', () => {
     await createWindow(MockWindow as any, logger as any);
     expect(logger.info).toHaveBeenCalledWith('Creating browser window');
     expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('index.html'));
+  });
+
+  it('starts Electron on execution when NODE_ENV is not test', () => {
+    const result = spawnSync(
+      'node',
+      ['--loader', 'ts-node/esm', 'src/electron-main.ts'],
+      { env: { ...process.env, NODE_ENV: 'development' } },
+    );
+    expect(result.status).not.toBe(0);
+  });
+
+  it('does not start Electron during tests', () => {
+    const result = spawnSync(
+      'node',
+      ['--loader', 'ts-node/esm', 'src/electron-main.ts'],
+      { env: { ...process.env, NODE_ENV: 'test' } },
+    );
+    expect(result.status).toBe(0);
   });
 });

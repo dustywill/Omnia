@@ -55,3 +55,7 @@ export const startElectron = (
   });
 };
 
+if (process.env.NODE_ENV !== 'test') {
+  startElectron();
+}
+
