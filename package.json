@@ -8,8 +8,8 @@
     "clean": "node -e \"import('fs').then(fs=>fs.rmSync('dist',{recursive:true,force:true}))\"",
     "build": "npm run clean && tsc",
     "dev": "node --loader ts-node/esm --loader ./loaders/css-loader.js src/index.ts",
-    "start": "node --loader ./loaders/css-loader.js dist/src/index.js",
-    "electron": "npm run build && electron dist/src/electron-main.js"
+    "start": "node --loader ./loaders/css-loader.js dist/index.js",
+    "electron": "npm run build && electron dist/electron-main.js"
   },
   "devDependencies": {
     "@codemirror/lang-markdown": "^6.1.1",
