@@ -28,6 +28,7 @@
   - `plugins/as-built-documenter/index.tsx` - Documentation generation plugin UI.
   - `tests/plugins/as-built-documenter.test.tsx` - Tests for As-Built Documenter plugin behavior.
 - `plugins/customer-links/index.ts` - Customer links viewer and exporter.
+- `tests/plugins/customer-links.test.ts` - Tests for Customer Links plugin behavior.
 - `config/app-config.json5` - Main application configuration file.
 - `tests/core/**/*.ts` - Jest unit tests for core modules and components.
 - `tests/e2e/**/*.spec.ts` - Playwright end-to-end tests for plugin flows.
@@ -151,7 +152,7 @@
     - [x] 4.3.21 Write failing test for Add Data Source button prompting for ID and URL and saving immediately.
     - [x] 4.3.22 Implement Add Data Source button prompting for ID and URL and saving immediately.
   - [ ] 4.4 Customer Links Plugin
-    - [ ] 4.4.1 Write failing test for scanning configurable JSON or JSON5 file for customer sites.
+    - [x] 4.4.1 Write failing test for scanning configurable JSON or JSON5 file for customer sites.
     - [ ] 4.4.2 Implement scanning configurable JSON or JSON5 file for customer sites.
     - [ ] 4.4.3 Write failing test for generating standalone HTML and rendering it inside the plugin.
     - [ ] 4.4.4 Implement generating standalone HTML and rendering it inside the plugin.
