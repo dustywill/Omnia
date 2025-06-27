@@ -1,0 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans&display=swap');
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+  font-family: 'Nunito Sans', sans-serif;
+}
+
+.card {
+  background-color: var(--tt-color-surface-light);
+  color: var(--tt-color-text-primary-light);
+  border: 1px solid var(--tt-color-border-light);
+  border-radius: 4px;
+  padding: 1rem;
+}
+
+.card header {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 600px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+}
