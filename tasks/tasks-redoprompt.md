@@ -156,10 +156,10 @@
     - [x] 4.4.2 Implement scanning configurable JSON or JSON5 file for customer sites.
     - [x] 4.4.3 Write failing test for generating standalone HTML and rendering it inside the plugin.
     - [x] 4.4.4 Implement generating standalone HTML and rendering it inside the plugin.
-    - [ ] 4.4.5 Write failing test for saving generated HTML, CSS, and JavaScript to configured output path.
-    - [ ] 4.4.6 Implement saving generated HTML, CSS, and JavaScript to configured output path.
-    - [ ] 4.4.7 Write failing test for launching JsonEditor to modify `Customers.json` and update locations.
-    - [ ] 4.4.8 Implement launching JsonEditor to modify `Customers.json` and update locations.
+    - [x] 4.4.5 Write failing test for saving generated HTML, CSS, and JavaScript to configured output path.
+    - [x] 4.4.6 Implement saving generated HTML, CSS, and JavaScript to configured output path.
+    - [x] 4.4.7 Write failing test for launching JsonEditor to modify `Customers.json` and update locations.
+    - [x] 4.4.8 Implement launching JsonEditor to modify `Customers.json` and update locations.
 
 - [ ] 5.0 UI and Testing
   - [ ] 5.1 Write failing test for creating responsive card-based UI using palette colors and Nunito Sans.
