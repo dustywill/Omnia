@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import fs from 'fs/promises';
 import path from 'path';
@@ -152,4 +152,76 @@ describe('as-built documenter plugin', () => {
     expect(writeText).toHaveBeenNthCalledWith(2, '{{#each items}}');
     expect(screen.getByText(/copied/i)).toBeInTheDocument();
   });
+
+it('pages through sample data with Prev/Next buttons', async () => {
+  const invoke = jest.fn().mockResolvedValue([{ id: 1 }, { id: 2 }]);
+  (window as any).ipcRenderer = { invoke };
+
+  render(
+    <AsBuiltDocumenter
+      templates={[]}
+      dataSources={{ foo: { url: 'http://foo' } }}
+    />,
+  );
+
+  await userEvent.selectOptions(screen.getByLabelText(/data source/i), 'foo');
+  await userEvent.click(
+    screen.getByRole('button', { name: /load sample data/i }),
+  );
+
+  expect(await screen.findByRole('button', { name: /next sample/i })).toBeInTheDocument();
+  expect(screen.getByText(/"id": 1/)).toBeInTheDocument();
+
+  await userEvent.click(screen.getByRole('button', { name: /next sample/i }));
+  expect(screen.getByText(/"id": 2/)).toBeInTheDocument();
+
+  await userEvent.click(screen.getByRole('button', { name: /prev sample/i }));
+  expect(screen.getByText(/"id": 1/)).toBeInTheDocument();
+});
+
+it('saves configuration using Save Config button', async () => {
+  const writeFile = jest.spyOn(fs, 'writeFile').mockResolvedValue();
+  jest.spyOn(fs, 'readFile').mockResolvedValue('');
+
+  render(
+    <AsBuiltDocumenter templates={[]} configPath="/tmp/config.json" />,
+  );
+  const editor = await screen.findByRole('textbox', {
+    name: /configuration editor/i,
+  });
+  fireEvent.change(editor, { target: { value: '{"foo":1}' } });
+  await userEvent.click(screen.getByRole('button', { name: /save config/i }));
+
+  expect(writeFile).toHaveBeenCalledWith('/tmp/config.json', '{"foo":1}');
+});
+
+it('adds data source via prompt and saves immediately', async () => {
+  jest.spyOn(fs, 'readFile').mockResolvedValue('{}');
+  const writeFile = jest.spyOn(fs, 'writeFile').mockResolvedValue();
+  const prompt = jest
+    .spyOn(window, 'prompt')
+    .mockImplementationOnce(() => 'foo')
+    .mockImplementationOnce(() => 'http://foo');
+
+  render(
+    <AsBuiltDocumenter
+      templates={[]}
+      dataSources={{}}
+      configPath="/tmp/config.json"
+    />,
+  );
+
+  await userEvent.click(
+    screen.getByRole('button', { name: /add data source/i }),
+  );
+
+  expect(prompt).toHaveBeenCalledTimes(2);
+  expect(writeFile).toHaveBeenCalledWith(
+    '/tmp/config.json',
+    JSON.stringify({ foo: { url: 'http://foo' } }, null, 2),
+  );
+  const select = screen.getByRole('combobox', { name: /data source/i }) as HTMLSelectElement;
+  expect(Array.from(select.options).map((o) => o.value)).toContain('foo');
+});
+
 });

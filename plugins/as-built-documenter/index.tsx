@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import fs from 'fs/promises';
 import path from 'path';
 import CodeMirror from '@uiw/react-codemirror';
@@ -10,6 +10,7 @@ export type AsBuiltDocumenterProps = {
   saveDir?: string;
   initialContent?: string;
   dataSources?: Record<string, { url: string }>;
+  configPath?: string;
 };
 
 export const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({
@@ -18,12 +19,29 @@ export const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({
   saveDir = path.join('templates', 'as-built'),
   initialContent,
   dataSources = {},
+  configPath,
 }) => {
   const [template, setTemplate] = useState('');
   const [content, setContent] = useState(initialContent ?? '');
   const [sourceId, setSourceId] = useState('');
+  const [sources, setSources] = useState<Record<string, { url: string }>>(dataSources);
   const [sample, setSample] = useState<unknown>(null);
+  const [sampleIndex, setSampleIndex] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [config, setConfig] = useState('');
+
+  useEffect(() => {
+    const loadConfig = async () => {
+      if (!configPath) return;
+      try {
+        const text = await fs.readFile(configPath, 'utf8');
+        setConfig(text);
+      } catch {
+        setConfig('');
+      }
+    };
+    loadConfig();
+  }, [configPath]);
 
   const insertEach = () => {
     setContent((c: string) => `${c}{{#each items}}\n{{/each}}`);
@@ -80,21 +98,42 @@ export const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({
         onChange={(e) => setSourceId(e.target.value)}
       >
         <option value="">(none)</option>
-        {Object.keys(dataSources).map((id) => (
+        {Object.keys(sources).map((id) => (
           <option key={id} value={id}>
             {id}
           </option>
         ))}
       </select>
+      {configPath && (
+        <button
+          type="button"
+          aria-label="Add Data Source"
+          onClick={async () => {
+            const id = window.prompt('Data Source ID');
+            if (!id) return;
+            const url = window.prompt('Data Source URL');
+            if (!url) return;
+            const next = { ...sources, [id]: { url } };
+            setSources(next);
+            setConfig(JSON.stringify(next, null, 2));
+            if (configPath) {
+              await fs.writeFile(configPath, JSON.stringify(next, null, 2));
+            }
+          }}
+        >
+          Add Data Source
+        </button>
+      )}
       <button
         type="button"
         onClick={async () => {
           if (!sourceId) return;
           const data = await (window as any).ipcRenderer.invoke(
             'load-sample-data',
-            { id: sourceId, ...dataSources[sourceId] },
+            { id: sourceId, ...sources[sourceId] },
           );
           setSample(data);
+          setSampleIndex(0);
           setCopied(false);
         }}
       >
@@ -102,6 +141,29 @@ export const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({
       </button>
       {Array.isArray(sample) && sample.length > 0 && (
         <>
+          <div>
+            <button
+              type="button"
+              aria-label="Prev Sample"
+              disabled={sampleIndex === 0}
+              onClick={() => setSampleIndex((i) => Math.max(i - 1, 0))}
+            >
+              Prev
+            </button>
+            <button
+              type="button"
+              aria-label="Next Sample"
+              disabled={sampleIndex === (sample as any).length - 1}
+              onClick={() =>
+                setSampleIndex((i) =>
+                  Math.min(i + 1, (sample as any).length - 1),
+                )
+              }
+            >
+              Next
+            </button>
+          </div>
+          <pre>{JSON.stringify((sample as any)[sampleIndex], null, 2)}</pre>
           <table>
             <thead>
               <tr>
@@ -140,6 +202,25 @@ export const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({
         extensions={[markdown()]}
         onChange={(v) => setContent(v)}
       />
+      {configPath && (
+        <>
+          <textarea
+            aria-label="Configuration Editor"
+            value={config}
+            onChange={(e) => setConfig(e.target.value)}
+          />
+          <button
+            type="button"
+            onClick={async () => {
+              if (configPath) {
+                await fs.writeFile(configPath, config);
+              }
+            }}
+          >
+            Save Config
+          </button>
+        </>
+      )}
       <button onClick={saveTemplate}>Save</button>
     </>
   );
