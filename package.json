@@ -7,7 +7,7 @@
     "test:e2e": "playwright test",
     "clean": "node -e \"import('fs').then(fs=>fs.rmSync('dist',{recursive:true,force:true}))\"",
     "build": "npm run clean && tsc",
-    "dev": "node --loader ts-node/esm src/index.ts",
+    "dev": "node --loader ts-node/esm --loader ./loaders/css-loader.js src/index.ts",
     "start": "node dist/src/index.js"
   },
   "devDependencies": {
