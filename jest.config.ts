@@ -9,6 +9,7 @@ const config: Config = {
     '\\.(css)$': '<rootDir>/tests/style-mock.js',
   },
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
+  testPathIgnorePatterns: ['<rootDir>/tests/e2e/'],
 };
 
 export default config;

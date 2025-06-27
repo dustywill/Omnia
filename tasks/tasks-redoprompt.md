@@ -35,6 +35,7 @@
 - `config/app-config.json5` - Main application configuration file.
 - `tests/core/**/*.ts` - Jest unit tests for core modules and components.
 - `tests/e2e/**/*.spec.ts` - Playwright end-to-end tests for plugin flows.
+- `tests/e2e/plugin-workflows.spec.ts` - End-to-end tests exercising plugin workflows.
 - `tasks/tasks-redoprompt.md` - Task list for project management.
 
 ### Notes
@@ -170,5 +171,5 @@
   - [x] 5.3 Write failing test for loading plugin interfaces via `plugin-ui-loader.ts`.
   - [x] 5.4 Implement loading plugin interfaces via `plugin-ui-loader.ts`.
   - [x] 5.5 Write unit tests for core modules and components.
-  - [ ] 5.6 Write end-to-end tests covering plugin workflows.
+  - [x] 5.6 Write end-to-end tests covering plugin workflows.
   - [ ] 5.7 Ensure full test coverage before merging changes.
