@@ -28,9 +28,24 @@ const getMetaUrl = (): string | undefined => {
 // throwing IIFE at import time, which caused the Electron renderer to fail
 // before it could fall back to `window.require`. By delaying the error until the
 // function is called we keep that fallback intact.
+//
+// Attempt #3 notes: when launching the UI via Electron we observed
+// `[node-module-loader] no require available at load time` followed by a runtime
+// error. To help diagnose why `require` isn't present we're now logging the
+// environment details below. These logs will remain until the root cause is
+// confirmed so future attempts don't repeat the same debugging steps.
 let nodeRequire: NodeRequire;
 console.log(
   `[node-module-loader] typeof window.require: ${typeof (globalThis as any).window?.require}`,
+);
+console.log(
+  `[node-module-loader] process.type: ${(globalThis as any).process?.type}`,
+);
+console.log(
+  `[node-module-loader] electron version: ${(globalThis as any).process?.versions?.electron}`,
+);
+console.log(
+  `[node-module-loader] typeof module.createRequire: ${typeof module?.createRequire}`,
 );
 if (typeof require === 'function') {
   console.log('[node-module-loader] using built-in require');
