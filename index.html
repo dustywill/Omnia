@@ -4,12 +4,13 @@
     <link rel="stylesheet" href="./src/ui/components/CardGrid.css" />
     <link rel="stylesheet" href="./src/ui/components/FileScanner.css" />
     <link rel="stylesheet" href="./src/ui/components/JsonEditor.css" />
+    <!-- Attempting CDN-based React imports for ESM Electron -->
     <script type="importmap">
       {
         "imports": {
-          "react": "./node_modules/react/index.js",
-          "react/jsx-runtime": "./node_modules/react/jsx-runtime.js",
-          "react-dom/client": "./node_modules/react-dom/client.js"
+          "react": "https://esm.sh/react",
+          "react/jsx-runtime": "https://esm.sh/react/jsx-runtime",
+          "react-dom/client": "https://esm.sh/react-dom/client"
         }
       }
     </script>
