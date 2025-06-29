@@ -19,6 +19,7 @@ const getMetaUrl = (): string | undefined => {
     return undefined;
   }
 };
+//<<<<<<< g1vogr-codex/fix-react-default-export-error
 
 // Lazily resolve a CommonJS `require` function. Earlier revisions executed a
 // throwing IIFE at import time, which caused the Electron renderer to fail
@@ -40,6 +41,34 @@ if (typeof require === 'function') {
     throw new Error('require is not available');
   };
 }
+//=======
+
+//<<<<<<< gsbfat-codex/fix-react-default-export-error
+//const nodeRequire: NodeRequire = typeof require === 'function'
+//  ? require
+//  : typeof module !== 'undefined' && typeof module.createRequire === 'function'
+//  ? module.createRequire(getMetaUrl() ?? `${process.cwd()}/index.js`)
+//  : (() => {
+//      throw new Error('require is not available');
+//    })();
+//=======
+// Previous attempt used `eval('require')` when `require` wasn't available in ES modules.
+// That approach threw `ReferenceError: require is not defined` when running under ESM.
+// Instead, fall back to `createRequire` which safely provides a CommonJS `require`.
+//const getMetaUrl = (): string | undefined => {
+ // try {
+    // wrapped in Function to avoid syntax errors in CJS environments
+  //  return new Function('return import.meta.url')();
+//  } catch {
+//    return undefined;
+//  }
+//};
+
+//const nodeRequire: NodeRequire = typeof require === 'function'
+//  ? require
+//  : createRequire(getMetaUrl() ?? `${process.cwd()}/index.js`);
+//>>>>>>> main
+//>>>>>>> main
 
 export const loadNodeModule = <T = unknown>(name: string): T => {
   // Electron exposes `window.require` in the renderer. If present we prefer it
