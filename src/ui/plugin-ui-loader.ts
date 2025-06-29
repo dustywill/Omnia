@@ -1,5 +1,8 @@
 import { loadNodeModule } from './node-module-loader.js';
 const path = loadNodeModule<typeof import('path')>('path');
+// Attempt #3: previous runs failed to load plugin modules with an unclear
+// error. We now log the resolved module path before importing so we can see
+// exactly what Electron tries to load.
 import React from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 
@@ -14,6 +17,7 @@ export const loadPluginUI = async (
   options: LoadPluginUiOptions,
 ): Promise<Root> => {
   const modulePath = path.join(options.pluginsPath, id, 'index.tsx');
+  console.log(`[loadPluginUI] importing ${modulePath}`);
   const mod = await import(modulePath);
   const Component = (mod.default ?? Object.values(mod).find((v) => typeof v === 'function')) as React.ComponentType | undefined;
   if (!Component) {

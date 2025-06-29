@@ -20,3 +20,17 @@ it('build output does not include module specifier import', () => {
   );
   expect(js.includes("import { createRequire } from 'module'")).toBe(false);
 });
+
+it('logs environment details when require is unavailable', async () => {
+  jest.resetModules();
+  const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+  const originalWindow = (globalThis as any).window;
+  (globalThis as any).window = {};
+  const { loadNodeModule } = await import('../../src/ui/node-module-loader.js');
+  loadNodeModule('path');
+  (globalThis as any).window = originalWindow;
+  const logs = logSpy.mock.calls.flat().join('\n');
+  expect(logs).toContain('process.type');
+  expect(logs).toContain('electron version');
+  logSpy.mockRestore();
+});
