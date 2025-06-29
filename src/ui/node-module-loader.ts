@@ -7,11 +7,13 @@ declare const module: {
   createRequire?: (filename: string) => NodeRequire;
 } | undefined;
 
+
 // Attempt #1 used `eval('require')` when `require` wasn't available in ES modules.
 // That failed with `ReferenceError: require is not defined` when running under ESM.
 // Attempt #2 imported from 'module' to get `createRequire`, but the builtin was
 // missing in the renderer. This version keeps `createRequire` guarded behind a
 // runtime check so Electron can still load while we debug the issue.
+
 const getMetaUrl = (): string | undefined => {
   try {
     // wrapped in Function to avoid syntax errors in CJS environments
@@ -20,6 +22,7 @@ const getMetaUrl = (): string | undefined => {
     return undefined;
   }
 };
+
 
 // Lazily resolve a CommonJS `require` function. Earlier revisions executed a
 // throwing IIFE at import time, which caused the Electron renderer to fail
@@ -44,6 +47,7 @@ if (typeof require === 'function') {
     throw new Error('require is not available');
   };
 }
+
 
 export const loadNodeModule = <T = unknown>(name: string): T => {
   // Electron exposes `window.require` in the renderer. If present we prefer it
