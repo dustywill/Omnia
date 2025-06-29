@@ -1,4 +1,7 @@
 import { loadNodeModule } from '../../src/ui/node-module-loader.js';
+import { execSync } from 'child_process';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 it('falls back to Node require when window.require is absent', () => {
   const originalWindow = (globalThis as any).window;
@@ -6,4 +9,14 @@ it('falls back to Node require when window.require is absent', () => {
   const path = loadNodeModule<typeof import('path')>('path');
   expect(typeof path.join).toBe('function');
   (globalThis as any).window = originalWindow;
+});
+
+it('build output does not include module specifier import', () => {
+  // Ensure the dist files are up to date
+  execSync('npm run build', { stdio: 'ignore' });
+  const js = readFileSync(
+    join(__dirname, '../../dist/ui/node-module-loader.js'),
+    'utf8',
+  );
+  expect(js.includes("import { createRequire } from 'module'")).toBe(false);
 });
