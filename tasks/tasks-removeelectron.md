@@ -1,15 +1,15 @@
 ## Relevant Files
 
-- `package.json` – Contains Electron dependency and run scripts.​:codex-file-citation[codex-file-citation]{line_range_start=7 line_range_end=14 path=package.json git_url="https://github.com/dustywill/Omnia/blob/main/package.json#L7-L14"}​​:codex-file-citation[codex-file-citation]{line_range_start=13 line_range_end=25 path=package.json git_url="https://github.com/dustywill/Omnia/blob/main/package.json#L13-L25"}​
+- `package.json` – Contains build and start scripts.​:codex-file-citation[codex-file-citation]{line_range_start=5 line_range_end=12 path=package.json git_url="https://github.com/dustywill/Omnia/blob/main/package.json#L5-L12"}​​:codex-file-citation[codex-file-citation]{line_range_start=13 line_range_end=38 path=package.json git_url="https://github.com/dustywill/Omnia/blob/main/package.json#L13-L38"}​
 - `src/electron-main.ts` – Starts the Electron app and sets up IPC handlers.​:codex-file-citation[codex-file-citation]{line_range_start=1 line_range_end=20 path=src/electron-main.ts git_url="https://github.com/dustywill/Omnia/blob/main/src/electron-main.ts#L1-L20"}​
 - `src/preload.js` – Exposes Electron APIs to the renderer process.​:codex-file-citation[codex-file-citation]{line_range_start=1 line_range_end=33 path=src/preload.js git_url="https://github.com/dustywill/Omnia/blob/main/src/preload.js#L1-L33"}​
 - `src/index.ts` – Application startup logic that checks for `electronAPI`.​:codex-file-citation[codex-file-citation]{line_range_start=12 line_range_end=44 path=src/index.ts git_url="https://github.com/dustywill/Omnia/blob/main/src/index.ts#L12-L44"}​
 - `src/ui/node-module-loader.ts` – Provides Node module access through Electron IPC.​:codex-file-citation[codex-file-citation]{line_range_start=8 line_range_end=35 path=src/ui/node-module-loader.ts git_url="https://github.com/dustywill/Omnia/blob/main/src/ui/node-module-loader.ts#L8-L35"}​
 - `index.html` – Loads the application and references Electron APIs.​:codex-file-citation[codex-file-citation]{line_range_start=9 line_range_end=23 path=index.html git_url="https://github.com/dustywill/Omnia/blob/main/index.html#L9-L23"}​
-- `tests/root/electron-main.test.ts` – Tests specific to Electron startup.​:codex-file-citation[codex-file-citation]{line_range_start=1 line_range_end=20 path=tests/root/electron-main.test.ts git_url="https://github.com/dustywill/Omnia/blob/main/tests/root/electron-main.test.ts#L1-L20"}​
-- `tests/root/startup-clone.test.ts` – Relies on Electron mocks.​:codex-file-citation[codex-file-citation]{line_range_start=1 line_range_end=21 path=tests/root/startup-clone.test.ts git_url="https://github.com/dustywill/Omnia/blob/main/tests/root/startup-clone.test.ts#L1-L21"}​
-- `tests/core/ipc-sanitize.test.ts` – Exercises the preload script’s sanitization logic.​:codex-file-citation[codex-file-citation]{line_range_start=1 line_range_end=25 path=tests/core/ipc-sanitize.test.ts git_url="https://github.com/dustywill/Omnia/blob/main/tests/core/ipc-sanitize.test.ts#L1-L25"}​
-- `tests/core/ipc-trace.test.ts` – Verifies warnings for unserializable IPC arguments.​:codex-file-citation[codex-file-citation]{line_range_start=1 line_range_end=20 path=tests/core/ipc-trace.test.ts git_url="https://github.com/dustywill/Omnia/blob/main/tests/core/ipc-trace.test.ts#L1-L20"}​
+- `tests/root/electron-main.test.ts` – Tests specific to Electron startup. **Deleted.**
+- `tests/root/startup-clone.test.ts` – Relies on Electron mocks. **Deleted.**
+- `tests/core/ipc-sanitize.test.ts` – Sanitization logic for preload script. **Deleted.**
+- `tests/core/ipc-trace.test.ts` – Verifies warnings for unserializable IPC arguments. **Deleted.**
 - `plugins/as-built-documenter/index.tsx` – Uses `ipcRenderer.invoke` to load sample data.​:codex-file-citation[codex-file-citation]{line_range_start=120 line_range_end=145 path=plugins/as-built-documenter/index.tsx git_url="https://github.com/dustywill/Omnia/blob/main/plugins/as-built-documenter/index.tsx#L120-L145"}​
 - `troubleshooting/ElectronStartupIssue.md` – Document describing Electron specific errors.
 
@@ -23,9 +23,9 @@
 
 - [ ] 1.0 Remove Electron from the project
 
-  - [ ] 1.1 Delete `electron` scripts and dependency from `package.json`; remove the entries from `package-lock.json`.
-  - [ ] 1.2 Remove `src/electron-main.ts` and `src/preload.js`.
-  - [ ] 1.3 Delete tests that depend on Electron (`tests/root/electron-main.test.ts`, `tests/root/startup-clone.test.ts`).
+  - [x] 1.1 Delete `electron` scripts and dependency from `package.json`; remove the entries from `package-lock.json`.
+  - [x] 1.2 Remove `src/electron-main.ts` and `src/preload.js`.
+  - [x] 1.3 Delete tests that depend on Electron (`tests/root/electron-main.test.ts`, `tests/root/startup-clone.test.ts`).
   - [ ] 1.4 Remove `troubleshooting/ElectronStartupIssue.md` and any Electron references in documentation.
 
 - [ ] 2.0 Replace IPC file access with a web API

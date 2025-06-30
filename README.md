@@ -1,6 +1,9 @@
 # Omnia
 This will be an evolution of the ttComander application
 
+The project no longer relies on Electron. Development and builds run in a
+standard Node environment.
+
 ## Contributing
 
 - Follow Test-Driven Development for all changes.
