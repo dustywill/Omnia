@@ -3,7 +3,13 @@
 
 // Mock the Node.js modules for browser environment
 export const loadNodeModule = <T = unknown>(name: string): T => {
+  const envDetails = {
+    nodeVersion: typeof process !== "undefined" ? process.version : "unknown",
+    hasWindow: typeof window !== "undefined",
+    hasRequire: typeof require !== "undefined",
+  };
   console.log(`[loadNodeModule] Attempting to load module: ${name}`);
+  console.log(`[loadNodeModule] environment details`, envDetails);
 
   // Check if we're in an Electron renderer with exposed APIs
   if (typeof window !== "undefined" && (window as any).electronAPI) {
@@ -59,6 +65,12 @@ export const loadNodeModule = <T = unknown>(name: string): T => {
     console.log(`[loadNodeModule] Using require for ${name}`);
     return require(name) as T;
   }
+
+  // Log environment details when require is unavailable
+  console.log(
+    `[loadNodeModule] require unavailable; env details for ${name}`,
+    envDetails,
+  );
 
   // Last resort - throw an error
   throw new Error(`Module ${name} is not available in this environment`);
