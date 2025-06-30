@@ -1,8 +1,9 @@
 # Omnia
 This will be an evolution of the ttComander application
 
-The project runs entirely in a standard Node environment using an Express server.
-The server exposes a simple file system API:
+The project runs entirely in a standard Node environment using an Express
+server. The server runs on port `3000` by default and exposes a simple file
+system API:
 
 - `GET /api/read?path=FILE`
 - `POST /api/write?path=FILE` with `{ data: string }`
@@ -29,4 +30,4 @@ plugins to read and write files through the Express server.
 1. Install dependencies with `npm install`.
 2. Start the app in development mode using `npm run dev`.
 3. Build the project with `npm run build`.
-4. Run the compiled app using `npm start` which launches the Express server and opens the app in your browser.
+4. Run the compiled app using `npm start`. This launches the Express server and automatically opens `http://localhost:3000` in your default browser.
