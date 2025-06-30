@@ -8,6 +8,7 @@
 - `tests/core/ipc-sanitize.test.ts` - Verifies arguments are sanitized before IPC.
 - `src/index.ts` - Application startup logic.
 - `tests/root/startup.test.ts` - Tests startup behavior.
+- `tests/root/startup-clone.test.ts` - Ensures app starts without structured cloning errors.
 
 ### Notes
 
@@ -22,12 +23,12 @@
   - [x] 1.1 Update `style-src` in `index.html` to include `https://fonts.googleapis.com`.
   - [x] 1.2 Add `font-src` directive allowing `https://fonts.gstatic.com`.
   - [x] 1.3 Verify fonts load without CSP violations.
-- [ ] 4.0 Diagnose cloning error
+- [x] 4.0 Diagnose cloning error
   - [x] 4.1 Trace calls to Electron `ipcRenderer` or `contextBridge` for non-serializable objects.
   - [x] 4.2 Refactor any API calls to pass plain JSON-serializable data only.
   - [x] 4.3 Add logging around `start()` to capture the failing object.
-- [ ] 5.0 Add tests
-  - [ ] 5.1 Write a test ensuring the application starts without the cloning error.
+- [x] 5.0 Add tests
+  - [x] 5.1 Write a test ensuring the application starts without the cloning error.
   - [x] 5.2 Write a test verifying the fonts load successfully under the chosen approach.
 - [ ] 2.0 Self-host Nunito Sans
   - [ ] 2.1 Download Nunito Sans fonts into the project (e.g., `src/assets/fonts`).
