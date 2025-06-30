@@ -35,17 +35,12 @@ export const start = async (opts?: StartOptions): Promise<void> => {
   const container = document.createElement("div");
   document.body.appendChild(container);
 
-  let cwd: string;
-  if (typeof process !== "undefined") {
-    cwd = process.cwd();
-  } else if (
-    typeof window !== "undefined" &&
-    (window as any).electronAPI?.getCwd
-  ) {
-    cwd = await (window as any).electronAPI.getCwd();
-  } else {
-    cwd = "/";
-  }
+  const cwd =
+    typeof process !== "undefined"
+      ? process.cwd()
+      : typeof window !== "undefined" && (window as any).electronAPI?.getCwd
+      ? await (window as any).electronAPI.getCwd()
+      : "/";
   const pluginsPath = path.join(cwd, "plugins");
   const entries = await fs.readdir(pluginsPath, { withFileTypes: true });
   const tree: never[] = [];
