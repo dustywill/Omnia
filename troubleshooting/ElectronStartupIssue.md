@@ -20,3 +20,7 @@ ipcRenderer.invoke failed for fs-readdir Error: Error invoking remote method 'fs
 ---
 
 Before making code changes, confirm which argument is sent to `fs.readdir`. Logging the value just before invoking `electronAPI.readdir` can reveal whether a non-string object is being passed.
+
+## Troubleshooting Attempts
+- Updated renderer code to await `path.join` calls so a string is passed to `fs.readdir`. This should resolve "Non-string path argument" errors on startup.
+
