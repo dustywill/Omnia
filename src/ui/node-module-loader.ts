@@ -1,76 +1,53 @@
+// For Electron renderer with context isolation, we need to use the exposed APIs
+// instead of trying to access Node.js modules directly
 
-
-type NodeRequire = (module: string) => unknown;
-
-declare const require: NodeRequire | undefined;
-declare const module: {
-  createRequire?: (filename: string) => NodeRequire;
-} | undefined;
-
-
-// Attempt #1 used `eval('require')` when `require` wasn't available in ES modules.
-// That failed with `ReferenceError: require is not defined` when running under ESM.
-// Attempt #2 imported from 'module' to get `createRequire`, but the builtin was
-// missing in the renderer. This version keeps `createRequire` guarded behind a
-// runtime check so Electron can still load while we debug the issue.
-
-const getMetaUrl = (): string | undefined => {
-  try {
-    // wrapped in Function to avoid syntax errors in CJS environments
-    return new Function('return import.meta.url')();
-  } catch {
-    return undefined;
-  }
-};
-
-
-// Lazily resolve a CommonJS `require` function. Earlier revisions executed a
-// throwing IIFE at import time, which caused the Electron renderer to fail
-// before it could fall back to `window.require`. By delaying the error until the
-// function is called we keep that fallback intact.
-//
-// Attempt #3 notes: when launching the UI via Electron we observed
-// `[node-module-loader] no require available at load time` followed by a runtime
-// error. To help diagnose why `require` isn't present we're now logging the
-// environment details below. These logs will remain until the root cause is
-// confirmed so future attempts don't repeat the same debugging steps.
-let nodeRequire: NodeRequire;
-console.log(
-  `[node-module-loader] typeof window.require: ${typeof (globalThis as any).window?.require}`,
-);
-console.log(
-  `[node-module-loader] process.type: ${(globalThis as any).process?.type}`,
-);
-console.log(
-  `[node-module-loader] electron version: ${(globalThis as any).process?.versions?.electron}`,
-);
-console.log(
-  `[node-module-loader] typeof module.createRequire: ${typeof module?.createRequire}`,
-);
-if (typeof require === 'function') {
-  console.log('[node-module-loader] using built-in require');
-  nodeRequire = require;
-} else if (
-  typeof module !== 'undefined' &&
-  typeof module.createRequire === 'function'
-) {
-  console.log('[node-module-loader] using module.createRequire fallback');
-  nodeRequire = module.createRequire(getMetaUrl() ?? `${process.cwd()}/index.js`);
-} else {
-  console.log('[node-module-loader] no require available at load time');
-  nodeRequire = () => {
-    throw new Error('require is not available');
-  };
-}
-
-
+// Mock the Node.js modules for browser environment
 export const loadNodeModule = <T = unknown>(name: string): T => {
-  // Electron exposes `window.require` in the renderer. If present we prefer it
-  // over our fallback implementation above.
-  if (typeof window !== 'undefined' && (window as any).require) {
-    console.log(`[loadNodeModule] window.require used for ${name}`);
-    return (window as any).require(name) as T;
+  console.log(`[loadNodeModule] Attempting to load module: ${name}`);
+
+  // Check if we're in an Electron renderer with exposed APIs
+  if (typeof window !== "undefined" && (window as any).electronAPI) {
+    console.log(`[loadNodeModule] Using Electron API for ${name}`);
+
+    // Return mock implementations that use IPC
+    switch (name) {
+      case "fs/promises":
+        return {
+          readFile: async (filePath: string, options?: any) => {
+            return (window as any).electronAPI.readFile(filePath, options);
+          },
+          writeFile: async (filePath: string, data: string) => {
+            return (window as any).electronAPI.writeFile(filePath, data);
+          },
+          mkdir: async (dirPath: string, options?: any) => {
+            return (window as any).electronAPI.mkdir(dirPath, options);
+          },
+          readdir: async (dirPath: string, options?: any) => {
+            return (window as any).electronAPI.readdir(dirPath, options);
+          },
+        } as T;
+
+      case "path":
+        return {
+          join: (...paths: string[]) => {
+            return (window as any).electronAPI.join(...paths);
+          },
+        } as T;
+
+      default:
+        console.warn(
+          `[loadNodeModule] Module ${name} not implemented in Electron renderer`,
+        );
+        return {} as T;
+    }
   }
-  console.log(`[loadNodeModule] nodeRequire used for ${name}`);
-  return nodeRequire(name) as T;
+
+  // Fallback for Node.js environment (main process or tests)
+  if (typeof require !== "undefined") {
+    console.log(`[loadNodeModule] Using require for ${name}`);
+    return require(name) as T;
+  }
+
+  // Last resort - throw an error
+  throw new Error(`Module ${name} is not available in this environment`);
 };

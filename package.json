@@ -6,10 +6,10 @@
     "test": "jest",
     "test:e2e": "playwright test",
     "clean": "node -e \"import('fs').then(fs=>fs.rmSync('dist',{recursive:true,force:true}))\"",
-    "build": "npm run clean && tsc -p tsconfig.build.json",
+    "build": "npm run clean && tsc -p tsconfig.build.json && cp src/preload.js dist/preload.js",
+    "electron": "npm run build && electron dist/electron-main.js",
     "dev": "node --loader ts-node/esm --loader ./loaders/css-loader.js src/index.ts",
-    "start": "node --loader ./loaders/css-loader.js dist/index.js",
-    "electron": "npm run build && electron dist/electron-main.js"
+    "start": "node --loader ./loaders/css-loader.js dist/index.js"
   },
   "devDependencies": {
     "@codemirror/lang-markdown": "^6.1.1",
