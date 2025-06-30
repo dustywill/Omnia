@@ -37,18 +37,18 @@
   - [x] 2.3 Update plugins and core modules to use the new API instead of Electron IPC.
   - [x] 2.4 Update the `start` script to launch the Express server and open the application.
 
-- [ ] 3.0 Adjust application startup for the browser
+- [x] 3.0 Adjust application startup for the browser
 
-  - [ ] 3.1 Simplify `src/index.ts` to remove Electron checks and jsdom fallback.
-  - [ ] 3.2 Ensure `index.html` loads the compiled app without Electron checks and communicates with the Express server.
+  - [x] 3.1 Simplify `src/index.ts` to remove Electron checks and jsdom fallback.
+  - [x] 3.2 Ensure `index.html` loads the compiled app without Electron checks and communicates with the Express server.
 
-- [ ] 4.0 Update and expand tests
+- [x] 4.0 Update and expand tests
 
-  - [ ] 4.1 Remove Electron mocks from existing tests and delete any tests that only exercise Electron behavior.
+  - [x] 4.1 Remove Electron mocks from existing tests and delete any tests that only exercise Electron behavior.
   - [x] 4.2 Add tests for the new Express server routes.
-  - [ ] 4.3 Update UI tests to verify browser-based behavior.
+  - [x] 4.3 Update UI tests to verify browser-based behavior.
 
-- [ ] 5.0 Update documentation
+- [x] 5.0 Update documentation
   - [x] 5.1 Rewrite the `README.md` setup instructions for running the Express server and opening `index.html` in a browser.
-  - [ ] 5.2 Document the available API endpoints and how plugins interact with them.
+  - [x] 5.2 Document the available API endpoints and how plugins interact with them.
   - [x] 5.3 Remove references to Electron, including `troubleshooting/ElectronStartupIssue.md`.
