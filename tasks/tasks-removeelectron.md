@@ -11,7 +11,9 @@
 - `tests/core/ipc-sanitize.test.ts` – Sanitization logic for preload script. **Deleted.**
 - `tests/core/ipc-trace.test.ts` – Verifies warnings for unserializable IPC arguments. **Deleted.**
 - `plugins/as-built-documenter/index.tsx` – Uses `ipcRenderer.invoke` to load sample data.​:codex-file-citation[codex-file-citation]{line_range_start=120 line_range_end=145 path=plugins/as-built-documenter/index.tsx git_url="https://github.com/dustywill/Omnia/blob/main/plugins/as-built-documenter/index.tsx#L120-L145"}​
-- `troubleshooting/ElectronStartupIssue.md` – Document describing Electron specific errors.
+- `troubleshooting/ElectronStartupIssue.md` – Document describing Electron specific errors. **Deleted.**
+- `src/server.ts` – Express server serving the app and file system API.
+- `tests/server/server.test.ts` – Tests for Express server routes.
 
 ### Notes
 
@@ -26,14 +28,14 @@
   - [x] 1.1 Delete `electron` scripts and dependency from `package.json`; remove the entries from `package-lock.json`.
   - [x] 1.2 Remove `src/electron-main.ts` and `src/preload.js`.
   - [x] 1.3 Delete tests that depend on Electron (`tests/root/electron-main.test.ts`, `tests/root/startup-clone.test.ts`).
-  - [ ] 1.4 Remove `troubleshooting/ElectronStartupIssue.md` and any Electron references in documentation.
+  - [x] 1.4 Remove `troubleshooting/ElectronStartupIssue.md` and any Electron references in documentation.
 
 - [ ] 2.0 Replace IPC file access with a web API
 
-  - [ ] 2.1 Implement a small Express server in `src/server.ts` exposing file system endpoints (read, write, readdir, etc.). The server should also serve `index.html` and compiled assets from `dist`.
+  - [x] 2.1 Implement a small Express server in `src/server.ts` exposing file system endpoints (read, write, readdir, etc.). The server should also serve `index.html` and compiled assets from `dist`.
   - [ ] 2.2 Modify `src/ui/node-module-loader.ts` to call these endpoints using `fetch`.
   - [ ] 2.3 Update plugins and core modules to use the new API instead of Electron IPC.
-  - [ ] 2.4 Update the `start` script to launch the Express server and open the application.
+  - [x] 2.4 Update the `start` script to launch the Express server and open the application.
 
 - [ ] 3.0 Adjust application startup for the browser
 
@@ -43,10 +45,10 @@
 - [ ] 4.0 Update and expand tests
 
   - [ ] 4.1 Remove Electron mocks from existing tests and delete any tests that only exercise Electron behavior.
-  - [ ] 4.2 Add tests for the new Express server routes.
+  - [x] 4.2 Add tests for the new Express server routes.
   - [ ] 4.3 Update UI tests to verify browser-based behavior.
 
 - [ ] 5.0 Update documentation
-  - [ ] 5.1 Rewrite the `README.md` setup instructions for running the Express server and opening `index.html` in a browser.
+  - [x] 5.1 Rewrite the `README.md` setup instructions for running the Express server and opening `index.html` in a browser.
   - [ ] 5.2 Document the available API endpoints and how plugins interact with them.
-  - [ ] 5.3 Remove references to Electron, including `troubleshooting/ElectronStartupIssue.md`.
+  - [x] 5.3 Remove references to Electron, including `troubleshooting/ElectronStartupIssue.md`.
