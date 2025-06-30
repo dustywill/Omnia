@@ -20,7 +20,11 @@ const getElectron = async () => {
 };
 
 // Set up all the IPC handlers that your renderer process will need
-const setupIpcHandlers = (ipcMain: IpcMain, logger?: Logger) => {
+const setupIpcHandlers = (ipcMain?: IpcMain, logger?: Logger) => {
+  if (!ipcMain) {
+    logger?.warn("ipcMain not available, skipping IPC handler setup");
+    return;
+  }
   // File system operations
   ipcMain.handle(
     "fs-read-file",
