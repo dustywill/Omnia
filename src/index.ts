@@ -8,6 +8,7 @@ export type StartOptions = {
 };
 
 export const start = async (opts?: StartOptions): Promise<void> => {
+  try {
   if (typeof document === "undefined") {
     const { JSDOM } = await import("jsdom");
     const dom = new JSDOM("<!doctype html><html><body></body></html>");
@@ -59,6 +60,10 @@ export const start = async (opts?: StartOptions): Promise<void> => {
     });
   const renderer = opts?.init ?? initRenderer;
   renderer({ container, pluginsPath, plugins });
+  } catch (err) {
+    console.error('[start] failed', { options: opts }, err);
+    throw err;
+  }
 };
 
 if (typeof process !== "undefined" && process.env.NODE_ENV !== "test") {
