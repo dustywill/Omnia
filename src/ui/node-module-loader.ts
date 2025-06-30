@@ -23,7 +23,19 @@ export const loadNodeModule = <T = unknown>(name: string): T => {
             return (window as any).electronAPI.mkdir(dirPath, options);
           },
           readdir: async (dirPath: string, options?: any) => {
-            return (window as any).electronAPI.readdir(dirPath, options);
+            const entries = await (window as any).electronAPI.readdir(
+              dirPath,
+              options,
+            );
+            if (options?.withFileTypes) {
+              return entries.map(
+                (e: { name: string; isDirectory: boolean }) => ({
+                  name: e.name,
+                  isDirectory: () => e.isDirectory,
+                }),
+              );
+            }
+            return entries;
           },
         } as T;
 

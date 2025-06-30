@@ -1,5 +1,6 @@
 import path from "path";
 import fs from "fs/promises";
+import type { Dirent } from "fs";
 import type {
   BrowserWindow as ElectronBrowserWindow,
   App,
@@ -70,7 +71,14 @@ const setupIpcHandlers = (ipcMain?: IpcMain, logger?: Logger) => {
     async (_event: any, dirPath: string, options?: any) => {
       try {
         logger?.info(`Reading directory: ${dirPath}`);
-        return await fs.readdir(dirPath, options);
+        const entries = await fs.readdir(dirPath, options);
+        if (options?.withFileTypes) {
+          return (entries as unknown as Dirent[]).map((d) => ({
+            name: d.name,
+            isDirectory: d.isDirectory(),
+          }));
+        }
+        return entries;
       } catch (error) {
         logger?.error(`Error reading directory ${dirPath}: ${error}`);
         throw error;
