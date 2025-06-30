@@ -15,6 +15,9 @@ describe('customer links plugin', () => {
   const jsonPath = path.join(dir, 'customers.json5');
 
   beforeEach(async () => {
+    // ensure Node require path is used
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (global as any).fetch = undefined;
     await fs.rm(dir, { recursive: true, force: true });
     await fs.mkdir(dir, { recursive: true });
     const content = `[

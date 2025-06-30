@@ -6,6 +6,11 @@ import type { FileNode } from '../../src/ui/components/FileScanner.js';
 import { ContextGenerator } from '../../plugins/context-generator/index.js';
 
 describe('context generator plugin', () => {
+  beforeEach(() => {
+    // force loadNodeModule to use Node require
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (global as any).fetch = undefined;
+  });
   it('uses FileScanner to choose files', async () => {
     const tree: FileNode[] = [
       {

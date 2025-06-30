@@ -1,65 +1,64 @@
-// For Electron renderer with context isolation, we need to use the exposed APIs
-// instead of trying to access Node.js modules directly
-
-// Mock the Node.js modules for browser environment
+// Provide minimal Node.js module shims for the browser by calling the Express
+// server's API endpoints. In a Node.js environment we fall back to `require`.
 export const loadNodeModule = <T = unknown>(name: string): T => {
   console.log(`[loadNodeModule] Attempting to load module: ${name}`);
 
-  // Check if we're in an Electron renderer with exposed APIs
-  if (typeof window !== "undefined" && (window as any).electronAPI) {
-    console.log(`[loadNodeModule] Using Electron API for ${name}`);
-
-    // Return mock implementations that use IPC
+  if (typeof window !== 'undefined' && typeof fetch === 'function') {
     switch (name) {
-      case "fs/promises":
+      case 'fs/promises':
         return {
-          readFile: async (filePath: string, options?: any) => {
-            return (window as any).electronAPI.readFile(filePath, options);
+          readFile: async (filePath: string): Promise<string> => {
+            const res = await fetch(`/api/read?path=${encodeURIComponent(filePath)}`);
+            if (!res.ok) throw new Error(await res.text());
+            return res.text();
           },
-          writeFile: async (filePath: string, data: string) => {
-            return (window as any).electronAPI.writeFile(filePath, data);
+          writeFile: async (filePath: string, data: string): Promise<void> => {
+            const res = await fetch(`/api/write?path=${encodeURIComponent(filePath)}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ data }),
+            });
+            if (!res.ok) throw new Error(await res.text());
           },
-          mkdir: async (dirPath: string, options?: any) => {
-            return (window as any).electronAPI.mkdir(dirPath, options);
+          mkdir: async (dirPath: string, options?: any): Promise<void> => {
+            const res = await fetch(`/api/mkdir?path=${encodeURIComponent(dirPath)}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ options }),
+            });
+            if (!res.ok) throw new Error(await res.text());
           },
-          readdir: async (dirPath: string, options?: any) => {
-            const entries = await (window as any).electronAPI.readdir(
-              dirPath,
-              options,
-            );
+          readdir: async (dirPath: string, options?: any): Promise<any> => {
+            const params = new URLSearchParams({ path: dirPath });
+            if (options?.withFileTypes) params.set('withFileTypes', 'true');
+            const res = await fetch(`/api/readdir?${params.toString()}`);
+            if (!res.ok) throw new Error(await res.text());
+            const entries = await res.json();
             if (options?.withFileTypes) {
-              return entries.map(
-                (e: { name: string; isDirectory: boolean }) => ({
-                  name: e.name,
-                  isDirectory: () => e.isDirectory,
-                }),
-              );
+              return entries.map((e: { name: string; isDirectory: boolean }) => ({
+                name: e.name,
+                isDirectory: () => e.isDirectory,
+              }));
             }
             return entries;
           },
         } as T;
 
-      case "path":
+      case 'path':
         return {
-          join: (...paths: string[]) => {
-            return (window as any).electronAPI.join(...paths);
-          },
+          join: (...paths: string[]) => paths.join('/').replace(/\\+/g, '/'),
         } as T;
 
       default:
-        console.warn(
-          `[loadNodeModule] Module ${name} not implemented in Electron renderer`,
-        );
+        console.warn(`[loadNodeModule] Module ${name} not implemented in browser`);
         return {} as T;
     }
   }
 
-  // Fallback for Node.js environment (main process or tests)
-  if (typeof require !== "undefined") {
+  if (typeof require !== 'undefined') {
     console.log(`[loadNodeModule] Using require for ${name}`);
     return require(name) as T;
   }
 
-  // Last resort - throw an error
   throw new Error(`Module ${name} is not available in this environment`);
 };

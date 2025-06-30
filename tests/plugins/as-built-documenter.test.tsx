@@ -5,6 +5,11 @@ import path from 'path';
 import { AsBuiltDocumenter } from '../../plugins/as-built-documenter/index.js';
 
 describe('as-built documenter plugin', () => {
+  beforeEach(() => {
+    // force Node require path in node-module-loader
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (global as any).fetch = undefined;
+  });
   it('lists Markdown templates in dropdown and allows clearing', async () => {
     render(<AsBuiltDocumenter templates={['one.md', 'two.md']} />);
 

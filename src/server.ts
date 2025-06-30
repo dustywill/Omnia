@@ -25,13 +25,35 @@ export const createServer = (rootDir = process.cwd()) => {
 
   app.get('/api/readdir', async (req, res): Promise<void> => {
     const relPath = req.query.path || '.';
+    const wantDirents = req.query.withFileTypes === 'true';
     if (typeof relPath !== 'string') {
       res.status(400).send('invalid path');
       return;
     }
     try {
-      const entries = await fs.readdir(path.join(rootDir, relPath));
-      res.json(entries);
+      if (wantDirents) {
+        const entries = await fs.readdir(path.join(rootDir, relPath), { withFileTypes: true });
+        res.json(entries.map(e => ({ name: e.name, isDirectory: e.isDirectory() })));
+      } else {
+        const entries = await fs.readdir(path.join(rootDir, relPath));
+        res.json(entries);
+      }
+    } catch (err) {
+      res.status(500).send((err as Error).message);
+      return;
+    }
+  });
+
+  app.post('/api/mkdir', async (req, res): Promise<void> => {
+    const relPath = req.query.path;
+    const options = req.body?.options;
+    if (typeof relPath !== 'string') {
+      res.status(400).send('path required');
+      return;
+    }
+    try {
+      await fs.mkdir(path.join(rootDir, relPath), options);
+      res.sendStatus(204);
     } catch (err) {
       res.status(500).send((err as Error).message);
       return;
