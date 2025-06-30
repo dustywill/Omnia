@@ -5,6 +5,7 @@
 - `src/ui/components/FileScanner.css` - Uses Nunito Sans font-family.
 - `src/ui/components/JsonEditor.css` - Uses Nunito Sans font-family.
 - `src/preload.js` - Exposes Electron APIs to renderer; may cause cloning errors.
+- `tests/core/ipc-sanitize.test.ts` - Verifies arguments are sanitized before IPC.
 
 ### Notes
 
@@ -21,7 +22,7 @@
   - [x] 1.3 Verify fonts load without CSP violations.
 - [ ] 4.0 Diagnose cloning error
   - [x] 4.1 Trace calls to Electron `ipcRenderer` or `contextBridge` for non-serializable objects.
-  - [ ] 4.2 Refactor any API calls to pass plain JSON-serializable data only.
+  - [x] 4.2 Refactor any API calls to pass plain JSON-serializable data only.
   - [ ] 4.3 Add logging around `start()` to capture the failing object.
 - [ ] 5.0 Add tests
   - [ ] 5.1 Write a test ensuring the application starts without the cloning error.

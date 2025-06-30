@@ -1,21 +1,27 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
-// Utility to log when an argument cannot be cloned/serialized
-const logIfNotSerializable = (label, value) => {
+// Utility to attempt structured cloning and fall back to JSON serialization
+const sanitizeForIpc = (label, value) => {
   try {
     // structuredClone will throw if value cannot be cloned
     structuredClone(value);
-  } catch (err) {
+    return value;
+  } catch (_err) {
     console.warn(`[preload] ${label} is not serializable`, value);
+    try {
+      return JSON.parse(JSON.stringify(value));
+    } catch {
+      return null;
+    }
   }
 };
 
 const safeInvoke = async (channel, ...args) => {
-  args.forEach((arg, idx) =>
-    logIfNotSerializable(`arg[${idx}] for ${channel}`, arg),
+  const sanitized = args.map((arg, idx) =>
+    sanitizeForIpc(`arg[${idx}] for ${channel}`, arg),
   );
   try {
-    return await ipcRenderer.invoke(channel, ...args);
+    return await ipcRenderer.invoke(channel, ...sanitized);
   } catch (err) {
     console.error(`[preload] ipcRenderer.invoke failed for ${channel}`, err);
     throw err;
@@ -42,12 +48,12 @@ const electronAPI = {
   // Other utilities
   getCwd: () => safeInvoke("get-cwd"),
 };
-logIfNotSerializable("electronAPI", electronAPI);
+sanitizeForIpc("electronAPI", electronAPI);
 contextBridge.exposeInMainWorld("electronAPI", electronAPI);
 
 // For backward compatibility with your existing code
 const exposedIpc = {
   invoke: (channel, data) => safeInvoke(channel, data),
 };
-logIfNotSerializable("ipcRenderer", exposedIpc);
+sanitizeForIpc("ipcRenderer", exposedIpc);
 contextBridge.exposeInMainWorld("ipcRenderer", exposedIpc);
