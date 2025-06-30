@@ -24,7 +24,7 @@ const setupIpcHandlers = (ipcMain: IpcMain, logger?: Logger) => {
   // File system operations
   ipcMain.handle(
     "fs-read-file",
-    async (event: any, filePath: string, options?: any) => {
+    async (_event: any, filePath: string, options?: any) => {
       try {
         logger?.info(`Reading file: ${filePath}`);
         return await fs.readFile(filePath, options);
@@ -37,7 +37,7 @@ const setupIpcHandlers = (ipcMain: IpcMain, logger?: Logger) => {
 
   ipcMain.handle(
     "fs-write-file",
-    async (event: any, filePath: string, data: string) => {
+    async (_event: any, filePath: string, data: string) => {
       try {
         logger?.info(`Writing file: ${filePath}`);
         return await fs.writeFile(filePath, data);
@@ -50,7 +50,7 @@ const setupIpcHandlers = (ipcMain: IpcMain, logger?: Logger) => {
 
   ipcMain.handle(
     "fs-mkdir",
-    async (event: any, dirPath: string, options?: any) => {
+    async (_event: any, dirPath: string, options?: any) => {
       try {
         logger?.info(`Creating directory: ${dirPath}`);
         return await fs.mkdir(dirPath, options);
@@ -63,7 +63,7 @@ const setupIpcHandlers = (ipcMain: IpcMain, logger?: Logger) => {
 
   ipcMain.handle(
     "fs-readdir",
-    async (event: any, dirPath: string, options?: any) => {
+    async (_event: any, dirPath: string, options?: any) => {
       try {
         logger?.info(`Reading directory: ${dirPath}`);
         return await fs.readdir(dirPath, options);
@@ -75,7 +75,7 @@ const setupIpcHandlers = (ipcMain: IpcMain, logger?: Logger) => {
   );
 
   // Path operations
-  ipcMain.handle("path-join", async (event: any, paths: string[]) => {
+  ipcMain.handle("path-join", async (_event: any, paths: string[]) => {
     return path.join(...paths);
   });
 
@@ -87,7 +87,7 @@ const setupIpcHandlers = (ipcMain: IpcMain, logger?: Logger) => {
   // Your existing load-sample-data handler
   ipcMain.handle(
     "load-sample-data",
-    async (event: any, { id, url }: { id: string; url: string }) => {
+    async (_event: any, { id, url }: { id: string; url: string }) => {
       try {
         logger?.info(`Loading sample data for ${id}: ${url}`);
         // Implement your actual data loading logic here
