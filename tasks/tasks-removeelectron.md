@@ -10,7 +10,7 @@
 - `tests/root/startup-clone.test.ts` – Relies on Electron mocks. **Deleted.**
 - `tests/core/ipc-sanitize.test.ts` – Sanitization logic for preload script. **Deleted.**
 - `tests/core/ipc-trace.test.ts` – Verifies warnings for unserializable IPC arguments. **Deleted.**
-- `plugins/as-built-documenter/index.tsx` – Uses `ipcRenderer.invoke` to load sample data.​:codex-file-citation[codex-file-citation]{line_range_start=120 line_range_end=145 path=plugins/as-built-documenter/index.tsx git_url="https://github.com/dustywill/Omnia/blob/main/plugins/as-built-documenter/index.tsx#L120-L145"}​
+- `plugins/as-built-documenter/index.tsx` – Loads sample data via `fetch` from the selected source.​:codex-file-citation[codex-file-citation]{line_range_start=126 line_range_end=142 path=plugins/as-built-documenter/index.tsx git_url="https://github.com/dustywill/Omnia/blob/main/plugins/as-built-documenter/index.tsx#L126-L142"}​
 - `troubleshooting/ElectronStartupIssue.md` – Document describing Electron specific errors. **Deleted.**
 - `src/server.ts` – Express server serving the app and file system API.
 - `tests/server/server.test.ts` – Tests for Express server routes.
@@ -23,18 +23,18 @@
 
 ## Tasks
 
-- [ ] 1.0 Remove Electron from the project
+- [x] 1.0 Remove Electron from the project
 
   - [x] 1.1 Delete `electron` scripts and dependency from `package.json`; remove the entries from `package-lock.json`.
   - [x] 1.2 Remove `src/electron-main.ts` and `src/preload.js`.
   - [x] 1.3 Delete tests that depend on Electron (`tests/root/electron-main.test.ts`, `tests/root/startup-clone.test.ts`).
   - [x] 1.4 Remove `troubleshooting/ElectronStartupIssue.md` and any Electron references in documentation.
 
-- [ ] 2.0 Replace IPC file access with a web API
+- [x] 2.0 Replace IPC file access with a web API
 
   - [x] 2.1 Implement a small Express server in `src/server.ts` exposing file system endpoints (read, write, readdir, etc.). The server should also serve `index.html` and compiled assets from `dist`.
   - [x] 2.2 Modify `src/ui/node-module-loader.ts` to call these endpoints using `fetch`.
-  - [ ] 2.3 Update plugins and core modules to use the new API instead of Electron IPC.
+  - [x] 2.3 Update plugins and core modules to use the new API instead of Electron IPC.
   - [x] 2.4 Update the `start` script to launch the Express server and open the application.
 
 - [ ] 3.0 Adjust application startup for the browser

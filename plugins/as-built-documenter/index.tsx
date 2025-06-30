@@ -129,10 +129,8 @@ export const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({
         type="button"
         onClick={async () => {
           if (!sourceId) return;
-          const data = await (window as any).ipcRenderer.invoke(
-            'load-sample-data',
-            { id: sourceId, ...sources[sourceId] },
-          );
+          const res = await fetch(sources[sourceId].url);
+          const data = await res.json();
           setSample(data);
           setSampleIndex(0);
           setCopied(false);
