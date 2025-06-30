@@ -86,10 +86,14 @@ export const createServer = (rootDir = process.cwd()) => {
   return app;
 };
 
-const openBrowser = (url: string) => {
+export const openBrowser = (url: string) => {
   const platform = process.platform;
-  const cmd = platform === 'darwin' ? 'open' : platform === 'win32' ? 'start' : 'xdg-open';
-  spawn(cmd, [url], { stdio: 'ignore', detached: true }).unref();
+  if (platform === 'win32') {
+    spawn('cmd', ['/c', 'start', '', url], { stdio: 'ignore', detached: true }).unref();
+  } else {
+    const cmd = platform === 'darwin' ? 'open' : 'xdg-open';
+    spawn(cmd, [url], { stdio: 'ignore', detached: true }).unref();
+  }
 };
 
 if (process.env.NODE_ENV !== 'test') {
