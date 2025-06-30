@@ -102,9 +102,11 @@ describe('as-built documenter plugin', () => {
     ]);
   });
 
-  it('loads sample data via IPC', async () => {
-    const invoke = jest.fn().mockResolvedValue([{ id: 1 }]);
-    (window as any).ipcRenderer = { invoke };
+  it('loads sample data via fetch', async () => {
+    const fetchMock = jest.fn().mockResolvedValue({
+      json: async () => [{ id: 1 }],
+    });
+    (global as any).fetch = fetchMock;
 
     render(
       <AsBuiltDocumenter
@@ -118,19 +120,16 @@ describe('as-built documenter plugin', () => {
       screen.getByRole('button', { name: /load sample data/i }),
     );
 
-    expect(invoke).toHaveBeenCalledWith('load-sample-data', {
-      id: 'foo',
-      url: 'http://foo',
-    });
+    expect(fetchMock).toHaveBeenCalledWith('http://foo');
 
     expect(await screen.findByRole('table')).toBeInTheDocument();
   });
 
   it('displays sample data table and copies loops or field names', async () => {
-    const invoke = jest
+    const fetchMock = jest
       .fn()
-      .mockResolvedValue([{ id: 1, name: 'Alice' }]);
-    (window as any).ipcRenderer = { invoke };
+      .mockResolvedValue({ json: async () => [{ id: 1, name: 'Alice' }] });
+    (global as any).fetch = fetchMock;
     const writeText = jest.fn();
     Object.assign(navigator, { clipboard: { writeText } });
 
@@ -161,8 +160,10 @@ describe('as-built documenter plugin', () => {
   });
 
 it('pages through sample data with Prev/Next buttons', async () => {
-  const invoke = jest.fn().mockResolvedValue([{ id: 1 }, { id: 2 }]);
-  (window as any).ipcRenderer = { invoke };
+  const fetchMock = jest
+    .fn()
+    .mockResolvedValue({ json: async () => [{ id: 1 }, { id: 2 }] });
+  (global as any).fetch = fetchMock;
 
   render(
     <AsBuiltDocumenter
@@ -175,6 +176,8 @@ it('pages through sample data with Prev/Next buttons', async () => {
   await userEvent.click(
     screen.getByRole('button', { name: /load sample data/i }),
   );
+
+  expect(fetchMock).toHaveBeenCalledWith('http://foo');
 
   expect(await screen.findByRole('button', { name: /next sample/i })).toBeInTheDocument();
   expect(screen.getByText(/"id": 1/)).toBeInTheDocument();
