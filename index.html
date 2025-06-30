@@ -25,19 +25,8 @@
     </script>
 
     <script type="module">
-      // Wait for the DOM to be ready and check if we have the necessary APIs
       document.addEventListener("DOMContentLoaded", async () => {
         try {
-          // Check if we're in Electron
-          if (window.electronAPI) {
-            console.log("Electron APIs available");
-          } else {
-            console.warn(
-              "Electron APIs not available - running in browser mode",
-            );
-          }
-
-          // Import and start your application
           const { start } = await import("./dist/index.js");
           await start();
         } catch (error) {

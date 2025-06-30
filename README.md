@@ -9,6 +9,13 @@ The server exposes a simple file system API:
 - `GET /api/readdir?path=DIR&withFileTypes=true`
 - `POST /api/mkdir?path=DIR` with `{ options?: object }`
 
+## Plugins
+
+Plugins are React components located in the `plugins/` directory. Each plugin is
+loaded at runtime and uses the helpers from `src/ui/node-module-loader.ts` to
+access the file system via the API endpoints above. This allows browser-based
+plugins to read and write files through the Express server.
+
 ## Contributing
 
 - Follow Test-Driven Development for all changes.

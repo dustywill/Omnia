@@ -9,39 +9,11 @@ export type StartOptions = {
 
 export const start = async (opts?: StartOptions): Promise<void> => {
   try {
-  if (typeof document === "undefined") {
-    const { JSDOM } = await import("jsdom");
-    const dom = new JSDOM("<!doctype html><html><body></body></html>");
-    Object.assign(globalThis, {
-      window: dom.window,
-      document: dom.window.document,
-      HTMLElement: dom.window.HTMLElement,
-    });
-    if (!globalThis.MutationObserver) {
-      globalThis.MutationObserver = class {
-        disconnect() {}
-        observe() {}
-        takeRecords() {
-          return [];
-        }
-      } as unknown as typeof MutationObserver;
-    }
-    if (!window.requestAnimationFrame) {
-      window.requestAnimationFrame = (cb) => setTimeout(cb, 0);
-      window.cancelAnimationFrame = (id) =>
-        clearTimeout(id as unknown as NodeJS.Timeout);
-    }
-  }
 
   const container = document.createElement("div");
   document.body.appendChild(container);
 
-  const cwd =
-    typeof process !== "undefined"
-      ? process.cwd()
-      : typeof window !== "undefined" && (window as any).electronAPI?.getCwd
-      ? await (window as any).electronAPI.getCwd()
-      : "/";
+  const cwd = typeof process !== "undefined" ? process.cwd() : "/";
   const pluginsPath = path.join(cwd, "plugins");
   const entries = await fs.readdir(pluginsPath, { withFileTypes: true });
   const tree: never[] = [];
