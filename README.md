@@ -2,6 +2,12 @@
 This will be an evolution of the ttComander application
 
 The project runs entirely in a standard Node environment using an Express server.
+The server exposes a simple file system API:
+
+- `GET /api/read?path=FILE`
+- `POST /api/write?path=FILE` with `{ data: string }`
+- `GET /api/readdir?path=DIR&withFileTypes=true`
+- `POST /api/mkdir?path=DIR` with `{ options?: object }`
 
 ## Contributing
 

@@ -4,7 +4,7 @@
 - `src/electron-main.ts` – Starts the Electron app and sets up IPC handlers.​:codex-file-citation[codex-file-citation]{line_range_start=1 line_range_end=20 path=src/electron-main.ts git_url="https://github.com/dustywill/Omnia/blob/main/src/electron-main.ts#L1-L20"}​
 - `src/preload.js` – Exposes Electron APIs to the renderer process.​:codex-file-citation[codex-file-citation]{line_range_start=1 line_range_end=33 path=src/preload.js git_url="https://github.com/dustywill/Omnia/blob/main/src/preload.js#L1-L33"}​
 - `src/index.ts` – Application startup logic that checks for `electronAPI`.​:codex-file-citation[codex-file-citation]{line_range_start=12 line_range_end=44 path=src/index.ts git_url="https://github.com/dustywill/Omnia/blob/main/src/index.ts#L12-L44"}​
-- `src/ui/node-module-loader.ts` – Provides Node module access through Electron IPC.​:codex-file-citation[codex-file-citation]{line_range_start=8 line_range_end=35 path=src/ui/node-module-loader.ts git_url="https://github.com/dustywill/Omnia/blob/main/src/ui/node-module-loader.ts#L8-L35"}​
+ - `src/ui/node-module-loader.ts` – Provides Node module access via fetch calls to the Express API.​:codex-file-citation[codex-file-citation]{line_range_start=8 line_range_end=35 path=src/ui/node-module-loader.ts git_url="https://github.com/dustywill/Omnia/blob/main/src/ui/node-module-loader.ts#L8-L35"}​
 - `index.html` – Loads the application and references Electron APIs.​:codex-file-citation[codex-file-citation]{line_range_start=9 line_range_end=23 path=index.html git_url="https://github.com/dustywill/Omnia/blob/main/index.html#L9-L23"}​
 - `tests/root/electron-main.test.ts` – Tests specific to Electron startup. **Deleted.**
 - `tests/root/startup-clone.test.ts` – Relies on Electron mocks. **Deleted.**
@@ -33,7 +33,7 @@
 - [ ] 2.0 Replace IPC file access with a web API
 
   - [x] 2.1 Implement a small Express server in `src/server.ts` exposing file system endpoints (read, write, readdir, etc.). The server should also serve `index.html` and compiled assets from `dist`.
-  - [ ] 2.2 Modify `src/ui/node-module-loader.ts` to call these endpoints using `fetch`.
+  - [x] 2.2 Modify `src/ui/node-module-loader.ts` to call these endpoints using `fetch`.
   - [ ] 2.3 Update plugins and core modules to use the new API instead of Electron IPC.
   - [x] 2.4 Update the `start` script to launch the Express server and open the application.
 

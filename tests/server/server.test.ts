@@ -27,4 +27,21 @@ describe('server', () => {
     expect(res.status).toBe(200);
     expect(res.text).toBe('hello');
   });
+
+  it('creates directories', async () => {
+    const res = await request(app).post('/api/mkdir').query({ path: 'dir' }).send({ options: { recursive: true } });
+    expect(res.status).toBe(204);
+    const stat = await fs.stat(path.join(tmpDir, 'dir'));
+    expect(stat.isDirectory()).toBe(true);
+  });
+
+  it('lists directory entries with file types', async () => {
+    await fs.mkdir(path.join(tmpDir, 'dir2'));
+    await fs.writeFile(path.join(tmpDir, 'dir2', 'file.txt'), 'x');
+    const res = await request(app)
+      .get('/api/readdir')
+      .query({ path: 'dir2', withFileTypes: 'true' });
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual([{ name: 'file.txt', isDirectory: false }]);
+  });
 });

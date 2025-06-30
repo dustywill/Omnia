@@ -6,6 +6,9 @@ import { join } from "path";
 it("falls back to Node require when window.require is absent", () => {
   const originalWindow = (globalThis as any).window;
   (globalThis as any).window = {};
+  // ensure fetch is undefined so require path is used
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (global as any).fetch = undefined;
   const path = loadNodeModule<typeof import("path")>("path");
   expect(typeof path.join).toBe("function");
   (globalThis as any).window = originalWindow;
@@ -35,21 +38,3 @@ it("logs environment details when require is unavailable", async () => {
   logSpy.mockRestore();
 });
 
-it("wraps readdir results from electron", async () => {
-  jest.resetModules();
-  const originalWindow = (global as any).window;
-  (originalWindow as any).electronAPI = {
-    readdir: async (_dir: string, _opts?: any) => [
-      { name: "a", isDirectory: true },
-      { name: "b", isDirectory: false },
-    ],
-  };
-  const { loadNodeModule } = await import("../../src/ui/node-module-loader.js");
-  const fs = loadNodeModule<typeof import("fs/promises")>("fs/promises");
-  const entries = await fs.readdir("/tmp", { withFileTypes: true });
-  expect(entries[0].name).toBe("a");
-  expect(entries[0].isDirectory()).toBe(true);
-  expect(entries[1].name).toBe("b");
-  expect(entries[1].isDirectory()).toBe(false);
-  delete (originalWindow as any).electronAPI;
-});
