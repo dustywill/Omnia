@@ -1,8 +1,7 @@
 # Omnia
 This will be an evolution of the ttComander application
 
-The project no longer relies on Electron. Development and builds run in a
-standard Node environment.
+The project runs entirely in a standard Node environment using an Express server.
 
 ## Contributing
 
@@ -17,4 +16,4 @@ standard Node environment.
 1. Install dependencies with `npm install`.
 2. Start the app in development mode using `npm run dev`.
 3. Build the project with `npm run build`.
-4. Run the compiled app using `npm start`.
+4. Run the compiled app using `npm start` which launches the Express server and opens the app in your browser.
