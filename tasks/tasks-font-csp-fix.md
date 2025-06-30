@@ -20,7 +20,7 @@
   - [x] 1.2 Add `font-src` directive allowing `https://fonts.gstatic.com`.
   - [x] 1.3 Verify fonts load without CSP violations.
 - [ ] 4.0 Diagnose cloning error
-  - [ ] 4.1 Trace calls to Electron `ipcRenderer` or `contextBridge` for non-serializable objects.
+  - [x] 4.1 Trace calls to Electron `ipcRenderer` or `contextBridge` for non-serializable objects.
   - [ ] 4.2 Refactor any API calls to pass plain JSON-serializable data only.
   - [ ] 4.3 Add logging around `start()` to capture the failing object.
 - [ ] 5.0 Add tests
