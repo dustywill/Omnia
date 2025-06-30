@@ -16,7 +16,7 @@ export const loadPluginUI = async (
   id: string,
   options: LoadPluginUiOptions,
 ): Promise<Root> => {
-  const modulePath = path.join(options.pluginsPath, id, 'index.tsx');
+  const modulePath = await path.join(options.pluginsPath, id, 'index.tsx');
   console.log(`[loadPluginUI] importing ${modulePath}`);
   const mod = await import(modulePath);
   const Component = (mod.default ?? Object.values(mod).find((v) => typeof v === 'function')) as React.ComponentType | undefined;
