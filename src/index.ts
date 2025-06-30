@@ -34,6 +34,7 @@ export const start = async (opts?: StartOptions): Promise<void> => {
 
   const container = document.createElement("div");
   document.body.appendChild(container);
+
   let cwd: string;
   if (typeof process !== "undefined") {
     cwd = process.cwd();
@@ -46,6 +47,8 @@ export const start = async (opts?: StartOptions): Promise<void> => {
     cwd = "/";
   }
   const pluginsPath = path.join(cwd, "plugins");
+h = path.join(process.cwd(), "plugins");
+
   const entries = await fs.readdir(pluginsPath, { withFileTypes: true });
   const tree: never[] = [];
   const plugins = entries
