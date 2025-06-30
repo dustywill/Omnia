@@ -47,8 +47,6 @@ export const start = async (opts?: StartOptions): Promise<void> => {
     cwd = "/";
   }
   const pluginsPath = path.join(cwd, "plugins");
-h = path.join(process.cwd(), "plugins");
-
   const entries = await fs.readdir(pluginsPath, { withFileTypes: true });
   const tree: never[] = [];
   const plugins = entries
