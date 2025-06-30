@@ -1,11 +1,15 @@
 import path from "path";
 import fs from "fs/promises";
-import type { BrowserWindow as ElectronBrowserWindow, App } from "electron";
+import type {
+  BrowserWindow as ElectronBrowserWindow,
+  App,
+  IpcMain,
+} from "electron";
 import type { Logger } from "./core/logger.js";
 import { createLogger } from "./core/logger.js";
 
 let electron:
-  | { BrowserWindow: typeof ElectronBrowserWindow; app: App; ipcMain: any }
+  | { BrowserWindow: typeof ElectronBrowserWindow; app: App; ipcMain: IpcMain }
   | undefined;
 
 const getElectron = async () => {
@@ -16,7 +20,7 @@ const getElectron = async () => {
 };
 
 // Set up all the IPC handlers that your renderer process will need
-const setupIpcHandlers = (ipcMain: any, logger?: Logger) => {
+const setupIpcHandlers = (ipcMain: IpcMain, logger?: Logger) => {
   // File system operations
   ipcMain.handle(
     "fs-read-file",
@@ -25,7 +29,7 @@ const setupIpcHandlers = (ipcMain: any, logger?: Logger) => {
         logger?.info(`Reading file: ${filePath}`);
         return await fs.readFile(filePath, options);
       } catch (error) {
-        logger?.error(`Error reading file ${filePath}:`, error);
+        logger?.error(`Error reading file ${filePath}: ${error}`);
         throw error;
       }
     },
@@ -38,7 +42,7 @@ const setupIpcHandlers = (ipcMain: any, logger?: Logger) => {
         logger?.info(`Writing file: ${filePath}`);
         return await fs.writeFile(filePath, data);
       } catch (error) {
-        logger?.error(`Error writing file ${filePath}:`, error);
+        logger?.error(`Error writing file ${filePath}: ${error}`);
         throw error;
       }
     },
@@ -51,7 +55,7 @@ const setupIpcHandlers = (ipcMain: any, logger?: Logger) => {
         logger?.info(`Creating directory: ${dirPath}`);
         return await fs.mkdir(dirPath, options);
       } catch (error) {
-        logger?.error(`Error creating directory ${dirPath}:`, error);
+        logger?.error(`Error creating directory ${dirPath}: ${error}`);
         throw error;
       }
     },
@@ -64,7 +68,7 @@ const setupIpcHandlers = (ipcMain: any, logger?: Logger) => {
         logger?.info(`Reading directory: ${dirPath}`);
         return await fs.readdir(dirPath, options);
       } catch (error) {
-        logger?.error(`Error reading directory ${dirPath}:`, error);
+        logger?.error(`Error reading directory ${dirPath}: ${error}`);
         throw error;
       }
     },
@@ -93,7 +97,7 @@ const setupIpcHandlers = (ipcMain: any, logger?: Logger) => {
           { id: 2, name: "Sample Item 2", value: "Test Value 2" },
         ];
       } catch (error) {
-        logger?.error(`Error loading sample data:`, error);
+        logger?.error(`Error loading sample data: ${error}`);
         throw error;
       }
     },
@@ -118,7 +122,7 @@ export const createWindow = async (
     webPreferences: {
       nodeIntegration: false, // Disable node integration for security
       contextIsolation: true, // Enable context isolation
-      enableRemoteModule: false, // Disable remote module
+      // enableRemoteModule is deprecated in newer Electron versions
       preload: path.join(process.cwd(), "dist", "preload.js"), // Add preload script
     },
   });
