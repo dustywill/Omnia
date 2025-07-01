@@ -13,9 +13,10 @@ system API:
 ## Plugins
 
 Plugins are React components located in the `plugins/` directory. Each plugin is
-loaded at runtime and uses the helpers from `src/ui/node-module-loader.ts` to
-access the file system via the API endpoints above. This allows browser-based
-plugins to read and write files through the Express server.
+compiled to JavaScript as part of the build process and loaded at runtime from
+`dist/plugins/<plugin-id>/index.js`. The helpers in
+`src/ui/node-module-loader.ts` allow these browser based plugins to read and
+write files through the Express server's API endpoints.
 
 ## Contributing
 
@@ -29,5 +30,5 @@ plugins to read and write files through the Express server.
 
 1. Install dependencies with `npm install`.
 2. Start the app in development mode using `npm run dev`.
-3. Build the project with `npm run build`.
+3. Build the project with `npm run build`. This compiles the server and all plugins to the `dist/` directory.
 4. Run the compiled app using `npm start`. This launches the Express server and automatically opens `http://localhost:3000` in your default browser.

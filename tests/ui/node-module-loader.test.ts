@@ -18,7 +18,7 @@ it("build output does not include module specifier import", () => {
   // Ensure the dist files are up to date
   execSync("npm run build", { stdio: "ignore" });
   const js = readFileSync(
-    join(__dirname, "../../dist/ui/node-module-loader.js"),
+    join(__dirname, "../../dist/src/ui/node-module-loader.js"),
     "utf8",
   );
   expect(js.includes("import { createRequire } from 'module'")).toBe(false);
