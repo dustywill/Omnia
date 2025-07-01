@@ -1,6 +1,4 @@
 import { loadNodeModule } from "./ui/node-module-loader.js";
-const fs = loadNodeModule<typeof import("fs/promises")>("fs/promises");
-const path = loadNodeModule<typeof import("path")>("path");
 import { initRenderer } from "./ui/renderer.js";
 
 export type StartOptions = {
@@ -9,6 +7,9 @@ export type StartOptions = {
 
 export const start = async (opts?: StartOptions): Promise<void> => {
   try {
+  const fs = await loadNodeModule<typeof import("fs/promises")>("fs/promises");
+  const path = await loadNodeModule<typeof import("path")>("path");
+  
   if (typeof document === "undefined") {
     const { JSDOM } = await import("jsdom");
     const dom = new JSDOM("<!doctype html><html><body></body></html>");

@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { loadNodeModule } from '../../src/ui/node-module-loader.js';
-const fs = loadNodeModule<typeof import('fs/promises')>('fs/promises');
-const path = loadNodeModule<typeof import('path')>('path');
 import CodeMirror from '@uiw/react-codemirror';
 import { markdown } from '@codemirror/lang-markdown';
 
@@ -17,7 +15,7 @@ export type AsBuiltDocumenterProps = {
 export const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({
   templates,
   onLoad,
-  saveDir = path.join('templates', 'as-built'),
+  saveDir = 'templates/as-built',
   initialContent,
   dataSources = {},
   configPath,
@@ -35,6 +33,7 @@ export const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({
     const loadConfig = async () => {
       if (!configPath) return;
       try {
+        const fs = await loadNodeModule<typeof import('fs/promises')>('fs/promises');
         const text = await fs.readFile(configPath, 'utf8');
         setConfig(text);
       } catch {
@@ -49,6 +48,8 @@ export const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({
   };
 
   const saveTemplate = async () => {
+    const fs = await loadNodeModule<typeof import('fs/promises')>('fs/promises');
+    const path = await loadNodeModule<typeof import('path')>('path');
     await fs.mkdir(saveDir, { recursive: true });
     const file = path.join(saveDir, template || 'template.md');
     await fs.writeFile(file, content);
@@ -118,6 +119,7 @@ export const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({
             setSources(next);
             setConfig(JSON.stringify(next, null, 2));
             if (configPath) {
+              const fs = await loadNodeModule<typeof import('fs/promises')>('fs/promises');
               await fs.writeFile(configPath, JSON.stringify(next, null, 2));
             }
           }}
@@ -214,6 +216,7 @@ export const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({
             type="button"
             onClick={async () => {
               if (configPath) {
+                const fs = await loadNodeModule<typeof import('fs/promises')>('fs/promises');
                 await fs.writeFile(configPath, config);
               }
             }}

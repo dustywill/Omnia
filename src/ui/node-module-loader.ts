@@ -2,7 +2,7 @@
 // instead of trying to access Node.js modules directly
 
 // Mock the Node.js modules for browser environment
-export const loadNodeModule = <T = unknown>(name: string): T => {
+export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
   console.log(`[loadNodeModule] Attempting to load module: ${name}`);
 
   // Check if we're in an Electron renderer with exposed APIs
@@ -42,7 +42,7 @@ export const loadNodeModule = <T = unknown>(name: string): T => {
       case "path":
         return {
           join: (...paths: string[]) => {
-            return (window as any).electronAPI.join(...paths);
+            return paths.join('/').replace(/\/+/g, '/');
           },
         } as T;
 
@@ -55,9 +55,23 @@ export const loadNodeModule = <T = unknown>(name: string): T => {
   }
 
   // Fallback for Node.js environment (main process or tests)
-  if (typeof require !== "undefined") {
-    console.log(`[loadNodeModule] Using require for ${name}`);
-    return require(name) as T;
+  if (typeof process !== "undefined" && process.versions?.node) {
+    console.log(`[loadNodeModule] Using dynamic import for ${name}`);
+    try {
+      // Use dynamic import for ESM environment
+      if (name === 'path') {
+        const pathModule = await import('path');
+        return pathModule as T;
+      } else if (name === 'fs') {
+        const fsModule = await import('fs');
+        return fsModule as T;
+      } else if (name === 'fs/promises') {
+        const fsPromises = await import('fs/promises');
+        return fsPromises as T;
+      }
+    } catch (err) {
+      console.warn(`[loadNodeModule] Failed to import ${name}:`, err);
+    }
   }
 
   // Last resort - throw an error

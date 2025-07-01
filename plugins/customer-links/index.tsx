@@ -1,7 +1,5 @@
 import React from 'react';
 import { loadNodeModule } from '../../src/ui/node-module-loader.js';
-const fs = loadNodeModule<typeof import('fs/promises')>('fs/promises');
-const path = loadNodeModule<typeof import('path')>('path');
 import { openJsonEditor } from '../../src/ui/json-editor-api.js';
 import { parse as parseJson5 } from 'json5';
 import { z } from 'zod';
@@ -17,6 +15,7 @@ export type CustomerSite = z.infer<typeof CustomerSiteSchema>;
 const CustomerSitesSchema = z.array(CustomerSiteSchema);
 
 export const scanCustomerSites = async (filePath: string): Promise<CustomerSite[]> => {
+  const fs = await loadNodeModule<typeof import('fs/promises')>('fs/promises');
   const text = await fs.readFile(filePath, 'utf8');
   const data = parseJson5(text);
   return CustomerSitesSchema.parse(data);
@@ -35,6 +34,8 @@ export const saveCustomerLinksFiles = async (
   js: string,
   outDir: string,
 ): Promise<void> => {
+  const fs = await loadNodeModule<typeof import('fs/promises')>('fs/promises');
+  const path = await loadNodeModule<typeof import('path')>('path');
   await fs.mkdir(outDir, { recursive: true });
   await fs.writeFile(path.join(outDir, 'index.html'), html);
   await fs.writeFile(path.join(outDir, 'style.css'), css);
@@ -50,6 +51,7 @@ export const openCustomerLocationsEditor = async (
   )) as React.ReactElement<any>;
   return React.cloneElement(element, {
     onChange: async (content: string) => {
+      const fs = await loadNodeModule<typeof import('fs/promises')>('fs/promises');
       await fs.writeFile(filePath, content);
     },
   });

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { loadNodeModule } from '../../src/ui/node-module-loader.js';
-const fs = loadNodeModule<typeof import('fs/promises')>('fs/promises');
 import { FileScanner, type FileNode } from '../../src/ui/components/FileScanner.js';
 
 export type ContextGeneratorProps = {
@@ -21,6 +20,7 @@ export const ContextGenerator: React.FC<ContextGeneratorProps> = ({ tree }) => {
   };
 
   const handleGenerate = async () => {
+    const fs = await loadNodeModule<typeof import('fs/promises')>('fs/promises');
     const total = selected.length;
     let chars = 0;
     let ctx = '';
@@ -68,3 +68,5 @@ export const ContextGenerator: React.FC<ContextGeneratorProps> = ({ tree }) => {
     </div>
   );
 };
+
+export default ContextGenerator;
