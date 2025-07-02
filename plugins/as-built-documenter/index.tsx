@@ -252,3 +252,5 @@ export const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({
     </>
   );
 };
+
+export default AsBuiltDocumenter;

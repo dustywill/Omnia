@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import JSON5 from 'json5';
+import { loadNodeModule } from '../node-module-loader.js';
 import type { ZodType } from 'zod';
 
 
@@ -21,34 +21,47 @@ export const JsonEditor: React.FC<JsonEditorProps> = ({
   const stringify = (obj: Record<string, unknown>): string =>
     JSON.stringify(obj).replace(/:/g, ': ').replace(/,/g, ', ');
 
-  useEffect(() => {
+  const parseJson = async (text: string) => {
     try {
-      const parsed = JSON5.parse(content);
-      if (
-        typeof parsed === 'object' &&
-        parsed !== null &&
-        !Array.isArray(parsed)
-      ) {
-        setEntries(parsed as Record<string, unknown>);
-      } else {
+      const JSON5 = await loadNodeModule<any>('json5');
+      return JSON5.parse(text);
+    } catch {
+      // Fallback to regular JSON
+      return JSON.parse(text);
+    }
+  };
+
+  useEffect(() => {
+    const updateContent = async () => {
+      try {
+        const parsed = await parseJson(content);
+        if (
+          typeof parsed === 'object' &&
+          parsed !== null &&
+          !Array.isArray(parsed)
+        ) {
+          setEntries(parsed as Record<string, unknown>);
+        } else {
+          setEntries({});
+        }
+        if (schema) {
+          const result = schema.safeParse(parsed);
+          setError(result.success ? null : 'Invalid content');
+        } else {
+          setError(null);
+        }
+      } catch {
+        setError('Invalid content');
         setEntries({});
       }
-      if (schema) {
-        const result = schema.safeParse(parsed);
-        setError(result.success ? null : 'Invalid content');
-      } else {
-        setError(null);
-      }
-    } catch {
-      setError('Invalid content');
-      setEntries({});
-    }
-    onChange?.(content);
+      onChange?.(content);
+    };
+    updateContent();
   }, [content, schema, onChange]);
 
-  const addEntry = () => {
+  const addEntry = async () => {
     try {
-      const parsed = JSON5.parse(content) as Record<string, unknown>;
+      const parsed = await parseJson(content) as Record<string, unknown>;
       parsed.new = '';
       const newContent = stringify(parsed);
       setContent(newContent);
@@ -57,9 +70,9 @@ export const JsonEditor: React.FC<JsonEditorProps> = ({
     }
   };
 
-  const deleteEntry = (key: string) => {
+  const deleteEntry = async (key: string) => {
     try {
-      const parsed = JSON5.parse(content) as Record<string, unknown>;
+      const parsed = await parseJson(content) as Record<string, unknown>;
       delete parsed[key];
       const newContent = stringify(parsed);
       setContent(newContent);
