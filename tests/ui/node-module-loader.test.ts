@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+import { jest } from "@jest/globals";
 import { loadNodeModule } from "../../src/ui/node-module-loader.js";
 import { execSync } from "child_process";
 import { readFileSync } from "fs";
@@ -26,11 +26,9 @@ it("build output does not include module specifier import", () => {
   expect(js.includes("import { createRequire } from 'module'")).toBe(false);
 });
 
-it("logs environment details when require is unavailable", async () => {
+it("logs environment details", async () => {
   jest.resetModules();
   const logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
-  const originalWindow = (globalThis as any).window;
-  (globalThis as any).window = {};
   const { loadNodeModule } = await import("../../src/ui/node-module-loader.js");
   await loadNodeModule("path");
   (globalThis as any).window = originalWindow;
@@ -42,7 +40,7 @@ it("logs environment details when require is unavailable", async () => {
 
 it("wraps readdir results from electron", async () => {
   const originalWindow = (global as any).window;
-  
+
   // Set up window as a global for the test environment
   const mockWindow = {
     electronAPI: {
@@ -52,16 +50,16 @@ it("wraps readdir results from electron", async () => {
       ],
     },
   };
-  
-  // Set window in global scope 
+
+  // Set window in global scope
   (global as any).window = mockWindow;
   (globalThis as any).window = mockWindow;
-  
+
   jest.resetModules();
-  
-  // Set window globally in the test environment 
+
+  // Set window globally in the test environment
   (global as any).window = mockWindow;
-  
+
   const { loadNodeModule } = await import("../../src/ui/node-module-loader.js");
   const fs = await loadNodeModule<typeof import("fs/promises")>("fs/promises");
   const entries = await fs.readdir("/any-dir", { withFileTypes: true });
@@ -69,7 +67,7 @@ it("wraps readdir results from electron", async () => {
   expect(entries[0].isDirectory()).toBe(true);
   expect(entries[1].name).toBe("b");
   expect(entries[1].isDirectory()).toBe(false);
-  
+
   // Restore environment
   (global as any).window = originalWindow;
   (globalThis as any).window = originalWindow;
