@@ -15,7 +15,21 @@ let electron:
 
 const getElectron = async () => {
   if (!electron) {
-    electron = await import("electron");
+    try {
+      // Try CommonJS require first (for Jest/test environments)
+      if (typeof require !== "undefined") {
+        electron = require("electron");
+      } else {
+        // Fall back to dynamic import for ESM
+        electron = await import("electron");
+      }
+    } catch (err) {
+      console.warn(`Failed to load electron:`, err);
+      if (process.env.NODE_ENV === "test") {
+        return undefined;
+      }
+      throw err;
+    }
   }
   return electron;
 };
@@ -120,7 +134,11 @@ export const createWindow = async (
   Window?: typeof ElectronBrowserWindow,
   logger?: Logger,
 ): Promise<ElectronBrowserWindow> => {
-  const { BrowserWindow, ipcMain } = await getElectron();
+  const electronModule = await getElectron();
+  if (!electronModule) {
+    throw new Error('Electron module not available');
+  }
+  const { BrowserWindow, ipcMain } = electronModule;
   const Win = Window ?? BrowserWindow;
 
   logger?.info("Creating browser window");
@@ -156,12 +174,20 @@ export const startElectron = (
   logger?: Logger,
 ): void => {
   const start = async () => {
-    const { app } = await getElectron();
+    const electronModule = await getElectron();
+    if (!electronModule) {
+      throw new Error('Electron module not available');
+    }
+    const { app } = electronModule;
     logger?.info("Electron app ready");
     await createWindow(Window, logger);
 
     app.on("activate", async () => {
-      const { BrowserWindow } = await getElectron();
+      const electronModule = await getElectron();
+      if (!electronModule) {
+        throw new Error('Electron module not available');
+      }
+      const { BrowserWindow } = electronModule;
       const Win = Window ?? BrowserWindow;
       if (Win.getAllWindows().length === 0) {
         await createWindow(Window, logger);
@@ -169,7 +195,11 @@ export const startElectron = (
     });
   };
 
-  getElectron().then(({ app }) => {
+  getElectron().then((electronModule) => {
+    if (!electronModule) {
+      throw new Error('Electron module not available');
+    }
+    const { app } = electronModule;
     logger?.info("Starting Electron");
     app.whenReady().then(start);
 
@@ -179,6 +209,8 @@ export const startElectron = (
         app.quit();
       }
     });
+  }).catch((err) => {
+    logger?.error(`Failed to start Electron: ${err}`);
   });
 };
 

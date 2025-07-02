@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { parse as parseJson5 } from 'json5';
+import JSON5 from 'json5';
 import type { ZodType } from 'zod';
 
 
@@ -23,7 +23,7 @@ export const JsonEditor: React.FC<JsonEditorProps> = ({
 
   useEffect(() => {
     try {
-      const parsed = parseJson5(content);
+      const parsed = JSON5.parse(content);
       if (
         typeof parsed === 'object' &&
         parsed !== null &&
@@ -48,7 +48,7 @@ export const JsonEditor: React.FC<JsonEditorProps> = ({
 
   const addEntry = () => {
     try {
-      const parsed = parseJson5(content) as Record<string, unknown>;
+      const parsed = JSON5.parse(content) as Record<string, unknown>;
       parsed.new = '';
       const newContent = stringify(parsed);
       setContent(newContent);
@@ -59,7 +59,7 @@ export const JsonEditor: React.FC<JsonEditorProps> = ({
 
   const deleteEntry = (key: string) => {
     try {
-      const parsed = parseJson5(content) as Record<string, unknown>;
+      const parsed = JSON5.parse(content) as Record<string, unknown>;
       delete parsed[key];
       const newContent = stringify(parsed);
       setContent(newContent);

@@ -17,6 +17,7 @@ jest.mock("../../src/core/logger.js", () => ({ createLogger }));
 
 describe("electron main", () => {
   it("loads index.html in BrowserWindow", async () => {
+    jest.resetModules();
     const loadFile = jest.fn();
     const MockWindow = jest.fn(() => ({ loadFile }));
     const { createWindow } = await import("../../src/electron-main.js");
@@ -36,6 +37,7 @@ describe("electron main", () => {
   });
 
   it("logs window lifecycle events", async () => {
+    jest.resetModules();
     const loadFile = jest.fn();
     const MockWindow = jest.fn(() => ({ loadFile }));
     const logger = { info: jest.fn(), warn: jest.fn(), error: jest.fn() };
@@ -48,16 +50,47 @@ describe("electron main", () => {
   });
 
   it("starts Electron when imported outside test env", async () => {
-    jest.resetModules();
+    const originalEnv = process.env.NODE_ENV;
+    
+    // Clear any previous calls to the mocks
+    createLogger.mockClear();
+    whenReady.mockClear();
+    
+    // Set environment to production BEFORE resetting modules
     process.env.NODE_ENV = "production";
 
-    await import("../../src/electron-main.js");
-    await Promise.resolve();
-    await Promise.resolve();
+    // Reset modules to ensure fresh import with new NODE_ENV
+    jest.resetModules();
+    
+    // Re-setup the mocks after resetModules using the SAME mock functions
+    jest.doMock("electron", () => ({
+      BrowserWindow,
+      app: { whenReady, on, quit },
+    }));
+    
+    jest.doMock("../../src/core/logger.js", () => ({ createLogger }));
+    
+    // Also mock the CommonJS require version since getElectron tries require first
+    const mockRequire = jest.fn().mockReturnValue({
+      BrowserWindow,
+      app: { whenReady, on, quit },
+    });
+    (global as any).require = jest.fn((moduleName: string) => {
+      if (moduleName === 'electron') {
+        return { BrowserWindow, app: { whenReady, on, quit } };
+      }
+      return mockRequire(moduleName);
+    });
 
-    expect(createLogger).toHaveBeenCalled();
+    // Import the module - this should trigger the top-level code that calls createLogger and startElectron
+    const electronMainModule = await import("../../src/electron-main.js");
+    
+    // Give time for async operations to complete (getElectron is async)
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    expect(createLogger).toHaveBeenCalledWith("electron-main", expect.stringContaining("app.log"));
     expect(whenReady).toHaveBeenCalled();
 
-    process.env.NODE_ENV = "test";
+    process.env.NODE_ENV = originalEnv;
   });
 });

@@ -5,11 +5,14 @@ import {
   watchConfig,
 } from '../../src/core/config.js';
 import { createEventBus } from '../../src/core/event-bus.js';
-import { parse as parseJson5 } from 'json5';
+import JSON5 from 'json5';
 import fs from 'fs/promises';
 import path from 'path';
-import { expect, describe, it, beforeEach, afterEach } from '@jest/globals';
+import { fileURLToPath } from 'url';
+import { jest, expect, describe, it, beforeEach, afterEach } from '@jest/globals';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const tempConfigPath = path.join(__dirname, 'app-config.json5');
 
 beforeEach(async () => {
@@ -37,7 +40,7 @@ describe('config manager', () => {
     const defaults = { alpha: 1 };
     const config = await loadConfig(tempConfigPath, defaults);
     const text = await fs.readFile(tempConfigPath, 'utf8');
-    expect(parseJson5(text)).toEqual(defaults);
+    expect(JSON5.parse(text)).toEqual(defaults);
     expect(config).toEqual(defaults);
   });
 
@@ -53,8 +56,16 @@ describe('config manager', () => {
     const handler = jest.fn();
     bus.subscribe('configChanged', handler);
     const stop = watchConfig(tempConfigPath, bus);
+    
     await writeConfig(tempConfigPath, { foo: 'updated' });
-    await new Promise((r) => setTimeout(r, 150));
+    
+    // Wait for file watcher to trigger with retries
+    let attempts = 0;
+    while (handler.mock.calls.length === 0 && attempts < 10) {
+      await new Promise((r) => setTimeout(r, 200));
+      attempts++;
+    }
+    
     stop();
     expect(handler).toHaveBeenCalledWith({ foo: 'updated' });
   });

@@ -1,11 +1,16 @@
+import { jest } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { z } from 'zod';
 import fs from 'fs/promises';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 import { JsonEditor } from '../../../src/ui/components/JsonEditor.js';
 import { openJsonEditor } from '../../../src/ui/json-editor-api.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 describe('JsonEditor component', () => {
   it('opens and edits JSON files without schema', async () => {

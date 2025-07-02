@@ -1,4 +1,4 @@
-import { crawlDirectory, type CrawlNode } from './crawler.js';
+import { crawlDirectory, type CrawlNode } from './crawler.mjs';
 import type { FileNode } from '../ui/components/FileScanner.js';
 
 const toFileNode = (node: CrawlNode): FileNode => ({

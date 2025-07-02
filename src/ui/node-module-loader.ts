@@ -1,5 +1,6 @@
 // For Electron renderer with context isolation, we need to use the exposed APIs
 // instead of trying to access Node.js modules directly
+import React from 'react';
 
 // Mock the Node.js modules for browser environment
 export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
@@ -41,10 +42,42 @@ export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
 
       case "path":
         return {
-          join: (...paths: string[]) => {
-            return paths.join('/').replace(/\/+/g, '/');
+          join: async (...paths: string[]) => {
+            return (window as any).electronAPI.join(...paths);
           },
         } as T;
+
+      case "fs":
+        return {
+          readFileSync: (_filePath: string, _options?: any) => {
+            // For Electron renderer, we'll need to use the async API via IPC
+            throw new Error("Use fs/promises instead of fs in Electron renderer");
+          },
+          writeFileSync: (_filePath: string, _data: string) => {
+            throw new Error("Use fs/promises instead of fs in Electron renderer");
+          },
+        } as T;
+
+      case "@uiw/react-codemirror":
+        console.log(`[loadNodeModule] Loading CodeMirror...`);
+        // Return a simple textarea as fallback for now
+        return React.forwardRef((props: any, ref) => {
+          return React.createElement('textarea', {
+            ...props,
+            ref,
+            style: { width: '100%', height: '200px', fontFamily: 'monospace' }
+          });
+        }) as any;
+
+      case "@codemirror/lang-markdown":
+        console.log(`[loadNodeModule] Loading markdown lang (mock)...`);
+        // Return empty function as fallback
+        return (() => []) as T;
+
+      case "json5":
+        console.log(`[loadNodeModule] Loading JSON5 (fallback to JSON)...`);
+        // Use regular JSON as fallback
+        return JSON as any;
 
       default:
         console.warn(
@@ -56,6 +89,17 @@ export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
 
   // Fallback for Node.js environment (main process or tests)
   if (typeof process !== "undefined" && process.versions?.node) {
+    // Try CommonJS require first (for Jest/test environments)
+    if (typeof require !== "undefined") {
+      console.log(`[loadNodeModule] Using require for ${name}`);
+      try {
+        return require(name) as T;
+      } catch (err) {
+        console.warn(`[loadNodeModule] Failed to require ${name}:`, err);
+      }
+    }
+    
+    // Fall back to dynamic import for ESM environment
     console.log(`[loadNodeModule] Using dynamic import for ${name}`);
     try {
       // Use dynamic import for ESM environment

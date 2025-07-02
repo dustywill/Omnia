@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "test": "jest",
+    "test": "node scripts/test-with-log.js",
+    "test:only": "node --experimental-vm-modules ./node_modules/.bin/jest",
     "test:e2e": "playwright test",
     "clean": "node -e \"import('fs').then(fs=>fs.rmSync('dist',{recursive:true,force:true}))\"",
     "build": "npm run clean && tsc -p tsconfig.build.json && tsc -p tsconfig.plugins.json && node scripts/fix-plugin-imports.js && node -e \"import('fs').then(fs=>fs.copyFileSync('src/preload.js','dist/preload.js'))\"",

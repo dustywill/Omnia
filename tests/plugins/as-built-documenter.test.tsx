@@ -1,8 +1,18 @@
+import { jest } from '@jest/globals';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import fs from 'fs/promises';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { AsBuiltDocumenter } from '../../plugins/as-built-documenter/index.js';
+
+// Mock the loadNodeModule function at the top level
+jest.mock('../../src/ui/node-module-loader.js', () => ({
+  loadNodeModule: jest.fn(),
+}));
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 describe('as-built documenter plugin', () => {
   it('lists Markdown templates in dropdown and allows clearing', async () => {
@@ -182,8 +192,18 @@ it('pages through sample data with Prev/Next buttons', async () => {
 });
 
 it('saves configuration using Save Config button', async () => {
-  const writeFile = jest.spyOn(fs, 'writeFile').mockResolvedValue();
-  jest.spyOn(fs, 'readFile').mockResolvedValue('');
+  const writeFile = jest.fn().mockResolvedValue(undefined);
+  const readFile = jest.fn().mockResolvedValue('');
+  const mockFs = { writeFile, readFile };
+  
+  // Use the mocked function from the top-level mock
+  const { loadNodeModule } = await import('../../src/ui/node-module-loader.js');
+  const mockLoadNodeModule = loadNodeModule as jest.MockedFunction<typeof loadNodeModule>;
+  
+  mockLoadNodeModule.mockImplementation(async (moduleName) => {
+    if (moduleName === 'fs/promises') return mockFs as any;
+    return {} as any;
+  });
 
   render(
     <AsBuiltDocumenter templates={[]} configPath="/tmp/config.json" />,
@@ -195,11 +215,25 @@ it('saves configuration using Save Config button', async () => {
   await userEvent.click(screen.getByRole('button', { name: /save config/i }));
 
   expect(writeFile).toHaveBeenCalledWith('/tmp/config.json', '{"foo":1}');
+  
+  // Reset the mock
+  mockLoadNodeModule.mockReset();
 });
 
 it('adds data source via prompt and saves immediately', async () => {
-  jest.spyOn(fs, 'readFile').mockResolvedValue('{}');
-  const writeFile = jest.spyOn(fs, 'writeFile').mockResolvedValue();
+  const writeFile = jest.fn().mockResolvedValue(undefined);
+  const readFile = jest.fn().mockResolvedValue('{}');
+  const mockFs = { writeFile, readFile };
+  
+  // Use the mocked function from the top-level mock
+  const { loadNodeModule } = await import('../../src/ui/node-module-loader.js');
+  const mockLoadNodeModule = loadNodeModule as jest.MockedFunction<typeof loadNodeModule>;
+  
+  mockLoadNodeModule.mockImplementation(async (moduleName) => {
+    if (moduleName === 'fs/promises') return mockFs as any;
+    return {} as any;
+  });
+  
   const prompt = jest
     .spyOn(window, 'prompt')
     .mockImplementationOnce(() => 'foo')
@@ -224,6 +258,9 @@ it('adds data source via prompt and saves immediately', async () => {
   );
   const select = screen.getByRole('combobox', { name: /data source/i }) as HTMLSelectElement;
   expect(Array.from(select.options).map((o) => o.value)).toContain('foo');
+  
+  // Reset the mock
+  mockLoadNodeModule.mockReset();
 });
 
 });

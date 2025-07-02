@@ -11,7 +11,7 @@ jest.mock('electron', () => ({
 test('sanitizes non-serializable arguments before invoking', async () => {
   jest.resetModules();
   const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
-  // @ts-ignore
+  // Import the preload module to trigger electronAPI setup
   await import('../../src/preload.js');
   const electronApi = (
     exposeInMainWorld.mock.calls.find((c) => c[0] === 'electronAPI')?.[1]

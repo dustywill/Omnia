@@ -7,8 +7,11 @@ export type StartOptions = {
 
 export const start = async (opts?: StartOptions): Promise<void> => {
   try {
+  console.log('[start] Loading fs module...');
   const fs = await loadNodeModule<typeof import("fs/promises")>("fs/promises");
+  console.log('[start] Loading path module...');
   const path = await loadNodeModule<typeof import("path")>("path");
+  console.log('[start] Modules loaded successfully');
   
   if (typeof document === "undefined") {
     const { JSDOM } = await import("jsdom");
@@ -37,14 +40,26 @@ export const start = async (opts?: StartOptions): Promise<void> => {
   const container = document.createElement("div");
   document.body.appendChild(container);
 
+  console.log('[start] Getting current working directory...');
   const cwd =
     typeof process !== "undefined"
       ? process.cwd()
       : typeof window !== "undefined" && (window as any).electronAPI?.getCwd
       ? await (window as any).electronAPI.getCwd()
       : "/";
-  const pluginsPath = await path.join(cwd, "plugins");
-  const entries = await fs.readdir(pluginsPath, { withFileTypes: true });
+  console.log('[start] Current working directory:', cwd);
+  
+  console.log('[start] Building plugins source path...');
+  const sourcePluginsPath = await path.join(cwd, "plugins");
+  console.log('[start] Source plugins path:', sourcePluginsPath);
+  
+  console.log('[start] Building plugins dist path...');
+  const distPluginsPath = await path.join(cwd, "dist", "plugins");
+  console.log('[start] Dist plugins path:', distPluginsPath);
+  
+  console.log('[start] Reading source plugins directory for discovery...');
+  const entries = await fs.readdir(sourcePluginsPath, { withFileTypes: true });
+  console.log('[start] Found entries:', entries.length);
   const tree: never[] = [];
   const plugins = entries
     .filter((e) => e.isDirectory())
@@ -59,8 +74,12 @@ export const start = async (opts?: StartOptions): Promise<void> => {
       }
       return base;
     });
+  
+  console.log('[start] Found plugins:', plugins.map(p => p.id));
+  console.log('[start] Initializing renderer...');
   const renderer = opts?.init ?? initRenderer;
-  renderer({ container, pluginsPath, plugins });
+  renderer({ container, pluginsPath: distPluginsPath, plugins });
+  console.log('[start] Renderer initialized successfully');
   } catch (err) {
     console.error('[start] failed', { options: opts }, err);
     throw err;

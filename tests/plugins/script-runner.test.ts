@@ -1,12 +1,16 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { describe, it, beforeEach, afterEach, expect } from '@jest/globals';
+import { fileURLToPath } from 'url';
+import { jest, describe, it, beforeEach, afterEach, expect } from '@jest/globals';
 import child_process from 'child_process';
 import {
   discoverScripts,
   filterScripts,
   runScript,
 } from '../../plugins/script-runner/index.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 describe('script runner plugin', () => {
   const tmpDir = path.join(__dirname, 'scripts');
@@ -37,18 +41,19 @@ describe('script runner plugin', () => {
   });
 
   it('runs scripts with default parameters and shows status', async () => {
+    const handlers: Record<string, (code: number) => void> = {};
+    
+    const mockChild = {
+      on: (event: string, cb: (code: number) => void) => {
+        handlers[event] = cb;
+        return mockChild; // Return mockChild for chaining
+      },
+      kill: jest.fn(),
+    } as any;
+
     const spawnMock = jest
       .spyOn(child_process, 'spawn')
-      .mockImplementation((): any => {
-        const handlers: Record<string, (code: number) => void> = {};
-        return {
-          on: (event: string, cb: (code: number) => void) => {
-            handlers[event] = cb;
-          },
-          kill: jest.fn(),
-          __handlers: handlers,
-        } as any;
-      });
+      .mockReturnValue(mockChild);
 
     const script = {
       id: 'build',
@@ -60,8 +65,12 @@ describe('script runner plugin', () => {
     const statuses: string[] = [];
     const promise = runScript(script, ['-Foo', 'Bar'], (s) => statuses.push(s));
 
-    const child = spawnMock.mock.results[0].value;
-    child.__handlers.exit(0);
+    // runScript should call child.on synchronously, no need to wait
+    expect(handlers.exit).toBeDefined();
+    expect(typeof handlers.exit).toBe('function');
+    
+    // Trigger exit with code 0
+    handlers.exit(0);
     await promise;
 
     expect(spawnMock).toHaveBeenCalledWith('pwsh', [

@@ -1,5 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { describe, it, beforeEach, afterEach, expect } from '@jest/globals';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -9,6 +10,9 @@ import {
   generateCustomerLinksHtml,
   CustomerLinks,
 } from '../../plugins/customer-links/index.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 describe('customer links plugin', () => {
   const dir = path.join(__dirname, 'data');

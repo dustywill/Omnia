@@ -1,9 +1,14 @@
+import { jest } from '@jest/globals';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import fs from 'fs/promises';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import type { FileNode } from '../../src/ui/components/FileScanner.js';
 import { ContextGenerator } from '../../plugins/context-generator/index.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 describe('context generator plugin', () => {
   it('uses FileScanner to choose files', async () => {

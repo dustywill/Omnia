@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import { promptCommitMessage } from '../../../src/ui/components/MercurialCommit.js';
 
 describe('promptCommitMessage', () => {

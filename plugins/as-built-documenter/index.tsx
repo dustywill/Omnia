@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { loadNodeModule } from '../../src/ui/node-module-loader.js';
-import CodeMirror from '@uiw/react-codemirror';
-import { markdown } from '@codemirror/lang-markdown';
 
 export type AsBuiltDocumenterProps = {
   templates: string[];
@@ -28,6 +26,7 @@ export const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({
   const [sampleIndex, setSampleIndex] = useState(0);
   const [copied, setCopied] = useState(false);
   const [config, setConfig] = useState('');
+  const [CodeMirrorComponent, setCodeMirrorComponent] = useState<any>(null);
 
   useEffect(() => {
     const loadConfig = async () => {
@@ -42,6 +41,27 @@ export const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({
     };
     loadConfig();
   }, [configPath]);
+
+  useEffect(() => {
+    const loadCodeMirror = async () => {
+      try {
+        const CodeMirror = await loadNodeModule('@uiw/react-codemirror');
+        setCodeMirrorComponent(() => CodeMirror);
+      } catch (err) {
+        console.warn('CodeMirror not available, using textarea fallback');
+        // Set a fallback textarea component
+        setCodeMirrorComponent(() => (props: any) => (
+          <textarea
+            value={props.value}
+            onChange={(e) => props.onChange?.(e.target.value)}
+            style={{ width: '100%', height: props.height || '200px', fontFamily: 'monospace' }}
+            aria-label={props['aria-label']}
+          />
+        ));
+      }
+    };
+    loadCodeMirror();
+  }, []);
 
   const insertEach = () => {
     setContent((c: string) => `${c}{{#each items}}\n{{/each}}`);
@@ -198,13 +218,16 @@ export const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({
       )}
       {sample && !Array.isArray(sample) && <pre>{JSON.stringify(sample, null, 2)}</pre>}
       {copied && <div>Copied to clipboard</div>}
-      <CodeMirror
-        aria-label="Template Editor"
-        value={content}
-        height="200px"
-        extensions={[markdown()]}
-        onChange={(v) => setContent(v)}
-      />
+      {CodeMirrorComponent ? (
+        <CodeMirrorComponent
+          aria-label="Template Editor"
+          value={content}
+          height="200px"
+          onChange={(v: string) => setContent(v)}
+        />
+      ) : (
+        <div>Loading editor...</div>
+      )}
       {configPath && (
         <>
           <textarea

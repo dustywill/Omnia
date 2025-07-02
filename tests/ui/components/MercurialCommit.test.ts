@@ -1,15 +1,17 @@
-import child_process from 'child_process';
-import { commitFile } from '../../../src/ui/components/MercurialCommit.js';
+import { jest } from '@jest/globals';
 
-jest.mock('child_process', () => ({
-  exec: jest.fn((_cmd: string, cb: (e: unknown, stdout: string, stderr: string) => void) => cb(null, '', '')),
+const mockExec = jest.fn((_cmd: string, cb: (e: unknown, stdout: string, stderr: string) => void) => cb(null, '', ''));
+
+jest.unstable_mockModule('child_process', () => ({
+  exec: mockExec,
 }));
+
+const { commitFile } = await import('../../../src/ui/components/MercurialCommit.js');
 
 describe('MercurialCommit', () => {
   it('commits changes via hg', async () => {
-    const execMock = child_process.exec as unknown as jest.Mock;
     await commitFile('test.json', 'update');
-    expect(execMock).toHaveBeenCalledWith(
+    expect(mockExec).toHaveBeenCalledWith(
       'hg commit -m "update" test.json',
       expect.any(Function),
     );

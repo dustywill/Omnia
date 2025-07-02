@@ -1,5 +1,5 @@
 import fs from 'fs/promises';
-import { parse as parseJson5 } from 'json5';
+import JSON5 from 'json5';
 import path from 'path';
 import { pathToFileURL } from 'url';
 import { type AppConfig, readConfig, writeConfig } from './config.js';
@@ -31,7 +31,7 @@ export const createPluginManager = (opts: PluginManagerOptions) => {
 
   const readManifest = async (file: string): Promise<PluginManifest> => {
     const text = await fs.readFile(file, 'utf8');
-    return parseJson5(text) as PluginManifest;
+    return JSON5.parse(text) as PluginManifest;
   };
 
   const loadPlugins = async () => {

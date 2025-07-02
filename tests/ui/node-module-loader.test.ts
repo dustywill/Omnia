@@ -1,7 +1,12 @@
+import { jest } from '@jest/globals';
 import { loadNodeModule } from "../../src/ui/node-module-loader.js";
 import { execSync } from "child_process";
 import { readFileSync } from "fs";
-import { join } from "path";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 it("falls back to Node require when window.require is absent", async () => {
   const originalWindow = (globalThis as any).window;
@@ -36,9 +41,10 @@ it("logs environment details when require is unavailable", async () => {
 });
 
 it("wraps readdir results from electron", async () => {
-  jest.resetModules();
   const originalWindow = (global as any).window;
-  (global as any).window = {
+  
+  // Set up window as a global for the test environment
+  const mockWindow = {
     electronAPI: {
       readdir: async (_dir: string, _opts?: any) => [
         { name: "a", isDirectory: true },
@@ -46,12 +52,25 @@ it("wraps readdir results from electron", async () => {
       ],
     },
   };
+  
+  // Set window in global scope 
+  (global as any).window = mockWindow;
+  (globalThis as any).window = mockWindow;
+  
+  jest.resetModules();
+  
+  // Set window globally in the test environment 
+  (global as any).window = mockWindow;
+  
   const { loadNodeModule } = await import("../../src/ui/node-module-loader.js");
   const fs = await loadNodeModule<typeof import("fs/promises")>("fs/promises");
-  const entries = await fs.readdir("/tmp", { withFileTypes: true });
+  const entries = await fs.readdir("/any-dir", { withFileTypes: true });
   expect(entries[0].name).toBe("a");
   expect(entries[0].isDirectory()).toBe(true);
   expect(entries[1].name).toBe("b");
   expect(entries[1].isDirectory()).toBe(false);
+  
+  // Restore environment
   (global as any).window = originalWindow;
+  (globalThis as any).window = originalWindow;
 });

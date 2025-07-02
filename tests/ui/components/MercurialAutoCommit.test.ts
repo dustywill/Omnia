@@ -1,16 +1,18 @@
-import child_process from 'child_process';
-import { createCommitOnSave } from '../../../src/ui/components/MercurialCommit.js';
+import { jest } from '@jest/globals';
 
-jest.mock('child_process', () => ({
-  exec: jest.fn((_cmd: string, cb: (e: unknown, stdout: string, stderr: string) => void) => cb(null, '', '')),
+const mockExec = jest.fn((_cmd: string, cb: (e: unknown, stdout: string, stderr: string) => void) => cb(null, '', ''));
+
+jest.unstable_mockModule('child_process', () => ({
+  exec: mockExec,
 }));
+
+const { createCommitOnSave } = await import('../../../src/ui/components/MercurialCommit.js');
 
 describe('createCommitOnSave', () => {
   it('creates a commit whenever a file is saved', async () => {
-    const execMock = child_process.exec as unknown as jest.Mock;
     const onSave = createCommitOnSave('path/to/file');
     await onSave('msg');
-    expect(execMock).toHaveBeenCalledWith(
+    expect(mockExec).toHaveBeenCalledWith(
       'hg commit -m "msg" path/to/file',
       expect.any(Function),
     );

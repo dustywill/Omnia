@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run dev:*)",
+      "Bash(mv *)",
+      "Bash(npm test:*)",
+      "Bash(nopx jest*)",
+      "Bash(npm run test:*)",
+      "Bash(git config:*)",
+      "Bash(git commit:*)",
+      "Bash(timeout *",
+      "Bash(npm run build:*)",
+      "Bash(rg*)",
+      "Bash(rg:*)",
+      "Bash(mv:*)",
+      "Bash(timeout 30 npx jest tests/root/csp-font.test.ts --no-coverage --detectOpenHandles --forceExit)",
+      "Bash(timeout 30 npm test:*)",
+      "Bash(npm run electron:*)",
+      "Bash(pkill:*)",
+      "Bash(rm:*)",
+      "Bash(npx jest:*)",
+      "Bash(npm run clean:*)",
+      "Bash(npx electron:*)"
+    ],
+    "deny": []
+  }
+}
