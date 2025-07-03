@@ -4,7 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Omnia is an evolution of the ttCommander application, built as a plugin-based system with both web and Electron environments. The application uses a React-based UI with TypeScript and supports dynamic plugin loading.
+Omnia is an evolution of the ttCommander application, built as a modern plugin-based system with both web and Electron environments. The application uses a React-based UI with TypeScript and supports dynamic plugin loading with a comprehensive hybrid configuration management system.
+
+### Key Architecture Components
+
+- **Settings Management**: Hybrid configuration system with Zod validation (`src/core/settings-manager.ts`)
+- **Plugin System**: Three-tier plugin architecture (Simple, Configured, Advanced)
+- **Configuration System**: Type-safe validation using Zod schemas (`src/lib/schemas/`)
+- **Permission System**: Manifest-based plugin permissions for security
+- **Service Registry**: Plugin-to-plugin communication through main application
+- **UI System**: Hybrid Tailwind CSS + CSS Modules styling (planned)
 
 ## Development Commands
 
@@ -18,9 +27,15 @@ Omnia is an evolution of the ttCommander application, built as a plugin-based sy
 - `npm test` - Run Jest unit tests (excludes e2e tests)
 - `npm test:e2e` - Run Playwright end-to-end tests
 - Run individual tests: `npx jest path/to/test.test.ts`
+- Settings integration test: `node scripts/test-settings-manager.mjs`
 
 ### Utilities
 - `npm run clean` - Remove dist directory
+
+### Documentation
+- [Plugin Developer Guide](./docs/PLUGIN_DEVELOPER_GUIDE.md) - Comprehensive plugin development guide
+- [Settings API Reference](./docs/SETTINGS_API.md) - Configuration system documentation
+- [Implementation Plan](./docs/IMPLEMENTATION_PLAN.md) - Development roadmap and priorities
 
 ## Architecture Overview
 
@@ -37,10 +52,13 @@ The application follows a plugin-based architecture with these key components:
 - Located in `src/core/event-bus.ts`
 - Supports subscribe/unsubscribe/publish pattern with typed payloads
 
-**Configuration**: JSON5-based configuration system
-- Main config at `config/app-config.json5`
-- Per-plugin configuration support with defaults from manifests
+**Settings Management**: Hybrid configuration system with Zod validation
+- `config/app.json5` - Main application settings
+- `config/plugins.json5` - Plugin registry and state
+- `config/plugins/*.json5` - Individual plugin configurations
+- Type-safe schemas with runtime validation
 - File watching for live configuration updates
+- Permission-based security system
 
 ### Application Structure
 - **Entry Point**: `src/index.ts` - handles environment setup (JSDOM for Node.js, native DOM for browser/Electron)
@@ -51,6 +69,8 @@ The application follows a plugin-based architecture with these key components:
 ### Key Files
 - `src/index.ts` - Main application entry and startup logic
 - `src/core/plugin-manager.ts` - Plugin discovery, loading, and lifecycle management  
+- `src/core/settings-manager.ts` - Hybrid configuration system with Zod validation
+- `src/lib/schemas/` - Type-safe Zod schemas for configuration validation
 - `src/ui/renderer.tsx` - React application initialization and plugin UI coordination
 - `src/ui/plugin-ui-loader.ts` - Dynamic loading of plugin React components
 
@@ -59,9 +79,11 @@ The application follows a plugin-based architecture with these key components:
 **Test-Driven Development**: All changes require tests. Write failing tests first, then implement code to pass them.
 
 **Plugin Development**: 
-- Plugins export React components or functions from their main file
+- Three-tier architecture: Simple (React component), Configured (with schema), Advanced (full lifecycle)
 - Use TypeScript with JSX for plugin UIs
-- Plugin configurations merge with defaults from manifests
+- Plugin configurations use Zod schemas for type safety and validation
+- Manifest-based permission system for security
+- Service registry for plugin-to-plugin communication
 
 **Environment Compatibility**: Code runs in both Node.js (with JSDOM) and browser/Electron environments. The startup code in `src/index.ts` handles environment detection and setup.
 
