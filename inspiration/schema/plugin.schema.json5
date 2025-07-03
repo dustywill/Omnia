@@ -1,0 +1,65 @@
+// config/plugin.schema.json5
+{
+  $schema: "http://json-schema.org/draft-07/schema#",
+  title: "ttCommander Plugin Manifest Schema",
+  description: "Schema for ttCommander plugin.json5 files",
+  type: "object",
+  properties: {
+    id: {
+      type: "string",
+      description: "Unique identifier for the plugin (e.g., com.example.myplugin).",
+      pattern: "^[a-zA-Z0-9_.-]+$", // Basic pattern for an ID
+    },
+    name: {
+      type: "string",
+      description: "Human-readable name of the plugin.",
+      minLength: 1,
+    },
+    version: {
+      type: "string",
+      description: "Semantic version of the plugin (e.g., 1.0.0).",
+      pattern: "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$", // SemVer regex
+    },
+    description: {
+      type: "string",
+      description: "A brief description of what the plugin does.",
+    },
+    author: {
+      type: "string",
+      description: "Author of the plugin (e.g., Name <email@example.com>).",
+    },
+    main: {
+      type: "string",
+      description: "The main JavaScript entry point file for the plugin, relative to the plugin root (e.g., index.js).",
+      pattern: "^[^/\\\\].*\\.js$", // Must be a .js file, not starting with / or \
+    },
+    engine: {
+      type: "object",
+      description: "Specifies compatibility with ttCommander and Node.js.",
+      properties: {
+        ttCommanderVersion: {
+          type: "string",
+          description: "Compatible ttCommander version range (e.g., >=0.1.0). Uses node-semver format.",
+        },
+        nodeVersion: {
+          type: "string",
+          description: "Compatible Node.js version range (e.g., >=18.0.0). Uses node-semver format.",
+        },
+      },
+      required: ["ttCommanderVersion"], // ttCommander version is mandatory
+    },
+    // Placeholders for future expansion
+    permissions: {
+      type: "array",
+      items: { type: "string" },
+      description: 'Array of permissions required by the plugin (e.g., "executeScript").',
+      default: [],
+    },
+    uiContributions: {
+      type: "object",
+      description: "Defines how this plugin contributes to the UI (e.g., menu items, views).",
+      default: {},
+    },
+  },
+  required: ["id", "name", "version", "description", "main", "engine"],
+}

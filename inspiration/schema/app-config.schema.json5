@@ -1,0 +1,104 @@
+{
+  $schema: "http://json-schema.org/draft-07/schema#",
+  title: "ttCommander Application Configuration",
+  description: "Schema for ttCommander configuration file (app-config.json5)",
+  type: "object",
+  properties: {
+    appSettings: {
+      type: "object",
+      title: "Application Settings",
+      properties: {
+        version: {
+          type: "string",
+          title: "Application Version",
+          description: "Current version of the application (read-only).",
+          readOnly: true, // Indicates to UI not to make this editable
+        },
+        debugMode: {
+          type: "boolean",
+          title: "Debug Mode",
+          description: "Enable application-wide debug features and verbose logging to console.",
+          default: false,
+        },
+        userName: {
+          type: "string",
+          title: "Username",
+          description: "Username for identifying user activity (for logging/auditing purposes).",
+          default: "DefaultUser",
+        },
+        theme: {
+          type: "string",
+          title: "UI Theme",
+          description: "Select the user interface theme.",
+          enum: ["light", "dark", "system"], // Added 'system' option
+          default: "system",
+        },
+        pluginsDirectory: {
+          type: "string",
+          title: "Plugins Directory",
+          description: "Path to the directory containing ttCommander plugins (relative to app root or absolute).",
+          default: "plugins", // Default to a 'plugins' folder in the app root
+        },
+        scriptsDirectory: {
+          type: "string",
+          title: "Scripts Directory",
+          description: "The directory (relative to the application root) where PowerShell scripts are stored.",
+          default: "scripts",
+        },
+      },
+      required: [
+        "version",
+        "debugMode",
+        "userName",
+        "theme",
+        "pluginsDirectory",
+      ],
+    },
+    logging: {
+      type: "object",
+      title: "Logging Settings",
+      properties: {
+        level: {
+          type: "string",
+          title: "Log Level",
+          description: "Minimum log level to record. Affects both console and file logs.",
+          enum: ["trace", "debug", "info", "warn", "error", "fatal"],
+          default: "info",
+        },
+        prettyPrint: {
+          type: "boolean",
+          title: "Pretty Print Console Logs",
+          description: "Format console logs for easier readability (recommended for development).",
+          default: false,
+        },
+        filePath: {
+          type: "string",
+          title: "Log File Path",
+          description: "Path to the log file, relative to the application root.",
+          default: "logs/ttcommander.log",
+        },
+      },
+      required: ["level", "prettyPrint", "filePath"],
+    },
+    window: {
+      // Added for remembering window state (optional for now, but good for schema)
+      type: "object",
+      title: "Window Settings",
+      properties: {
+        width: { type: "integer", default: 1024, minimum: 800 },
+        height: { type: "integer", default: 768, minimum: 600 },
+      },
+    },
+    plugins: {
+      type: "object",
+      title: "Plugin Configurations",
+      description: "Settings specific to installed plugins will appear here.",
+      additionalProperties: {
+        // Allows any structure for individual plugin configs
+        type: "object",
+      },
+      default: {},
+    },
+  },
+  required: ["appSettings", "logging"],
+}

@@ -1,0 +1,359 @@
+[
+  {
+    "CustomerName": "AER",
+    "sites": [
+      {
+        "Location": "AER - 2030 Chenault",
+        "Label": "2030",
+        "LogoFile": "aer-logo.png",
+        "IPAddress": "172.25.30.26",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      },
+      {
+        "Location": "AER - 3405 - 3420 Wiley post",
+        "Label": "3420 Wiley Post",
+        "LogoFile": "aer-logo.PNG",
+        "IPAddress": "172.25.30.27",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      }
+    ]
+  },
+  {
+    "CustomerName": "AGS",
+    "sites": [
+      {
+        "Location": "AGS - 352",
+        "Label": "352 - Tiercon",
+        "LogoFile": "Tiercon.png",
+        "IPAddress": "172.25.26.97",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      },
+      {
+        "Location": "AGS - Sterling",
+        "Label": "Sterling",
+        "LogoFile": "logo.jpg",
+        "IPAddress": "172.25.26.67",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      },
+      {
+        "Location": "AGS - Tiercon - 591",
+        "Label": "Tiercon - 591",
+        "LogoFile": "Tiercon.png",
+        "IPAddress": "172.25.26.117",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      },
+      {
+        "Location": "AGS - Tiercon Coplas",
+        "Label": "Tiercon Coplas",
+        "LogoFile": "Tiercon.png",
+        "IPAddress": "172.25.26.122",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      },
+      {
+        "Location": "AGS - Oshwa",
+        "Label": "Oshwa",
+        "LogoFile": "logo.jpg",
+        "IPAddress": "172.25.26.77",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      },
+      {
+        "Location": "AGS - Cambridge",
+        "Label": "AGES - Cambridge",
+        "LogoFile": "logo.jpg",
+        "IPAddress": "172.25.26.114",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      },
+      {
+        "Location": "AGS - Windsor",
+        "Label": "AGES - Windsor",
+        "LogoFile": "logo.jpg",
+        "IPAddress": "172.25.26.118",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      }
+    ]
+  },
+  {
+    "CustomerName": "BASCO",
+    "sites": [
+      {
+        "Location": "BASCO - Auburn",
+        "Label": "Auburn",
+        "LogoFile": "vanguard.png",
+        "IPAddress": "172.25.30.19",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      },
+      {
+        "Location": "BASCO - Statesboro, GA",
+        "Label": "Statesboro",
+        "LogoFile": "vanguard.png",
+        "IPAddress": "172.25.30.21",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      }
+    ]
+  },
+
+  {
+    "CustomerName": "BWI",
+    "sites": [
+      {
+        "Location": "BWI",
+        "Label": "BWI",
+        "LogoFile": "BWI-Group.svg",
+        "IPAddress": "172.25.26.111",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      }
+    ]
+  },
+  {
+    "CustomerName": "Elma",
+    "sites": [
+      {
+        "Location": "Elma - Atlanta, GA",
+        "Label": "Elma",
+        "LogoFile": "ElmaLogo.svg",
+        "IPAddress": "172.25.26.141",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      }
+    ]
+  },
+  {
+    "CustomerName": "Fehrer",
+    "sites": [
+      {
+        "Location": "Fehrer Automotive",
+        "Label": "Fehrer",
+        "LogoFile": "FehrerLogo.svg",
+        "IPAddress": "172.25.26.90",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      }
+    ]
+  },
+  {
+    "CustomerName": "Ground Effects",
+    "sites": [
+      {
+        "Location": "# Ground Effects, 1990 Concept Dr. Warren, MI - P08",
+        "Label": "P08",
+        "LogoFile": "logo.jpg",
+        "IPAddress": "10.34.50.10",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      },
+      {
+        "Location": "# Ground Effects, 1200 Corvette Dr., Plum Springs (aka Bowling Green), KY - P09",
+        "Label": "P09",
+        "LogoFile": "logo.jpg",
+        "IPAddress": "10.21.50.10",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      },
+      {
+        "Location": "# Ground Effects, 3435 Van Slyke, Flint, MI - P12",
+        "Label": "P12",
+        "LogoFile": "logo.jpg",
+        "IPAddress": "10.33.50.10",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      },
+      {
+        "Location": "# Ground Effects (Fort Wayne), 13204 Aboite Rd, Roanoke, IN - P16",
+        "Label": "P16",
+        "LogoFile": "logo.jpg",
+        "IPAddress": "10.14.50.10",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      },
+      {
+        "Location": "Ground Effects, 320 Shockdrake Ct., Wentzville, MO - P18",
+        "Label": "P18",
+        "LogoFile": "logo.jpg",
+        "IPAddress": "10.17.50.10",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      },
+      {
+        "Location": "# Ground Effects (Louisville), 13600 Northeast Park Drive, Louisville, KY - P19",
+        "Label": "P19",
+        "LogoFile": "logo.jpg",
+        "IPAddress": "10.39.0.40",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      },
+      {
+        "Location": "# Ground Effects, 1655 Tricont Ave., Whitby, ON - P23",
+        "Label": "P23",
+        "LogoFile": "logo.jpg",
+        "IPAddress": "10.22.50.10",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      },
+      {
+        "Location": "Ground Effects, 7566 Metropolitan Pkwy (aka 16 Mile), Sterling Heights, MI - P24",
+        "Label": "P24",
+        "LogoFile": "logo.jpg",
+        "IPAddress": "10.24.50.10",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      },
+      {
+        "Location": "# Ground Effects (Wayne), 39055 Maple Ave, Wayne, MI - P26",
+        "Label": "P26",
+        "LogoFile": "logo.jpg",
+        "IPAddress": "10.29.0.40",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      },
+      {
+        "Location": "# Ground Effects, 4670 North Service Rd E, Windsor - P28",
+        "Label": "P28",
+        "LogoFile": "logo.jpg",
+        "IPAddress": "10.28.50.10",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      },
+      {
+        "Location": "Ground Effects, 6600 Mount Elliot, Hamtramck, MI - P32",
+        "Label": "P32",
+        "LogoFile": "logo.jpg",
+        "IPAddress": "10.36.50.10",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      },
+      {
+        "Location": "# Ground Effects (Dearborn), 13750 Rotunda Drive, Dearborn, MI - P36",
+        "Label": "P36",
+        "LogoFile": "logo.jpg",
+        "IPAddress": "10.33.50.10",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      },
+      {
+        "Location": "# Ground Effects (Saltillo), Av. Principal Parque Industrial Mencorsa #31360, Edificio B1, Parque Industrial Derramadero, Carr. Saltillo – Zacatecas Km. 327, Saltillo, COA",
+        "Label": "P39",
+        "LogoFile": "logo.jpg",
+        "IPAddress": "10.40.50.10",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      }
+    ]
+  },
+  {
+    "CustomerName": "SRC",
+    "sites": [
+      {
+        "Location": "CNH Reman",
+        "Label": "CNH Reman",
+        "LogoFile": "cnhlogo.png",
+        "IPAddress": "172.25.26.109",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      },
+      {
+        "Location": "SRC Automotive",
+        "Label": "SRC Automotive",
+        "LogoFile": "SRClogo.jpg",
+        "IPAddress": "172.25.26.39",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      },
+      {
+        "Location": "SRC HD",
+        "Label": "SRC HD",
+        "LogoFile": "SRCHD.jpg",
+        "IPAddress": "172.25.26.70",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      }
+    ]
+  },
+
+  {
+    "CustomerName": "Textron",
+    "sites": [
+      {
+        "Location": "EZ-Go",
+        "Label": "EZ-Go",
+        "LogoFile": "Textronlogo.jpg",
+        "IPAddress": "10.238.142.21",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      },
+      {
+        "Location": "Arctic Cat",
+        "Label": "Arctic Cat",
+        "LogoFile": "ArcticCatLogo.jpg",
+        "IPAddress": "10.191.4.40",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      }
+    ]
+  },
+  {
+    "CustomerName": "TS Tech",
+    "sites": [
+      {
+        "Location": "TSTech - Alabama",
+        "Label": "Alabama",
+        "LogoFile": "TSTECHlogo.png",
+        "IPAddress": "10.8.15.1",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      },
+      {
+        "Location": "TSTech - Indiana",
+        "Label": "Indiana",
+        "LogoFile": "TSTECHlogo.png",
+        "IPAddress": "10.14.0.17",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      },
+      {
+        "Location": "TSTech - New Market - Canada",
+        "Label": "New Market - Canada",
+        "LogoFile": "TSTECHlogo.jpg",
+        "IPAddress": "10.4.0.66",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      },
+
+      {
+        "Location": "TSTech - Tricon",
+        "Label": "Tricon",
+        "LogoFile": "TSTECHlogo.png",
+        "IPAddress": "10.6.0.45",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      },
+      {
+        "Location": "TSTech - Trim",
+        "Label": "Trim",
+        "LogoFile": "TSTECHlogo.jpg",
+        "IPAddress": "10.3.32.121",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      },
+      {
+        "Location": "TSTech - Trimont",
+        "Label": "Trimont",
+        "LogoFile": "logo.jpg",
+        "IPAddress": "10.12.0.54",
+        "CIDR": 32,
+        "Link": "/admin/configs"
+      }
+    ]
+  }
+]
