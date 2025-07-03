@@ -1,14 +1,12 @@
 import { loadNodeModule } from "./ui/node-module-loader.js";
-import { initRenderer } from "./ui/renderer.js";
+import { initEnhancedRenderer } from "./ui/enhanced-renderer.js";
 
 export type StartOptions = {
-  init?: typeof initRenderer;
+  init?: typeof initEnhancedRenderer;
 };
 
 export const start = async (opts?: StartOptions): Promise<void> => {
   try {
-  console.log('[start] Loading fs module...');
-  const fs = await loadNodeModule<typeof import("fs/promises")>("fs/promises");
   console.log('[start] Loading path module...');
   const path = await loadNodeModule<typeof import("path")>("path");
   console.log('[start] Modules loaded successfully');
@@ -57,28 +55,17 @@ export const start = async (opts?: StartOptions): Promise<void> => {
   const distPluginsPath = await path.join(cwd, "dist", "plugins");
   console.log('[start] Dist plugins path:', distPluginsPath);
   
-  console.log('[start] Reading source plugins directory for discovery...');
-  const entries = await fs.readdir(sourcePluginsPath, { withFileTypes: true });
-  console.log('[start] Found entries:', entries.length);
-  const tree: never[] = [];
-  const plugins = entries
-    .filter((e) => e.isDirectory())
-    .map((e) => {
-      const id = e.name;
-      const base = { id, title: id.replace(/-/g, " ") };
-      if (id === "context-generator") {
-        return { ...base, props: { tree } };
-      }
-      if (id === "as-built-documenter") {
-        return { ...base, props: { templates: [] } };
-      }
-      return base;
-    });
+  console.log('[start] Building config path...');
+  const configPath = await path.join(cwd, "config");
+  console.log('[start] Config path:', configPath);
   
-  console.log('[start] Found plugins:', plugins.map(p => p.id));
-  console.log('[start] Initializing renderer...');
-  const renderer = opts?.init ?? initRenderer;
-  renderer({ container, pluginsPath: distPluginsPath, plugins });
+  console.log('[start] Initializing enhanced renderer...');
+  const renderer = opts?.init ?? initEnhancedRenderer;
+  await renderer({ 
+    container, 
+    pluginsPath: sourcePluginsPath, // Use source path so enhanced manager can access manifests
+    configPath 
+  });
   console.log('[start] Renderer initialized successfully');
   } catch (err) {
     console.error('[start] failed', { options: opts }, err);

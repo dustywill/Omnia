@@ -1,0 +1,27 @@
+.sidebar {
+  background-color: var(--tt-color-surface);
+  border-right: 1px solid var(--tt-color-border);
+}
+
+.sidebarItem {
+  transition: all 200ms ease-in-out;
+}
+
+.sidebarItem:not(.active):hover {
+  background-color: var(--tt-color-background);
+  transform: translateX(2px);
+}
+
+.sidebarItem.active {
+  background-color: var(--tt-color-action);
+  color: white;
+  box-shadow: var(--tt-shadow-sm);
+}
+
+.sidebarIcon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

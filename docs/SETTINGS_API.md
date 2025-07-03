@@ -446,4 +446,317 @@ describe('Plugin Configuration', () => {
 });
 ```
 
-This API provides a robust foundation for managing configuration in Omnia while maintaining type safety and providing a good developer experience.
+## Schema-Driven Settings UI Components
+
+Omnia provides a complete set of React components for automatic settings form generation from Zod schemas.
+
+### SchemaForm Component
+
+The core component that automatically generates forms from any Zod schema.
+
+#### Basic Usage
+
+```typescript
+import React, { useState } from 'react';
+import { SchemaForm } from '../ui/components';
+import { z } from 'zod';
+
+const userSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  email: z.string().email('Invalid email address'),
+  age: z.number().min(18, 'Must be at least 18'),
+  preferences: z.object({
+    theme: z.enum(['light', 'dark']).default('light'),
+    notifications: z.boolean().default(true),
+    language: z.string().default('en')
+  })
+});
+
+function UserSettingsForm() {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    age: 18,
+    preferences: {
+      theme: 'light',
+      notifications: true,
+      language: 'en'
+    }
+  });
+
+  const handleSubmit = (data: any) => {
+    console.log('Form submitted:', data);
+    // Save configuration
+  };
+
+  return (
+    <SchemaForm
+      schema={userSchema}
+      data={formData}
+      onChange={setFormData}
+      onSubmit={handleSubmit}
+    />
+  );
+}
+```
+
+#### Advanced Schema Support
+
+```typescript
+const advancedSchema = z.object({
+  // String constraints
+  username: z.string()
+    .min(3, 'Minimum 3 characters')
+    .max(20, 'Maximum 20 characters')
+    .regex(/^[a-zA-Z0-9_]+$/, 'Only alphanumeric and underscore'),
+  
+  // Number constraints
+  port: z.number()
+    .min(1000, 'Port must be at least 1000')
+    .max(65535, 'Port must be less than 65536'),
+  
+  // Arrays with dynamic items
+  tags: z.array(z.string()).default([]),
+  
+  // Nested objects
+  database: z.object({
+    host: z.string().default('localhost'),
+    port: z.number().default(5432),
+    ssl: z.boolean().default(false)
+  }),
+  
+  // Optional fields
+  apiKey: z.string().optional(),
+  
+  // Custom validation
+  confirmPassword: z.string().refine((val) => val === formData.password, {
+    message: "Passwords don't match"
+  })
+});
+```
+
+### AppSettings Component
+
+Pre-built component for application-level configuration.
+
+```typescript
+import { AppSettings } from '../ui/components';
+
+function SettingsPage() {
+  return (
+    <div className="max-w-4xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-8">Application Settings</h1>
+      <AppSettings />
+    </div>
+  );
+}
+```
+
+**Features**:
+- Multi-section layout (Application, Logging, Window)
+- Real-time validation and error display
+- Unsaved changes tracking
+- Automatic save/load from SettingsManager
+- Success/error feedback
+
+### PluginSettings Component
+
+Component for plugin-specific configuration management.
+
+```typescript
+import { PluginSettings } from '../ui/components';
+
+function PluginConfigPage({ pluginId }: { pluginId: string }) {
+  return (
+    <div className="max-w-2xl mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-6">
+        Configure {pluginId}
+      </h1>
+      <PluginSettings pluginId={pluginId} />
+    </div>
+  );
+}
+```
+
+**Features**:
+- Automatic schema detection based on plugin type
+- Three-tier plugin support (Simple/Configured/Advanced)
+- Plugin enable/disable functionality
+- Permission validation
+- Dynamic form generation
+
+### SettingsPage Component
+
+Complete settings interface with tabbed navigation.
+
+```typescript
+import { SettingsPage } from '../ui/components';
+
+function MainSettings() {
+  return <SettingsPage />;
+}
+```
+
+**Features**:
+- Tabbed interface (App Settings, Plugin Settings, System Settings)
+- Responsive design
+- Integrated navigation
+- Deep linking support
+
+## Integration with Plugin Development
+
+### Using Schema-Driven Forms in Plugins
+
+```typescript
+// In your plugin (plugins/my-plugin/index.tsx)
+import React from 'react';
+import { SchemaForm } from '../../../src/ui/components';
+import { usePluginConfig } from '../../../src/hooks';
+import { z } from 'zod';
+
+export const configSchema = z.object({
+  enabled: z.boolean().default(true),
+  apiEndpoint: z.string().url().default('https://api.example.com'),
+  refreshInterval: z.number().min(30).max(3600).default(300),
+  features: z.object({
+    notifications: z.boolean().default(true),
+    autoSync: z.boolean().default(false)
+  })
+});
+
+export type MyPluginConfig = z.infer<typeof configSchema>;
+
+export default function MyPlugin() {
+  const { config, updateConfig, isLoading, hasUnsavedChanges } = 
+    usePluginConfig(configSchema);
+
+  if (isLoading) {
+    return <div>Loading plugin configuration...</div>;
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold mb-4">Plugin Configuration</h2>
+        
+        <SchemaForm
+          schema={configSchema}
+          data={config}
+          onChange={updateConfig}
+        />
+        
+        {hasUnsavedChanges && (
+          <div className="mt-4 p-3 bg-yellow-100 text-yellow-800 rounded">
+            You have unsaved changes
+          </div>
+        )}
+      </div>
+      
+      <div className="bg-gray-50 rounded-lg p-6">
+        <h3 className="text-lg font-medium mb-2">Plugin Content</h3>
+        {config.enabled ? (
+          <div>Plugin is running with endpoint: {config.apiEndpoint}</div>
+        ) : (
+          <div>Plugin is disabled</div>
+        )}
+      </div>
+    </div>
+  );
+}
+```
+
+### Form Field Types
+
+The SchemaForm component automatically generates appropriate field types:
+
+| Zod Type | Generated Field | Features |
+|----------|----------------|----------|
+| `z.string()` | Text input | Min/max length, regex validation |
+| `z.number()` | Number input | Min/max values, step |
+| `z.boolean()` | Checkbox | Toggle switch style |
+| `z.enum()` | Select dropdown | Multi-option selection |
+| `z.array()` | Dynamic list | Add/remove items |
+| `z.object()` | Nested fieldset | Grouped form sections |
+| `z.string().email()` | Email input | Email validation |
+| `z.string().url()` | URL input | URL validation |
+| `z.string().optional()` | Optional field | Clear indication |
+
+### Custom Field Descriptions
+
+Add descriptions to schema fields for better UX:
+
+```typescript
+const schema = z.object({
+  apiKey: z.string()
+    .min(32, 'API key must be at least 32 characters')
+    .describe('Your secret API key from the service provider'),
+  
+  timeout: z.number()
+    .min(1)
+    .max(300)
+    .default(30)
+    .describe('Request timeout in seconds (1-300)'),
+  
+  features: z.object({
+    caching: z.boolean()
+      .default(true)
+      .describe('Enable response caching for better performance'),
+    
+    retries: z.number()
+      .min(0)
+      .max(5)
+      .default(3)
+      .describe('Number of retry attempts for failed requests')
+  }).describe('Feature configuration options')
+});
+```
+
+### Validation and Error Handling
+
+```typescript
+const schema = z.object({
+  password: z.string()
+    .min(8, 'Password must be at least 8 characters')
+    .regex(/[A-Z]/, 'Must contain uppercase letter')
+    .regex(/[a-z]/, 'Must contain lowercase letter')
+    .regex(/[0-9]/, 'Must contain number'),
+  
+  confirmPassword: z.string()
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"]
+});
+
+function PasswordForm() {
+  const [data, setData] = useState({ password: '', confirmPassword: '' });
+  const [errors, setErrors] = useState({});
+
+  const handleSubmit = (formData: any) => {
+    try {
+      const validated = schema.parse(formData);
+      console.log('Valid data:', validated);
+      setErrors({});
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const errorMap = {};
+        error.issues.forEach(issue => {
+          errorMap[issue.path.join('.')] = issue.message;
+        });
+        setErrors(errorMap);
+      }
+    }
+  };
+
+  return (
+    <SchemaForm
+      schema={schema}
+      data={data}
+      onChange={setData}
+      onSubmit={handleSubmit}
+      errors={errors}
+    />
+  );
+}
+```
+
+This API provides a robust foundation for managing configuration in Omnia while maintaining type safety and providing a good developer experience, now enhanced with automatic UI generation capabilities.

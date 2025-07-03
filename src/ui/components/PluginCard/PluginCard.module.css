@@ -1,0 +1,137 @@
+.pluginCard {
+  background-color: var(--tt-color-surface);
+  border: 2px solid var(--tt-color-border);
+  border-radius: var(--tt-radius-lg);
+  transition: all 200ms ease-in-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.pluginCard:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--tt-shadow-lg);
+}
+
+/* Status-specific styling */
+.pluginCard.active {
+  border-color: var(--tt-color-success);
+  background: linear-gradient(135deg, 
+    var(--tt-color-surface) 0%, 
+    var(--tt-palette--g95) 100%);
+}
+
+.pluginCard.error {
+  border-color: var(--tt-color-danger);
+  background: linear-gradient(135deg, 
+    var(--tt-color-surface) 0%, 
+    var(--tt-palette--r95) 100%);
+}
+
+.pluginCard.loading {
+  border-color: var(--tt-color-info);
+  background: linear-gradient(135deg, 
+    var(--tt-color-surface) 0%, 
+    var(--tt-palette--c95) 100%);
+}
+
+.pluginCard.inactive {
+  opacity: 0.8;
+}
+
+/* Loading bar animation */
+.loadingBar {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, 
+    transparent, 
+    var(--tt-color-info), 
+    transparent);
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Status indicator */
+.statusIndicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.statusDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  transition: all 200ms ease-in-out;
+}
+
+.activeDot {
+  background-color: var(--tt-color-success);
+  box-shadow: 0 0 0 3px var(--tt-palette--g95);
+}
+
+.inactiveDot {
+  background-color: var(--tt-palette--n60);
+  box-shadow: 0 0 0 3px var(--tt-palette--n90);
+}
+
+.errorDot {
+  background-color: var(--tt-color-danger);
+  box-shadow: 0 0 0 3px var(--tt-palette--r95);
+  animation: pulse 2s infinite;
+}
+
+.loadingDot {
+  background-color: var(--tt-color-info);
+  box-shadow: 0 0 0 3px var(--tt-palette--c95);
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
+}
+
+/* Error banner */
+.errorBanner {
+  background: var(--tt-palette--r95);
+  padding: var(--tt-space-3) var(--tt-space-4);
+  margin: var(--tt-space-4) calc(-1 * var(--tt-space-6)) var(--tt-space-2);
+  border-top: 1px solid var(--tt-palette--r80);
+  border-bottom: 1px solid var(--tt-palette--r80);
+}
+
+/* Remove button - initially hidden */
+.removeButton {
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 200ms ease-in-out;
+}
+
+.pluginCard:hover .removeButton {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Utility class for text truncation */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

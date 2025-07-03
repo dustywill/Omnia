@@ -201,19 +201,29 @@ const fileService = useService<FileService>('file-scanner');
 
 ## **5. Component Library Strategy**
 
-### **Decision: Reusable Component Library Architecture**
-**Structure**:
+### **Decision: Reusable Component Library Architecture** ✅ IMPLEMENTED
+**Actual Structure**:
 ```
-src/lib/
-├── components/
-│   ├── primitives/     # Button, Input, Badge (Tailwind-heavy)
-│   ├── layout/         # Sidebar, Card, Grid (Hybrid)
-│   ├── complex/        # PluginCard, SettingsForm (CSS Modules-heavy)
-│   └── theme/          # Design tokens and theme system
-├── hooks/              # Reusable React hooks
-├── utils/              # Configuration utilities
-└── types/              # Common TypeScript types
+src/ui/components/
+├── Button/             # Tailwind-heavy primitive (7 variants, 3 sizes)
+├── Input/              # Tailwind-heavy primitive (validation, labels, icons)
+├── Badge/              # Tailwind-heavy primitive (7 semantic colors)
+├── Card/               # Hybrid layout (hover effects, elevation)
+├── Grid/               # Tailwind-heavy layout (responsive grid)
+├── Sidebar/            # Hybrid navigation (animations, state management)
+├── AppNavigation/      # Hybrid navigation (Unus-inspired sidebar)
+├── PluginCard/         # CSS Modules-heavy complex (status, permissions)
+├── SettingsForm/       # CSS Modules-heavy complex (schema-driven)
+├── index.ts            # Component library exports
+└── [legacy components] # Existing components being phased out
 ```
+
+**Implementation Results**:
+- **9 production-ready components** following hybrid styling approach
+- **Complete TypeScript support** with exported interfaces
+- **Comprehensive documentation** with usage examples in [Component Library Guide](./COMPONENT_LIBRARY.md)
+- **Successful hybrid styling** - Tailwind for utilities, CSS Modules for complex behavior
+- **Schema-driven forms** ready for settings management integration
 
 **Rationale**:
 - Future applications: Build once, reuse everywhere
@@ -221,16 +231,24 @@ src/lib/
 - Maintainability: Centralized component development
 - Documentation: Self-documenting component library
 
-### **Decision: Schema-Driven Form Generation**
+### **Decision: Schema-Driven Form Generation** ✅ IMPLEMENTED
 **Pattern**: Auto-generate settings forms from Zod schemas
 ```typescript
-// Automatic form generation
+// Implemented SettingsForm component
 <SettingsForm 
   schema={ScriptRunnerSchema} 
-  value={config} 
-  onChange={updateConfig}
+  initialValues={config}
+  onSubmit={handleSave}
+  onChange={handleChange}
 />
 ```
+
+**Implementation Results**:
+- **SettingsForm component** built with CSS Modules for complex validation UI
+- **Real-time validation** with Zod schema integration
+- **Change tracking** with visual indicators for modified fields
+- **Accessible form controls** with proper ARIA attributes
+- **Error state management** with field-level validation feedback
 
 **Rationale**:
 - DRY principle: Define schema once, get validation + UI

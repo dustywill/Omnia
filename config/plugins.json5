@@ -1,0 +1,44 @@
+{
+  // Plugin registry and state management
+  version: "1.0.0",
+  lastUpdated: "2024-01-01T00:00:00.000Z",
+  
+  plugins: {
+    "customer-links": {
+      id: "customer-links",
+      enabled: true,
+      configPath: "plugins/customer-links.json5",
+      type: "configured",
+      version: "2.0.0"
+    },
+    
+    "script-runner": {
+      id: "script-runner", 
+      enabled: true,
+      configPath: "plugins/script-runner.json5",
+      type: "hybrid",
+      version: "2.0.0"
+    },
+    
+    "as-built-documenter": {
+      id: "as-built-documenter",
+      enabled: true,
+      type: "simple",
+      version: "1.0.0"
+    },
+    
+    "context-generator": {
+      id: "context-generator",
+      enabled: true, 
+      type: "simple",
+      version: "1.0.0"
+    },
+    
+    "test-simple": {
+      id: "test-simple",
+      enabled: true,
+      type: "simple", 
+      version: "1.0.0"
+    }
+  }
+}

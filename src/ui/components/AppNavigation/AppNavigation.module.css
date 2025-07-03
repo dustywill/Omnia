@@ -1,0 +1,15 @@
+.navigationWrapper {
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.navigation {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.navigationFooter {
+  margin-top: auto;
+  padding-top: var(--tt-space-4);
+}

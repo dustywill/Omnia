@@ -1,0 +1,121 @@
+.settingsPage {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--tt-space-8) var(--tt-space-6);
+  min-height: 100vh;
+}
+
+.tabNavigation {
+  display: flex;
+  gap: var(--tt-space-2);
+  border-bottom: 2px solid var(--tt-color-border);
+  padding-bottom: var(--tt-space-4);
+}
+
+.tabButton {
+  display: flex;
+  align-items: center;
+  gap: var(--tt-space-3);
+  padding: var(--tt-space-4) var(--tt-space-6);
+  border-radius: var(--tt-radius-lg) var(--tt-radius-lg) 0 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 200ms ease-in-out;
+  position: relative;
+}
+
+.tabButton:hover {
+  background-color: var(--tt-color-background);
+}
+
+.tabButton.activeTab {
+  background-color: var(--tt-color-surface);
+  border: 2px solid var(--tt-color-border);
+  border-bottom: 2px solid var(--tt-color-surface);
+  margin-bottom: -2px;
+}
+
+.tabButton.activeTab::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--tt-color-surface);
+}
+
+.tabIcon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.tabContent {
+  text-align: left;
+}
+
+.tabLabel {
+  font-weight: 600;
+  color: var(--tt-color-text-primary);
+  font-size: 1rem;
+}
+
+.tabDescription {
+  font-size: 0.875rem;
+  color: var(--tt-color-text-secondary);
+  display: block;
+  margin-top: 0.25rem;
+}
+
+.tabContent {
+  background-color: var(--tt-color-surface);
+  border: 2px solid var(--tt-color-border);
+  border-top: none;
+  border-radius: 0 0 var(--tt-radius-lg) var(--tt-radius-lg);
+  padding: var(--tt-space-8);
+  min-height: 600px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .settingsPage {
+    padding: var(--tt-space-6) var(--tt-space-4);
+  }
+  
+  .tabContent {
+    padding: var(--tt-space-6);
+  }
+}
+
+@media (max-width: 768px) {
+  .settingsPage {
+    padding: var(--tt-space-4) var(--tt-space-3);
+  }
+  
+  .tabNavigation {
+    flex-direction: column;
+    gap: var(--tt-space-1);
+  }
+  
+  .tabButton {
+    border-radius: var(--tt-radius-md);
+    justify-content: flex-start;
+  }
+  
+  .tabButton.activeTab {
+    border-radius: var(--tt-radius-md);
+    margin-bottom: 0;
+    border-bottom: 2px solid var(--tt-color-border);
+  }
+  
+  .tabButton.activeTab::after {
+    display: none;
+  }
+  
+  .tabContent {
+    border-radius: var(--tt-radius-lg);
+    border-top: 2px solid var(--tt-color-border);
+    padding: var(--tt-space-4);
+  }
+}

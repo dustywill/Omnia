@@ -1,0 +1,27 @@
+{
+  // Main application settings
+  appSettings: {
+    version: "0.1.0",
+    debugMode: true,
+    userName: "User",
+    theme: "system",
+    pluginsDirectory: "plugins",
+    scriptsDirectory: "scripts"
+  },
+  
+  // Logging configuration
+  logging: {
+    level: "info",
+    prettyPrint: true,
+    filePath: "logs/app.log"
+  },
+  
+  // Window settings for Electron mode
+  window: {
+    width: 1200,
+    height: 800
+  },
+  
+  // Legacy plugin configurations (for backward compatibility)
+  plugins: {}
+}

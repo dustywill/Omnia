@@ -4,19 +4,28 @@ Omnia is an evolution of the ttCommander application, built as a modern plugin-b
 
 ## Architecture Overview
 
-Omnia features a hybrid configuration system with:
+Omnia features a modern plugin-based architecture with:
+- **Enhanced Plugin Manager** with service registry for secure inter-plugin communication
+- **Three-tier plugin system** (Simple/Configured/Advanced) supporting all development needs
+- **Permission-based security** for plugin operations and service access
 - **Zod-based schemas** for type-safe configuration with runtime validation
+- **Schema-driven settings forms** with automatic UI generation from Zod schemas
 - **Hybrid styling** combining Tailwind CSS utilities with CSS Modules 
-- **Three-tier plugin architecture** supporting simple to advanced plugin development
-- **Service registry pattern** for safe plugin-to-plugin communication
+- **React hooks** for plugin development (usePluginConfig, useService, usePluginContext)
 - **Unus-inspired UI** with sidebar navigation and single-plugin focus
+- **Complete component library** with 16 production-ready components
 
 ### Key Components
 
+- **Enhanced Plugin Manager**: Complete plugin lifecycle management with service registry
+- **Service Registry**: Secure, permission-based inter-plugin communication system
 - **Settings Management**: Hybrid configuration system with `config/app.json5`, `config/plugins.json5`, and `config/plugins/*.json5`
-- **Plugin System**: Dynamic plugin loading with manifest-based permissions
+- **Schema-driven Settings Forms**: Automatic UI generation from Zod schemas with real-time validation
+- **Plugin Hooks**: React hooks for configuration, services, and context access
+- **Permission System**: Manifest-based security for plugin operations
 - **Configuration System**: Type-safe validation using Zod schemas
 - **UI System**: React components with hybrid Tailwind CSS + CSS Modules styling
+- **Component Library**: 16 reusable components following design system patterns
 
 ## Quick Start
 
@@ -28,10 +37,13 @@ Omnia features a hybrid configuration system with:
 
 ## Documentation
 
-- **[Design Decisions](./docs/DESIGN_DECISIONS.md)** - Architectural choices and rationale
-- **[Implementation Plan](./docs/IMPLEMENTATION_PLAN.md)** - Development roadmap and dependencies  
-- **[Plugin Developer Guide](./docs/PLUGIN_DEVELOPER_GUIDE.md)** - How to create plugins
+- **[Plugin Developer Guide](./docs/PLUGIN_DEVELOPER_GUIDE.md)** - Complete plugin development guide with hooks and examples
+- **[Architecture Guide](./docs/ARCHITECTURE.md)** - System architecture and plugin system overview
+- **[Implementation Plan](./docs/IMPLEMENTATION_PLAN.md)** - Development roadmap and current status
 - **[Settings Management API](./docs/SETTINGS_API.md)** - Configuration system usage
+- **[Component Library](./docs/COMPONENT_LIBRARY.md)** - Complete component documentation and usage
+- **[Design Decisions](./docs/DESIGN_DECISIONS.md)** - Architectural choices and rationale
+- **[Styling Strategy](./docs/STYLING_STRATEGY.md)** - Hybrid Tailwind + CSS Modules approach
 - **[Asset Loading](./docs/ASSET_LOADING.md)** - Handling CSS, images, and other assets
 
 ## Contributing
@@ -43,10 +55,30 @@ Omnia features a hybrid configuration system with:
 
 ## Plugin Development
 
-Omnia supports three tiers of plugin complexity:
+Omnia supports three tiers of plugin complexity with full development toolkit:
 
-1. **Simple Plugins**: Just export a React component
-2. **Configured Plugins**: Component + configuration schema (most common)
-3. **Advanced Plugins**: Full lifecycle with background processing
+1. **Simple Plugins**: Just export a React component - perfect for static content
+2. **Configured Plugins**: Component + Zod schema validation - most common pattern
+3. **Advanced Plugins**: Full lifecycle hooks + service registration - for complex functionality
 
-See the [Plugin Developer Guide](./docs/PLUGIN_DEVELOPER_GUIDE.md) for detailed instructions.
+### Plugin Features
+- **Service Registry**: Secure plugin-to-plugin communication
+- **Permission System**: Manifest-based security for all operations
+- **React Hooks**: `usePluginConfig`, `useService`, `usePluginContext` for easy development
+- **Type Safety**: Full TypeScript support with Zod validation
+- **Live Configuration**: Real-time config updates with validation
+- **Event System**: Plugin lifecycle and custom events
+
+### Quick Start
+```bash
+# Create plugin directory
+mkdir plugins/my-plugin
+
+# Copy template
+cp -r examples/plugins/simple-plugin/* plugins/my-plugin/
+
+# Build and test
+npm run build && npm run electron
+```
+
+See the [Plugin Developer Guide](./docs/PLUGIN_DEVELOPER_GUIDE.md) for comprehensive instructions and examples.

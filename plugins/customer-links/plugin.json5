@@ -1,0 +1,15 @@
+{
+  id: "customer-links",
+  name: "Customer Links Manager",
+  version: "2.0.0",
+  description: "Manage customer site links and generate HTML output files with configurable templates",
+  author: "Omnia Team",
+  type: "configured",
+  main: "index.tsx",
+  permissions: [
+    "filesystem:read",
+    "filesystem:write"
+  ],
+  dependencies: [],
+  configSchema: "config-schema.js"
+}

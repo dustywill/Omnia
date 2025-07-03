@@ -34,6 +34,7 @@ Omnia is an evolution of the ttCommander application, built as a modern plugin-b
 
 ### Documentation
 - [Plugin Developer Guide](./docs/PLUGIN_DEVELOPER_GUIDE.md) - Comprehensive plugin development guide
+- [Architecture Guide](./docs/ARCHITECTURE.md) - System architecture and plugin system overview
 - [Settings API Reference](./docs/SETTINGS_API.md) - Configuration system documentation
 - [Implementation Plan](./docs/IMPLEMENTATION_PLAN.md) - Development roadmap and priorities
 
@@ -42,11 +43,13 @@ Omnia is an evolution of the ttCommander application, built as a modern plugin-b
 ### Core System
 The application follows a plugin-based architecture with these key components:
 
-**Plugin System**: Dynamic plugin loading from `plugins/` directory
-- Each plugin has its own directory with `index.tsx` (React UI) or `index.ts` (logic)
-- Plugins can have `plugin.json5` manifests for configuration
+**Plugin System**: Enhanced plugin manager with service registry and three-tier architecture
+- Three plugin types: Simple (React component), Configured (with schema), Advanced (full lifecycle)
+- Service registry enables secure inter-plugin communication with permission validation
+- Each plugin has its own directory with `index.tsx` and `plugin.json5` manifest
 - Plugin UI components are compiled to JavaScript during build process
-- Plugin manager handles loading, initialization, and configuration management
+- React hooks (usePluginConfig, useService, usePluginContext) for easy development
+- Complete plugin lifecycle management with error handling and status tracking
 
 **Event System**: Type-safe event bus for inter-component communication
 - Located in `src/core/event-bus.ts`
@@ -59,6 +62,15 @@ The application follows a plugin-based architecture with these key components:
 - Type-safe schemas with runtime validation
 - File watching for live configuration updates
 - Permission-based security system
+
+**Component Library**: Complete design system with 9 production-ready components
+- `src/ui/components/` - Reusable UI components following hybrid styling approach
+- **Primitive Components**: Button, Input, Badge (Tailwind-heavy)
+- **Layout Components**: Card, Grid, Sidebar (Hybrid Tailwind + CSS Modules)
+- **Navigation Components**: AppNavigation (Unus-inspired sidebar)
+- **Complex Components**: PluginCard, SettingsForm (CSS Modules-heavy)
+- TypeScript support with exported interfaces
+- CSS Modules for complex animations and state management
 
 ### Application Structure
 - **Entry Point**: `src/index.ts` - handles environment setup (JSDOM for Node.js, native DOM for browser/Electron)
@@ -73,6 +85,8 @@ The application follows a plugin-based architecture with these key components:
 - `src/lib/schemas/` - Type-safe Zod schemas for configuration validation
 - `src/ui/renderer.tsx` - React application initialization and plugin UI coordination
 - `src/ui/plugin-ui-loader.ts` - Dynamic loading of plugin React components
+- `src/ui/components/` - Complete component library with 9 production-ready components
+- `src/ui/components/index.ts` - Component library exports and TypeScript interfaces
 
 ## Development Practices
 
