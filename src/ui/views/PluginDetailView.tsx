@@ -44,6 +44,7 @@ const PluginComponent: React.FC<{
           throw new Error(`Plugin ${plugin.id} does not export a default component`);
         }
         
+        // Store both component and module for config fallback
         setPluginComponent(() => Component);
         setLoading(false);
         
@@ -133,7 +134,13 @@ const PluginComponent: React.FC<{
   
   // For configured and hybrid plugins, pass the configuration
   if (plugin.type === 'configured' || plugin.type === 'hybrid') {
+    // Use plugin config if available, otherwise fallback will be handled by plugin loading
     componentProps.config = plugin.config;
+    
+    // If no config is provided, log a warning but let the plugin handle it
+    if (!plugin.config) {
+      console.warn(`[PluginComponent] No config provided for configured plugin ${plugin.id}, plugin should use defaultConfig internally`);
+    }
   }
   
   return React.createElement(pluginComponent, componentProps);
@@ -166,7 +173,7 @@ export function PluginDetailView({
   };
 
   return (
-    <div>
+    <div style={{ height: '100vh', overflowY: 'auto' }}>
       {/* Header */}
       <header style={headerStyle}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>

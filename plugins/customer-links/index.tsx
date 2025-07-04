@@ -182,10 +182,12 @@ export const saveCustomerLinksFiles = async (
 
 // Main configured plugin component
 interface CustomerLinksPluginProps {
-  config: CustomerLinksConfig;
+  config?: CustomerLinksConfig;
 }
 
-const CustomerLinksPlugin: React.FC<CustomerLinksPluginProps> = ({ config }) => {
+const CustomerLinksPlugin: React.FC<CustomerLinksPluginProps> = ({ config: providedConfig }) => {
+  // Use provided config or fall back to default
+  const config = providedConfig || defaultConfig;
   const [sites, setSites] = useState<CustomerSite[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

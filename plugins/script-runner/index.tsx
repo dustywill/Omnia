@@ -276,10 +276,12 @@ export class ScriptExecutionService {
 
 // Main configured plugin component
 interface ScriptRunnerPluginProps {
-  config: ScriptRunnerConfig;
+  config?: ScriptRunnerConfig;
 }
 
-const ScriptRunnerPlugin: React.FC<ScriptRunnerPluginProps> = ({ config }) => {
+const ScriptRunnerPlugin: React.FC<ScriptRunnerPluginProps> = ({ config: providedConfig }) => {
+  // Use provided config or fall back to default
+  const config = providedConfig || defaultConfig;
   const [scripts, setScripts] = useState<Script[]>([]);
   const [selectedScript, setSelectedScript] = useState<Script | null>(null);
   const [status, setStatus] = useState<ScriptStatus>('idle');

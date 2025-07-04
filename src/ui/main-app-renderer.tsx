@@ -72,7 +72,7 @@ const MainApp: React.FC<{
 
   const contentStyle: React.CSSProperties = {
     flex: 1,
-    overflow: 'auto'
+    overflow: 'hidden'
   };
 
   return (
@@ -191,16 +191,34 @@ export const initMainAppRenderer = async (
       // Load configuration for configured and hybrid plugins  
       if (manifest.type === 'configured' || manifest.type === 'hybrid') {
         try {
+          // First try to load the default config from the plugin
+          const pluginModule = await pluginManager.loadPluginModule(pluginId);
+          config = pluginModule?.defaultConfig;
+          
+          // Then try to load and merge any saved configuration
           const configSchema = await pluginManager.loadConfigSchema(pluginId);
           if (configSchema) {
-            config = await settingsManager.loadPluginConfig(pluginId, configSchema);
+            const savedConfig = await settingsManager.loadPluginConfig(pluginId, configSchema);
+            // Merge saved config with defaults if available
+            if (savedConfig && config) {
+              config = { ...config, ...savedConfig };
+            } else if (savedConfig) {
+              config = savedConfig;
+            }
           }
         } catch (err) {
           console.warn(`[initMainAppRenderer] Failed to load config for ${pluginId}:`, err);
-          status = 'error';
-          // Use default config from plugin if available
-          const pluginModule = await pluginManager.loadPluginModule(pluginId);
-          config = pluginModule?.defaultConfig;
+          // Keep status as active but use default config only
+          try {
+            const pluginModule = await pluginManager.loadPluginModule(pluginId);
+            config = pluginModule?.defaultConfig;
+            if (!config) {
+              status = 'error';
+            }
+          } catch (moduleErr) {
+            console.error(`[initMainAppRenderer] Failed to load plugin module for ${pluginId}:`, moduleErr);
+            status = 'error';
+          }
         }
       }
       
