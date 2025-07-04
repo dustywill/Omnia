@@ -2,11 +2,7 @@ import { jest } from "@jest/globals";
 import { loadNodeModule } from "../../src/ui/node-module-loader.js";
 import { execSync } from "child_process";
 import { readFileSync } from "fs";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import { join } from "path";
 
 it("falls back to Node require when window.require is absent", async () => {
   const originalWindow = (globalThis as any).window;
@@ -20,7 +16,7 @@ it("build output does not include module specifier import", () => {
   // Ensure the dist files are up to date
   execSync("npm run build", { stdio: "ignore" });
   const js = readFileSync(
-    join(__dirname, "../../dist/ui/node-module-loader.js"),
+    join(process.cwd(), "dist/ui/node-module-loader.js"),
     "utf8",
   );
   expect(js.includes("import { createRequire } from 'module'")).toBe(false);

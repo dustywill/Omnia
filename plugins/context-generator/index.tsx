@@ -6,7 +6,7 @@ export type ContextGeneratorProps = {
   tree: FileNode[];
 };
 
-export const ContextGenerator: React.FC<ContextGeneratorProps> = ({ tree }) => {
+const ContextGenerator: React.FC<ContextGeneratorProps> = ({ tree }) => {
   const [selected, setSelected] = useState<string[]>([]);
   const [progress, setProgress] = useState<{ index: number; total: number; chars: number } | null>(null);
   const [context, setContext] = useState('');

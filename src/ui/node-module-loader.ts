@@ -42,9 +42,39 @@ export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
 
       case "path":
         return {
-          join: async (...paths: string[]) => {
-            return (window as any).electronAPI.join(...paths);
+          join: (...paths: string[]) => {
+            // Use synchronous path operations for Electron renderer
+            // The electronAPI should provide a sync join method
+            if ((window as any).electronAPI.joinSync) {
+              return (window as any).electronAPI.joinSync(...paths);
+            }
+            // Fallback to basic path joining if electronAPI doesn't have joinSync
+            return paths.join('/').replace(/\/+/g, '/');
           },
+          basename: (path: string, ext?: string) => {
+            const name = path.split(/[/\\]/).pop() || '';
+            if (ext && name.endsWith(ext)) {
+              return name.slice(0, -ext.length);
+            }
+            return name;
+          },
+          dirname: (path: string) => {
+            const parts = path.split(/[/\\]/);
+            parts.pop();
+            return parts.join('/') || '/';
+          },
+          extname: (path: string) => {
+            const parts = path.split('.');
+            return parts.length > 1 ? '.' + parts.pop() : '';
+          },
+          resolve: (...paths: string[]) => {
+            // Simple resolve - just join and normalize
+            return paths.join('/').replace(/\/+/g, '/');
+          },
+          relative: (from: string, to: string) => {
+            // Simple relative path calculation
+            return to.replace(from, '').replace(/^[/\\]/, '');
+          }
         } as T;
 
       case "fs":
@@ -75,9 +105,78 @@ export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
         return (() => []) as T;
 
       case "json5":
-        console.log(`[loadNodeModule] Loading JSON5 (fallback to JSON)...`);
-        // Use regular JSON as fallback
-        return JSON as any;
+        console.log(`[loadNodeModule] Loading JSON5 via Electron require...`);
+        try {
+          if (typeof window !== 'undefined' && (window as any).require) {
+            const json5 = (window as any).require('json5');
+            console.log(`[loadNodeModule] JSON5 loaded successfully:`, json5);
+            return json5 as T;
+          }
+        } catch (err) {
+          console.error(`[loadNodeModule] Failed to load json5 via Electron require:`, err);
+        }
+        console.warn(`[loadNodeModule] JSON5 not available, using JSON fallback`);
+        // Return a JSON5-compatible parser as fallback
+        return {
+          parse: (text: string) => {
+            // Simple JSON5 fallback - remove comments and try to parse
+            const cleaned = text
+              .replace(/\/\/.*$/gm, '') // Remove single-line comments
+              .replace(/\/\*[\s\S]*?\*\//g, '') // Remove multi-line comments
+              .replace(/,(\s*[}\]])/g, '$1') // Remove trailing commas
+              .replace(/([{,]\s*)([a-zA-Z_$][a-zA-Z0-9_$]*)\s*:/g, '$1"$2":'); // Quote unquoted keys
+            
+            return JSON.parse(cleaned);
+          },
+          stringify: JSON.stringify
+        } as any;
+
+      case "url":
+        console.log(`[loadNodeModule] Loading URL module via Electron require...`);
+        try {
+          if (typeof window !== 'undefined' && (window as any).require) {
+            const url = (window as any).require('url');
+            console.log(`[loadNodeModule] URL module loaded successfully:`, url);
+            return url as T;
+          }
+        } catch (err) {
+          console.error(`[loadNodeModule] Failed to load url via Electron require:`, err);
+        }
+        // Fallback - provide basic pathToFileURL implementation
+        console.warn(`[loadNodeModule] URL module not available, providing fallback pathToFileURL`);
+        return {
+          pathToFileURL: (path: string) => {
+            // Simple fallback for pathToFileURL
+            if (path.startsWith('file://')) {
+              return { href: path };
+            }
+            // Convert Windows/Unix paths to file:// URLs
+            const normalizedPath = path.replace(/\\/g, '/');
+            const fileUrl = normalizedPath.startsWith('/') 
+              ? `file://${normalizedPath}`
+              : `file:///${normalizedPath}`;
+            return { href: fileUrl };
+          },
+          fileURLToPath: (url: string | URL) => {
+            const urlStr = typeof url === 'string' ? url : url.href;
+            return urlStr.replace(/^file:\/\/\/?/, '').replace(/\//g, '\\');
+          }
+        } as T;
+
+      case "zod":
+        console.log(`[loadNodeModule] Loading Zod via Electron require...`);
+        try {
+          if (typeof window !== 'undefined' && (window as any).require) {
+            const zod = (window as any).require('zod');
+            console.log(`[loadNodeModule] Zod loaded successfully:`, zod);
+            return zod as T;
+          }
+        } catch (err) {
+          console.error(`[loadNodeModule] Failed to load zod via Electron require:`, err);
+        }
+        // Fallback - return empty object which will cause the error we're seeing
+        console.warn(`[loadNodeModule] Zod not available in Electron renderer, returning empty object`);
+        return {} as T;
 
       default:
         console.warn(
@@ -112,6 +211,20 @@ export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
       } else if (name === 'fs/promises') {
         const fsPromises = await import('fs/promises');
         return fsPromises as T;
+      } else if (name === 'zod') {
+        const zodModule = await import('zod');
+        return zodModule as T;
+      } else if (name === 'json5') {
+        const json5Module = await import('json5');
+        // Handle both CommonJS and ESM exports
+        return (json5Module.default || json5Module) as T;
+      } else if (name === 'url') {
+        const urlModule = await import('url');
+        return urlModule as T;
+      } else {
+        // Generic dynamic import for other modules
+        const module = await import(name);
+        return module as T;
       }
     } catch (err) {
       console.warn(`[loadNodeModule] Failed to import ${name}:`, err);

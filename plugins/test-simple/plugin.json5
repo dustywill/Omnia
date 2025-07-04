@@ -1,0 +1,12 @@
+{
+  // Test Simple Plugin Manifest
+  id: "test-simple",
+  name: "Test Simple Plugin",
+  version: "1.0.0", 
+  description: "A simple test plugin for development and testing",
+  author: "Omnia Team",
+  type: "simple",
+  main: "index.tsx",
+  permissions: [],
+  dependencies: []
+}

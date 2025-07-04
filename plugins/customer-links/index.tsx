@@ -5,7 +5,27 @@ import { Button } from '../../src/ui/components/Button/Button.js';
 import { Badge } from '../../src/ui/components/Badge/Badge.js';
 import { Grid } from '../../src/ui/components/Grid/Grid.js';
 // @ts-ignore
-import { CustomerLinksConfigSchema, type CustomerLinksConfig, type CustomerSite } from './config-schema.js';
+import { createSchemas } from './config-schema.js';
+
+// Type definitions
+export type CustomerLinksConfig = {
+  configFilePath: string;
+  outputDirectory: string;
+  title: string;
+  showDescription: boolean;
+  autoReload: boolean;
+  htmlTemplate: 'simple' | 'styled' | 'cards';
+  customCss: string;
+  openAfterGenerate: boolean;
+  validateUrls: boolean;
+  maxSites: number;
+};
+
+export type CustomerSite = {
+  id: string;
+  name: string;
+  url: string;
+};
 
 // Default configuration
 export const defaultConfig: CustomerLinksConfig = {
@@ -22,7 +42,11 @@ export const defaultConfig: CustomerLinksConfig = {
 };
 
 // Configuration schema export for the plugin system
-export { CustomerLinksConfigSchema as configSchema };
+// Export config schema factory function
+export const configSchema = async () => {
+  const { CustomerLinksConfigSchema } = await createSchemas();
+  return CustomerLinksConfigSchema;
+};
 
 // Utility functions
 export const scanCustomerSites = async (filePath: string): Promise<CustomerSite[]> => {

@@ -3,16 +3,12 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import fs from 'fs/promises';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { AsBuiltDocumenter } from '../../plugins/as-built-documenter/index.js';
 
 // Mock the loadNodeModule function at the top level
 jest.mock('../../src/ui/node-module-loader.js', () => ({
   loadNodeModule: jest.fn(),
 }));
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 describe('as-built documenter plugin', () => {
   it('lists Markdown templates in dropdown and allows clearing', async () => {
@@ -66,7 +62,7 @@ describe('as-built documenter plugin', () => {
   });
 
   it('saves templates to templates/as-built folder', async () => {
-    const dir = path.join(__dirname, 'tmp-save');
+    const dir = path.join(process.cwd(), 'tmp-save');
     const saveDir = path.join(dir, 'templates', 'as-built');
     await fs.rm(dir, { recursive: true, force: true });
     await fs.mkdir(saveDir, { recursive: true });

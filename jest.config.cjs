@@ -19,7 +19,6 @@ const config = {
   ],
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
   testPathIgnorePatterns: ['<rootDir>/tests/e2e/', '<rootDir>/dist/'],
-
 };
 
 module.exports = config;

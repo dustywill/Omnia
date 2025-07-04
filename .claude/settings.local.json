@@ -29,7 +29,17 @@
       "Bash(git checkout:*)",
       "Bash(git add:*)",
       "Bash(find:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(timeout 15 npm run electron)",
+      "WebFetch(domain:zod.dev)",
+      "WebFetch(domain:www.typescriptlang.org)",
+      "Bash(timeout 8 npm run electron)",
+      "Bash(timeout 5s npm run dev:*)",
+      "Bash(timeout 3s npm run dev:*)",
+      "Bash(ls:*)",
+      "Bash(timeout 5s npm run electron:*)",
+      "Bash(timeout:*)",
+      "Bash(tsc:*)"
     ],
     "deny": []
   }

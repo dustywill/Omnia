@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { loadNodeModule } from '../../src/ui/node-module-loader.js';
 
 export type AsBuiltDocumenterProps = {
-  templates: string[];
+  templates?: string[];
   onLoad?: (file: File) => void;
   saveDir?: string;
   initialContent?: string;
@@ -10,18 +10,21 @@ export type AsBuiltDocumenterProps = {
   configPath?: string;
 };
 
-export const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({
-  templates,
+const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({
+  templates = [],
   onLoad,
   saveDir = 'templates/as-built',
   initialContent,
   dataSources = {},
   configPath,
 }) => {
+  // Ensure templates is always an array to prevent map errors
+  const safeTemplates = Array.isArray(templates) ? templates : [];
+  const safeSources = dataSources && typeof dataSources === 'object' ? dataSources : {};
   const [template, setTemplate] = useState('');
   const [content, setContent] = useState(initialContent ?? '');
   const [sourceId, setSourceId] = useState('');
-  const [sources, setSources] = useState<Record<string, { url: string }>>(dataSources);
+  const [sources, setSources] = useState<Record<string, { url: string }>>(safeSources);
   const [sample, setSample] = useState<unknown>(null);
   const [sampleIndex, setSampleIndex] = useState(0);
   const [copied, setCopied] = useState(false);
@@ -92,7 +95,7 @@ export const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({
         onChange={(e) => setTemplate(e.target.value)}
       >
         <option value="">(none)</option>
-        {templates.map((t) => (
+        {safeTemplates.map((t) => (
           <option key={t} value={t}>
             {t}
           </option>
@@ -195,7 +198,7 @@ export const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({
               </tr>
             </thead>
             <tbody>
-              {Object.keys((sample as any)[0]).map((key: string) => (
+              {Array.isArray(sample) && sample.length > 0 && sample[0] && Object.keys(sample[0]).map((key: string) => (
                 <tr key={key}>
                   <td>{key}</td>
                   <td>

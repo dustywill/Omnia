@@ -1,6 +1,7 @@
 import React from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { CardGrid, type CardGridItem } from './components/CardGrid.js';
+import { AppHeader } from './components/AppHeader/AppHeader.js';
 import { EnhancedPluginManager, PluginType } from '../core/enhanced-plugin-manager.js';
 import { ServiceRegistry } from '../core/service-registry.js';
 import { createEventBus } from '../core/event-bus.js';
@@ -140,6 +141,7 @@ export const initEnhancedRenderer = async (
   // Initialize core systems
   console.log('[initEnhancedRenderer] Initializing settings manager');
   const settingsManager = new SettingsManager(configPath);
+  await settingsManager.init();
   
   console.log('[initEnhancedRenderer] Initializing service registry');
   const serviceRegistry = new ServiceRegistry(createEventBus(), {
@@ -155,6 +157,7 @@ export const initEnhancedRenderer = async (
     settingsManager,
     serviceRegistry,
   });
+  await pluginManager.init();
   
   // Discover and load plugin information
   console.log('[initEnhancedRenderer] Discovering plugins');
@@ -231,8 +234,16 @@ export const initEnhancedRenderer = async (
     }),
   }));
 
+  // Create the main application layout with header and plugin grid
+  const App = () => (
+    React.createElement('div', { className: 'omnia-app' },
+      React.createElement(AppHeader),
+      React.createElement(CardGrid, { items })
+    )
+  );
+
   const root = createRoot(opts.container);
-  root.render(React.createElement(CardGrid, { items }));
+  root.render(React.createElement(App));
   
   console.log('[initEnhancedRenderer] Enhanced renderer initialized successfully');
   return root;

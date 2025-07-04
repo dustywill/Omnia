@@ -1610,9 +1610,151 @@ Check the existing plugins for examples:
 - Real-time statistics and monitoring
 - Plugin-to-plugin communication examples
 
+## Troubleshooting
+
+### Common Plugin Loading Issues
+
+#### 1. CSS Module Import Errors (RESOLVED)
+```
+Card.module.css:1 Failed to load module script: Expected a JavaScript-or-Wasm module script but the server responded with a MIME type of "text/css"
+```
+**Solution**: This is automatically handled by the build system. CSS modules are processed into JavaScript objects during build. Just use normal CSS module imports:
+```tsx
+import styles from './MyComponent.module.css'; // ✅ Works correctly
+```
+
+#### 2. Plugin Export Validation Errors
+```
+Simple plugin must export a component
+```
+**Causes & Solutions**:
+- **Missing export**: Ensure your plugin exports either a named `component` or a default export
+- **Incorrect export pattern**: 
+  ```tsx
+  // ✅ Option 1: Named export
+  export const component = MyPluginComponent;
+  
+  // ✅ Option 2: Default export
+  export default MyPluginComponent;
+  ```
+
+#### 3. Manifest File Not Found
+```
+Could not load manifest for plugin my-plugin: Error: ENOENT: no such file or directory
+```
+**Solution**: Ensure `plugin.json5` exists in your plugin directory with required fields:
+```json5
+{
+  id: "my-plugin",
+  name: "My Plugin",
+  version: "1.0.0",
+  type: "simple", // or "configured" or "advanced"
+  main: "index.tsx",
+  permissions: []
+}
+```
+
+#### 4. Plugin Module Loading Failures
+```
+Failed to fetch dynamically imported module: file:///path/to/plugin/index.js
+```
+**Solutions**:
+- Run `npm run build` to ensure plugin is compiled
+- Check that `dist/plugins/my-plugin/index.js` exists
+- Verify import paths are correct in compiled plugin
+
+#### 5. Configuration Schema Errors
+```
+Failed to load config schema for plugin: Error loading config-schema.js
+```
+**For Configured Plugins**:
+- Ensure `config-schema.js` file exists in plugin directory
+- Export schema correctly:
+  ```typescript
+  import { z } from 'zod';
+  export const configSchema = z.object({
+    myField: z.string().default('default value')
+  });
+  ```
+
+### Plugin Development Debugging
+
+#### Console Debugging
+Enable detailed plugin loading logs:
+1. Open browser developer tools
+2. Look for `[EnhancedPluginPanel]` and `[initEnhancedRenderer]` log messages
+3. Check for specific plugin loading errors
+
+#### Build Verification
+```bash
+# 1. Clean build
+npm run clean
+npm run build
+
+# 2. Check generated files
+ls dist/plugins/my-plugin/
+# Should contain: index.js and any .module.css.js files
+
+# 3. Test in Electron
+npm run electron
+```
+
+#### Plugin Registry Issues
+If plugins aren't appearing:
+1. Check `config/plugins.json5` for plugin entries
+2. Ensure plugin is enabled: `"enabled": true`
+3. Verify plugin ID matches directory name
+
+### CSS and Styling Issues
+
+#### CSS Modules Not Working
+- CSS modules are automatically processed during build
+- Check that `.module.css.js` files are generated in dist/
+- Verify imports in compiled JS point to `.css.js` files
+
+#### Tailwind Classes Not Working
+- Ensure global CSS is loaded
+- Use theme variables: `bg-theme-surface`, `text-theme-primary`
+- Combine with CSS modules for complex behavior
+
+### Performance Issues
+
+#### Slow Plugin Loading
+- Check for large dependencies in plugin code
+- Use dynamic imports for heavy libraries
+- Implement proper error boundaries
+
+#### Memory Leaks
+- Clean up event listeners in plugin cleanup
+- Unsubscribe from services when plugin unloads
+- Avoid circular references in plugin context
+
+### Advanced Plugin Issues
+
+#### Service Registration Failures
+```
+Failed to initialize service my-service for plugin my-plugin
+```
+**Solutions**:
+- Ensure service is exported correctly in plugin module
+- Check service manifest matches implementation
+- Verify required permissions are granted
+
+#### Permission Denied Errors
+```
+Plugin my-plugin requests invalid permissions: some-permission
+```
+**Valid permissions**:
+- `filesystem:read`, `filesystem:write`
+- `network:http`
+- `system:exec`
+- `plugins:communicate`
+- `settings:read`, `settings:write`
+
 ## Getting Help
 
 - **Documentation**: 
+  - [Asset Loading Guide](./ASSET_LOADING.md) for CSS module details
   - [Settings API](./SETTINGS_API.md) for configuration details
   - [Architecture Guide](./ARCHITECTURE.md) for system overview
   - [Implementation Plan](./IMPLEMENTATION_PLAN.md) for development status

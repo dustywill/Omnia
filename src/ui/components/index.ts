@@ -22,6 +22,9 @@ export type { SidebarProps, SidebarItemProps } from './Sidebar/Sidebar.js';
 export { AppNavigation } from './AppNavigation/AppNavigation.js';
 export type { AppNavigationProps } from './AppNavigation/AppNavigation.js';
 
+export { AppHeader } from './AppHeader/AppHeader.js';
+export type { AppHeaderProps } from './AppHeader/AppHeader.js';
+
 // Complex Components
 export { PluginCard } from './PluginCard/PluginCard.js';
 export type { PluginCardProps, Plugin } from './PluginCard/PluginCard.js';

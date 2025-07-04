@@ -1,0 +1,15 @@
+{
+  // Context Generator Plugin Manifest
+  id: "context-generator",
+  name: "Context Generator", 
+  version: "1.0.0",
+  description: "Generate context information and documentation for projects",
+  author: "Omnia Team",
+  type: "simple",
+  main: "index.tsx",
+  permissions: [
+    "filesystem:read",
+    "filesystem:write"
+  ],
+  dependencies: []
+}

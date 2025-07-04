@@ -3,12 +3,8 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import fs from 'fs/promises';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import type { FileNode } from '../../src/ui/components/FileScanner.js';
 import { ContextGenerator } from '../../plugins/context-generator/index.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 describe('context generator plugin', () => {
   it('uses FileScanner to choose files', async () => {
@@ -34,7 +30,7 @@ describe('context generator plugin', () => {
   });
 
   it('shows progress and character count when generating context', async () => {
-    const dir = path.join(__dirname, 'tmp');
+    const dir = path.join(process.cwd(), 'tmp');
     await fs.rm(dir, { recursive: true, force: true });
     await fs.mkdir(dir, { recursive: true });
     const fileA = path.join(dir, 'a.txt');
@@ -61,7 +57,7 @@ describe('context generator plugin', () => {
   });
 
   it('displays progress in output area with character count', async () => {
-    const dir = path.join(__dirname, 'tmpout');
+    const dir = path.join(process.cwd(), 'tmpout');
     await fs.rm(dir, { recursive: true, force: true });
     await fs.mkdir(dir, { recursive: true });
     const file1 = path.join(dir, 'one.txt');
@@ -91,7 +87,7 @@ describe('context generator plugin', () => {
   });
 
   it('copies context to clipboard and shows confirmation', async () => {
-    const dir = path.join(__dirname, 'tmpcopy');
+    const dir = path.join(process.cwd(), 'tmpcopy');
     await fs.rm(dir, { recursive: true, force: true });
     await fs.mkdir(dir, { recursive: true });
     const file = path.join(dir, 'c.txt');

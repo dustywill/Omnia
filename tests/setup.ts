@@ -1,5 +1,12 @@
 // Jest setup file - using ES modules
 import '@testing-library/jest-dom';
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+// TypeScript declaration for global utilities
+declare global {
+  function getTestPath(importMetaUrl: string): { filename: string; dirname: string };
+}
 
 // Add DOM polyfills for CodeMirror
 global.Range.prototype.getClientRects = function() {
@@ -34,5 +41,12 @@ if (!global.navigator.clipboard) {
     writable: true,
   });
 }
+
+// Utility for path resolution in tests
+global.getTestPath = function(importMetaUrl) {
+  const filename = fileURLToPath(importMetaUrl);
+  const dirname = path.dirname(filename);
+  return { filename, dirname };
+};
 
 // ES module - no exports needed

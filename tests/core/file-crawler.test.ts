@@ -1,12 +1,9 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { afterEach, beforeEach, describe, expect, it } from '@jest/globals';
 import { getFileTree } from '../../src/core/file-crawler.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const tmpDir = path.join(__dirname, 'tree');
+const tmpDir = path.join(process.cwd(), 'tree');
 
 afterEach(async () => {
   await fs.rm(tmpDir, { recursive: true, force: true });

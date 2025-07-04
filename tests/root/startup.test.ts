@@ -1,14 +1,14 @@
 import { jest } from '@jest/globals';
 
-jest.unstable_mockModule('../../src/ui/renderer.js', () => ({
-  initRenderer: jest.fn(),
+jest.unstable_mockModule('../../src/ui/main-app-renderer.js', () => ({
+  initMainAppRenderer: jest.fn(),
 }));
 
 beforeEach(() => {
   jest.resetModules();
 });
 
-it('calls initRenderer with discovered plugins', async () => {
+it('calls initMainAppRenderer with discovered plugins', async () => {
   const { start } = await import('../../src/index.js');
   const mockInit = jest.fn();
   await start({ init: mockInit as any });
@@ -16,8 +16,8 @@ it('calls initRenderer with discovered plugins', async () => {
 });
 
 it('logs options when start fails', async () => {
-  jest.unstable_mockModule('../../src/ui/renderer.js', () => ({
-    initRenderer: () => {
+  jest.unstable_mockModule('../../src/ui/main-app-renderer.js', () => ({
+    initMainAppRenderer: () => {
       throw new Error('boom');
     },
   }));

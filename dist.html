@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Omnia Application</title>
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self' https://esm.sh https://cdnjs.cloudflare.com; script-src 'self' 'unsafe-inline' https://esm.sh https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;"
+    />
+    <!-- Global Styles -->
+    <link rel="stylesheet" href="./ui/global.css" />
+    
+    <!-- Component CSS Modules -->
+    <link rel="stylesheet" href="./ui/components/AppHeader/AppHeader.module.css" />
+    <link rel="stylesheet" href="./ui/components/AppNavigation/AppNavigation.module.css" />
+    <link rel="stylesheet" href="./ui/components/AppSettings/AppSettings.module.css" />
+    <link rel="stylesheet" href="./ui/components/Card/Card.module.css" />
+    <link rel="stylesheet" href="./ui/components/PluginCard/PluginCard.module.css" />
+    <link rel="stylesheet" href="./ui/components/PluginSettings/PluginSettings.module.css" />
+    <link rel="stylesheet" href="./ui/components/SchemaForm/SchemaForm.module.css" />
+    <link rel="stylesheet" href="./ui/components/SettingsForm/SettingsForm.module.css" />
+    <link rel="stylesheet" href="./ui/components/SettingsPage/SettingsPage.module.css" />
+    <link rel="stylesheet" href="./ui/components/Sidebar/Sidebar.module.css" />
+    
+    <!-- Component CSS -->
+    <link rel="stylesheet" href="./ui/components/CardGrid.css" />
+    <link rel="stylesheet" href="./ui/components/FileScanner.css" />
+    <link rel="stylesheet" href="./ui/components/JsonEditor.css" />
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <div id="app">Loading...</div>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "react": "https://esm.sh/react@19.1.0",
+          "react/jsx-runtime": "https://esm.sh/react@19.1.0/jsx-runtime",
+          "react-dom/client": "https://esm.sh/react-dom@19.1.0/client"
+        }
+      }
+    </script>
+
+    <script type="module">
+      // Wait for the DOM to be ready and check if we have the necessary APIs
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          // Check if we're in Electron
+          if (window.electronAPI) {
+            console.log("Electron APIs available");
+          } else {
+            console.warn(
+              "Electron APIs not available - running in browser mode",
+            );
+          }
+
+          // Import and start your application
+          const { start } = await import("./index.js");
+          await start();
+        } catch (error) {
+          console.error("Failed to start application:", error);
+          document.getElementById("app").innerHTML = `
+          <div style="padding: 20px; color: red;">
+            <h2>Application Failed to Start</h2>
+            <p>Error: ${error.message}</p>
+            <details>
+              <summary>Stack Trace</summary>
+              <pre>${error.stack}</pre>
+            </details>
+          </div>
+        `;
+        }
+      });
+    </script>
+  </body>
+</html>

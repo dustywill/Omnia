@@ -10,14 +10,34 @@
     {
       name: "script-execution",
       description: "Execute scripts with parameters and return output",
-      methods: ["executeScript", "getAvailableScripts", "validateScriptPath"]
+      methods: {
+        executeScript: {
+          description: "Execute a script with parameters",
+          parameters: {
+            scriptPath: "string",
+            parameters: "string[]"
+          },
+          returnType: "ExecutionResult"
+        },
+        getAvailableScripts: {
+          description: "Get list of available scripts",
+          parameters: {},
+          returnType: "Script[]"
+        },
+        validateScriptPath: {
+          description: "Validate if script path is allowed",
+          parameters: {
+            scriptPath: "string"
+          },
+          returnType: "boolean"
+        }
+      }
     }
   ],
   permissions: [
     "filesystem:read",
     "filesystem:write", 
-    "process:execute",
-    "process:spawn"
+    "system:exec"
   ],
   dependencies: [],
   configSchema: "config-schema.js"

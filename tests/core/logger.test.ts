@@ -1,13 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import fs from 'fs/promises';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
 import { createLogger } from '../../src/core/logger.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const logFile = path.join(__dirname, 'test.log');
+const logFile = path.join(process.cwd(), 'tests', 'test.log');
 
 beforeEach(async () => {
   await fs.writeFile(logFile, '', 'utf8');

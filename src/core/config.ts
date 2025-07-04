@@ -1,6 +1,3 @@
-import fs from 'fs/promises';
-import fsSync from 'fs';
-import JSON5 from 'json5';
 import { z } from 'zod';
 import type { EventBus } from './event-bus.js';
 
@@ -13,6 +10,9 @@ export const AppConfigSchema = z.record(z.unknown());
 export type AppConfig = z.infer<typeof AppConfigSchema>;
 
 export const readConfig = async (path: string): Promise<AppConfig> => {
+  const { loadNodeModule } = await import('../ui/node-module-loader.js');
+  const fs = await loadNodeModule<typeof import('fs/promises')>('fs/promises');
+  const JSON5 = await loadNodeModule<typeof import('json5')>('json5');
   const text = await fs.readFile(path, 'utf8');
   const data = JSON5.parse(text);
   return AppConfigSchema.parse(data);
@@ -22,6 +22,9 @@ export const writeConfig = async (
   path: string,
   config: AppConfig,
 ): Promise<void> => {
+  const { loadNodeModule } = await import('../ui/node-module-loader.js');
+  const fs = await loadNodeModule<typeof import('fs/promises')>('fs/promises');
+  const JSON5 = await loadNodeModule<typeof import('json5')>('json5');
   const text = JSON5.stringify(config, null, 2);
   await fs.writeFile(path, text, 'utf8');
 };
@@ -46,10 +49,12 @@ export const loadConfig = async (
   }
 };
 
-export const watchConfig = (
+export const watchConfig = async (
   path: string,
   bus: EventBus<{ configChanged: AppConfig }>,
-): (() => void) => {
+): Promise<() => void> => {
+  const { loadNodeModule } = await import('../ui/node-module-loader.js');
+  const fsSync = await loadNodeModule<typeof import('fs')>('fs');
   const onChange = async () => {
     try {
       const config = await readConfig(path);

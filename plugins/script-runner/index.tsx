@@ -6,9 +6,42 @@ import { Input } from '../../src/ui/components/Input/Input.js';
 import { Badge } from '../../src/ui/components/Badge/Badge.js';
 import { Grid } from '../../src/ui/components/Grid/Grid.js';
 // @ts-ignore
-import { ScriptRunnerConfigSchema, type ScriptRunnerConfig, type Script } from './config-schema.js';
+import { createSchemas } from './config-schema.js';
 
 export type ScriptStatus = 'idle' | 'running' | 'success' | 'error';
+
+// Type definitions (these will be inferred from zod schemas)
+export type ScriptRunnerConfig = {
+  scriptsDirectory: string;
+  outputDirectory: string;
+  defaultShell: 'powershell' | 'pwsh' | 'cmd';
+  timeout: number;
+  maxConcurrentScripts: number;
+  showAdvancedOptions: boolean;
+  autoSaveOutput: boolean;
+  showExecutionHistory: boolean;
+  allowedExtensions: string[];
+  restrictToScriptsDirectory: boolean;
+  maxOutputLength: number;
+  preserveOutputFormatting: boolean;
+  enableService: boolean;
+  serviceApiKey?: string;
+};
+
+export type Script = {
+  id: string;
+  name: string;
+  description: string;
+  path: string;
+  category: string;
+  parameters: Array<{
+    name: string;
+    description: string;
+    required: boolean;
+    type: 'string' | 'number' | 'boolean';
+    defaultValue?: string;
+  }>;
+};
 
 export type ExecutionResult = {
   success: boolean;
@@ -40,7 +73,11 @@ export const defaultConfig: ScriptRunnerConfig = {
 };
 
 // Configuration schema export for the plugin system
-export { ScriptRunnerConfigSchema as configSchema };
+// Export config schema factory function
+export const configSchema = async () => {
+  const { ScriptRunnerConfigSchema } = await createSchemas();
+  return ScriptRunnerConfigSchema;
+};
 
 // Service implementation for script execution
 export class ScriptExecutionService {

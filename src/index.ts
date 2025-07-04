@@ -1,8 +1,8 @@
 import { loadNodeModule } from "./ui/node-module-loader.js";
-import { initEnhancedRenderer } from "./ui/enhanced-renderer.js";
+import { initMainAppRenderer } from "./ui/main-app-renderer.js";
 
 export type StartOptions = {
-  init?: typeof initEnhancedRenderer;
+  init?: typeof initMainAppRenderer;
 };
 
 export const start = async (opts?: StartOptions): Promise<void> => {
@@ -11,7 +11,8 @@ export const start = async (opts?: StartOptions): Promise<void> => {
   const path = await loadNodeModule<typeof import("path")>("path");
   console.log('[start] Modules loaded successfully');
   
-  if (typeof document === "undefined") {
+  // Only setup JSDOM in Node.js environment (not Electron renderer)
+  if (typeof document === "undefined" && typeof window === "undefined") {
     const { JSDOM } = await import("jsdom");
     const dom = new JSDOM("<!doctype html><html><body></body></html>");
     Object.assign(globalThis, {
@@ -28,9 +29,9 @@ export const start = async (opts?: StartOptions): Promise<void> => {
         }
       } as unknown as typeof MutationObserver;
     }
-    if (!window.requestAnimationFrame) {
-      window.requestAnimationFrame = (cb) => setTimeout(cb, 0);
-      window.cancelAnimationFrame = (id) =>
+    if (!(globalThis as any).window.requestAnimationFrame) {
+      (globalThis as any).window.requestAnimationFrame = (cb: any) => setTimeout(cb, 0);
+      (globalThis as any).window.cancelAnimationFrame = (id: any) =>
         clearTimeout(id as unknown as NodeJS.Timeout);
     }
   }
@@ -48,22 +49,22 @@ export const start = async (opts?: StartOptions): Promise<void> => {
   console.log('[start] Current working directory:', cwd);
   
   console.log('[start] Building plugins source path...');
-  const sourcePluginsPath = await path.join(cwd, "plugins");
+  const sourcePluginsPath = path.join(cwd, "plugins");
   console.log('[start] Source plugins path:', sourcePluginsPath);
   
   console.log('[start] Building plugins dist path...');
-  const distPluginsPath = await path.join(cwd, "dist", "plugins");
+  const distPluginsPath = path.join(cwd, "dist", "plugins");
   console.log('[start] Dist plugins path:', distPluginsPath);
   
   console.log('[start] Building config path...');
-  const configPath = await path.join(cwd, "config");
+  const configPath = path.join(cwd, "config");
   console.log('[start] Config path:', configPath);
   
-  console.log('[start] Initializing enhanced renderer...');
-  const renderer = opts?.init ?? initEnhancedRenderer;
+  console.log('[start] Initializing main application renderer...');
+  const renderer = opts?.init ?? initMainAppRenderer;
   await renderer({ 
     container, 
-    pluginsPath: sourcePluginsPath, // Use source path so enhanced manager can access manifests
+    pluginsPath: sourcePluginsPath, // Use source path for manifest discovery
     configPath 
   });
   console.log('[start] Renderer initialized successfully');

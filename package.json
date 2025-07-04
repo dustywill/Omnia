@@ -7,7 +7,7 @@
     "test:only": "node --experimental-vm-modules ./node_modules/.bin/jest",
     "test:e2e": "playwright test",
     "clean": "node -e \"import('fs').then(fs=>fs.rmSync('dist',{recursive:true,force:true}))\"",
-    "build": "npm run clean && tsc -p tsconfig.build.json && tsc -p tsconfig.plugins.json && node scripts/fix-plugin-imports.js && node -e \"import('fs').then(fs=>fs.copyFileSync('src/preload.js','dist/preload.js'))\"",
+    "build": "npm run clean && tsc -p tsconfig.build.json && tsc -p tsconfig.plugins.json && node scripts/copy-assets.js && node scripts/process-css-modules.js && node scripts/fix-plugin-imports.js",
     "electron": "npm run build && electron dist/electron-main.js",
     "dev": "node --loader ts-node/esm --loader ./loaders/css-loader.js src/index.ts",
     "start": "node --loader ./loaders/css-loader.js dist/index.js"
@@ -36,7 +36,7 @@
     "tailwindcss": "^4.1.11",
     "ts-jest": "^29.4.0",
     "typescript": "^5.2.2",
-    "zod": "^3.22.4"
+    "zod": "^3.25.72"
   },
   "dependencies": {
     "@playwright/test": "^1.53.1",

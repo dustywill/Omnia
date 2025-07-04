@@ -157,7 +157,7 @@ export const createWindow = async (
     },
   });
 
-  const indexPath = path.join(process.cwd(), "index.html");
+  const indexPath = path.join(process.cwd(), "dist", "index.html");
   logger?.info(`Loading file: ${indexPath}`);
   await win.loadFile(indexPath);
 

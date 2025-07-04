@@ -1,13 +1,10 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { describe, it, beforeEach, afterEach, expect } from '@jest/globals';
 import { createPluginManager } from '../../src/core/plugin-manager.js';
 import { createEventBus } from '../../src/core/event-bus.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const fixturesDir = path.join(__dirname, 'fixtures');
+const fixturesDir = path.join(process.cwd(), 'fixtures');
 const pluginsDir = path.join(fixturesDir, 'plugins');
 const configPath = path.join(fixturesDir, 'app-config.json5');
 

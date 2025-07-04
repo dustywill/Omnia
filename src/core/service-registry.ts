@@ -64,7 +64,8 @@ export class ServiceRegistry {
     const serviceKey = `${name}@${version}`;
 
     // Validate provider has required permissions
-    const hasPermissions = requiredPermissions.every(permission => 
+    // Handle undefined or empty permissions arrays
+    const hasPermissions = (requiredPermissions || []).every(permission => 
       providerPermissions.includes(permission)
     );
 
@@ -83,7 +84,7 @@ export class ServiceRegistry {
     };
 
     this.services.set(serviceKey, registeredService);
-    this.servicePermissions.set(serviceKey, new Set(requiredPermissions));
+    this.servicePermissions.set(serviceKey, new Set(requiredPermissions || []));
 
     this.logger.info(`Service registered: ${serviceKey} by ${providerId}`);
     
@@ -92,7 +93,7 @@ export class ServiceRegistry {
       serviceName: name,
       version,
       providerId,
-      permissions: requiredPermissions
+      permissions: requiredPermissions || []
     } as any);
   }
 
