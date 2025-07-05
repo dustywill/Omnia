@@ -1,6 +1,5 @@
 import React from 'react';
-import { PluginCard } from '../components/PluginCard/PluginCard.js';
-import { Button } from '../components/Button/Button.js';
+import { DashboardPluginCard } from '../components/DashboardPluginCard/DashboardPluginCard.js';
 import { type PluginInfo } from '../main-app-renderer.js';
 
 export interface DashboardViewProps {
@@ -12,9 +11,7 @@ export interface DashboardViewProps {
 
 export function DashboardView({ 
   plugins, 
-  onPluginSelect, 
-  onPluginToggle, 
-  onPluginConfigure 
+  onPluginSelect
 }: DashboardViewProps) {
   const activePlugins = plugins.filter(p => p.status === 'active');
   const inactivePlugins = plugins.filter(p => p.status === 'inactive');
@@ -63,7 +60,7 @@ export function DashboardView({
   };
 
   return (
-    <div>
+    <div style={{ height: '100vh', overflowY: 'auto' }}>
       {/* Header */}
       <header style={headerStyle}>
         <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1f2937', marginBottom: '0.5rem' }}>
@@ -112,27 +109,11 @@ export function DashboardView({
             <h2 style={sectionHeaderStyle}>Active Plugins</h2>
             <div style={pluginGridStyle}>
               {activePlugins.map((plugin) => (
-                <div key={plugin.id} style={{ position: 'relative' }}>
-                  <PluginCard
-                    plugin={plugin}
-                    onToggle={onPluginToggle}
-                    onConfigure={onPluginConfigure}
-                  />
-                  <div style={{ 
-                    position: 'absolute', 
-                    top: '1rem', 
-                    right: '1rem',
-                    zIndex: 10
-                  }}>
-                    <Button
-                      variant="action"
-                      size="sm"
-                      onClick={() => onPluginSelect(plugin.id)}
-                    >
-                      Open Tool
-                    </Button>
-                  </div>
-                </div>
+                <DashboardPluginCard
+                  key={plugin.id}
+                  plugin={plugin}
+                  onPluginSelect={onPluginSelect}
+                />
               ))}
             </div>
           </section>
@@ -144,11 +125,10 @@ export function DashboardView({
             <h2 style={sectionHeaderStyle}>Available Plugins</h2>
             <div style={pluginGridStyle}>
               {inactivePlugins.map((plugin) => (
-                <PluginCard
+                <DashboardPluginCard
                   key={plugin.id}
                   plugin={plugin}
-                  onToggle={onPluginToggle}
-                  onConfigure={onPluginConfigure}
+                  onPluginSelect={onPluginSelect}
                 />
               ))}
             </div>
@@ -161,11 +141,10 @@ export function DashboardView({
             <h2 style={{ ...sectionHeaderStyle, color: '#dc2626' }}>Plugins with Issues</h2>
             <div style={pluginGridStyle}>
               {errorPlugins.map((plugin) => (
-                <PluginCard
+                <DashboardPluginCard
                   key={plugin.id}
                   plugin={plugin}
-                  onToggle={onPluginToggle}
-                  onConfigure={onPluginConfigure}
+                  onPluginSelect={onPluginSelect}
                 />
               ))}
             </div>

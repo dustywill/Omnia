@@ -74,13 +74,14 @@ The application follows a plugin-based architecture with these key components:
 - File watching for live configuration updates
 - Permission-based security system
 
-**Component Library**: Complete design system with 9 production-ready components
+**Component Library**: Complete design system with 18 production-ready components
 
 - `src/ui/components/` - Reusable UI components following hybrid styling approach
 - **Primitive Components**: Button, Input, Badge (Tailwind-heavy)
 - **Layout Components**: Card, Grid, Sidebar (Hybrid Tailwind + CSS Modules)
-- **Navigation Components**: AppNavigation (Unus-inspired sidebar)
-- **Complex Components**: PluginCard, SettingsForm (CSS Modules-heavy)
+- **Navigation Components**: AppNavigation (Unus-inspired sidebar with colorful icons)
+- **Complex Components**: PluginCard, DashboardPluginCard, StatusBar, SettingsForm (CSS Modules-heavy)
+- **UI Enhancements**: Clickable plugin cards with hover effects, status bar with plugin counts
 - TypeScript support with exported interfaces
 - CSS Modules for complex animations and state management
 

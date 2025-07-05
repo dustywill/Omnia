@@ -1,6 +1,7 @@
 import React from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { AppNavigation } from './components/AppNavigation/AppNavigation.js';
+import { StatusBar } from './components/StatusBar/StatusBar.js';
 import { DashboardView } from './views/DashboardView.js';
 import { PluginsView } from './views/PluginsView.js';
 import { SettingsView } from './views/SettingsView.js';
@@ -63,11 +64,21 @@ const MainApp: React.FC<{
     ? pluginInfos.find(p => p.id === selectedPluginId)
     : null;
 
+  const activePlugins = pluginInfos.filter(p => p.status === 'active').length;
+  const errorPlugins = pluginInfos.filter(p => p.status === 'error').length;
+
   const mainStyle: React.CSSProperties = {
     display: 'flex',
+    flexDirection: 'column',
     height: '100vh',
     fontFamily: "'Nunito Sans', sans-serif",
     backgroundColor: '#f8fafc'
+  };
+
+  const appBodyStyle: React.CSSProperties = {
+    display: 'flex',
+    flex: 1,
+    overflow: 'hidden'
   };
 
   const contentStyle: React.CSSProperties = {
@@ -77,12 +88,13 @@ const MainApp: React.FC<{
 
   return (
     <div style={mainStyle}>
-      <AppNavigation 
-        currentView={currentView === 'plugin-detail' ? 'plugins' : currentView} 
-        onViewChange={handleViewChange}
-      />
-      
-      <main style={contentStyle}>
+      <div style={appBodyStyle}>
+        <AppNavigation 
+          currentView={currentView === 'plugin-detail' ? 'plugins' : currentView} 
+          onViewChange={handleViewChange}
+        />
+        
+        <main style={contentStyle}>
         {currentView === 'dashboard' && (
           <DashboardView 
             plugins={pluginInfos}
@@ -133,7 +145,15 @@ const MainApp: React.FC<{
             onBack={handleBackToPlugins}
           />
         )}
-      </main>
+        </main>
+      </div>
+      
+      <StatusBar 
+        activePlugins={activePlugins}
+        totalPlugins={pluginInfos.length}
+        errorPlugins={errorPlugins}
+        currentView={currentView}
+      />
     </div>
   );
 };

@@ -9,7 +9,6 @@
 
 .sidebarItem:not(.active):hover {
   background-color: var(--tt-color-background);
-  transform: translateX(2px);
 }
 
 .sidebarItem.active {

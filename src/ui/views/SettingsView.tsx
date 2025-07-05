@@ -37,7 +37,7 @@ export function SettingsView({ plugins }: SettingsViewProps) {
   };
 
   return (
-    <div>
+    <div style={{ height: '100vh', overflowY: 'auto' }}>
       {/* Header */}
       <header style={headerStyle}>
         <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1f2937', marginBottom: '0.5rem' }}>

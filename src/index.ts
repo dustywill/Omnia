@@ -36,8 +36,11 @@ export const start = async (opts?: StartOptions): Promise<void> => {
     }
   }
 
-  const container = document.createElement("div");
-  document.body.appendChild(container);
+  const container = document.getElementById("app") || document.createElement("div");
+  if (!container.id) {
+    container.id = "app";
+    document.body.appendChild(container);
+  }
 
   console.log('[start] Getting current working directory...');
   const cwd =

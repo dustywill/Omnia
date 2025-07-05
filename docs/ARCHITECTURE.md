@@ -11,9 +11,11 @@ Omnia is built as a modern plugin-based application with a three-tier architectu
 │                        Omnia Application                        │
 ├─────────────────────────────────────────────────────────────────┤
 │  UI Layer (React + Tailwind + CSS Modules)                     │
-│  ├── Component Library (9 production components)               │
+│  ├── Component Library (18 production components)              │
+│  ├── Dashboard Plugin Cards (Clickable with hover effects)     │
+│  ├── Status Bar (Context-aware plugin status)                  │
 │  ├── Plugin UI Loader                                          │
-│  └── Unus-inspired Navigation                                  │
+│  └── Unus-inspired Navigation (Colorful icons, centered)       │
 ├─────────────────────────────────────────────────────────────────┤
 │  Plugin System                                                 │
 │  ├── Enhanced Plugin Manager                                   │

@@ -57,7 +57,7 @@ export function PluginsView({
   };
 
   return (
-    <div>
+    <div style={{ height: '100vh', overflowY: 'auto' }}>
       {/* Header */}
       <header style={headerStyle}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>

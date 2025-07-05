@@ -102,7 +102,6 @@
       }
     ]
   },
-
   {
     "CustomerName": "BWI",
     "sites": [
@@ -280,7 +279,6 @@
       }
     ]
   },
-
   {
     "CustomerName": "Textron",
     "sites": [
@@ -329,7 +327,6 @@
         "CIDR": 32,
         "Link": "/admin/configs"
       },
-
       {
         "Location": "TSTech - Tricon",
         "Label": "Tricon",

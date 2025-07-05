@@ -4,7 +4,7 @@ This document provides comprehensive documentation for the Omnia component libra
 
 ## Overview
 
-The Omnia component library consists of 16 production-ready components organized into five categories based on their styling approach:
+The Omnia component library consists of 18 production-ready components organized into five categories based on their styling approach:
 
 - **Primitive Components** (Tailwind-heavy): Basic UI elements
 - **Layout Components** (Hybrid approach): Structural and navigation components  
@@ -347,6 +347,75 @@ import { PluginCard } from '@/ui/components';
 **Features**:
 - Status-based styling (active, inactive, error, loading)
 - Loading animations with CSS keyframes
+- Action buttons with conditional rendering
+- Permission badge display
+- Error state handling
+
+#### DashboardPluginCard
+**Location**: `src/ui/components/DashboardPluginCard/DashboardPluginCard.tsx`
+
+Specialized plugin card for dashboard view with click-to-open functionality and enhanced visual feedback.
+
+**Props**:
+```typescript
+interface DashboardPluginCardProps {
+  plugin: PluginInfo;
+  onPluginSelect: (pluginId: string) => void;
+  className?: string;
+}
+```
+
+**Usage**:
+```jsx
+import { DashboardPluginCard } from '@/ui/components';
+
+<DashboardPluginCard
+  plugin={plugin}
+  onPluginSelect={handlePluginSelect}
+/>
+```
+
+**Features**:
+- Fully clickable cards with hand cursor for active plugins
+- Hover effects with elevation and shadow animation
+- Colorful plugin type icons (cyan for Simple, purple for Configured, amber for Hybrid)
+- Smart interaction states (active plugins clickable, inactive/error show status)
+- Visual feedback with "Click to open tool" messaging
+- Plugin metadata display (version, author, type)
+
+#### StatusBar
+**Location**: `src/ui/components/StatusBar/StatusBar.tsx`
+
+Application status bar showing plugin counts and current view context.
+
+**Props**:
+```typescript
+interface StatusBarProps {
+  activePlugins: number;
+  totalPlugins: number;
+  errorPlugins: number;
+  currentView: string;
+}
+```
+
+**Usage**:
+```jsx
+import { StatusBar } from '@/ui/components';
+
+<StatusBar 
+  activePlugins={activeCount}
+  totalPlugins={totalCount}
+  errorPlugins={errorCount}
+  currentView="plugins"
+/>
+```
+
+**Features**:
+- Context-aware display (plugin counts hidden on Dashboard)
+- Color-coded plugin status indicators (green/gray/red dots)
+- Current view labeling
+- Clean, minimal design matching application footer
+- Real-time plugin status tracking
 - Permission display
 - Action buttons with hover effects
 - Complex state management
