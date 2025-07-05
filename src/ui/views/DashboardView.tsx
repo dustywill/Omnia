@@ -7,21 +7,26 @@ export interface DashboardViewProps {
   onPluginSelect: (pluginId: string) => void;
   onPluginToggle: (pluginId: string) => void;
   onPluginConfigure: (pluginId: string) => void;
+  onViewChange?: (view: 'dashboard' | 'plugins' | 'settings') => void;
 }
 
 export function DashboardView({ 
   plugins, 
-  onPluginSelect
+  onPluginSelect,
+  onViewChange
 }: DashboardViewProps) {
   const activePlugins = plugins.filter(p => p.status === 'active');
   const inactivePlugins = plugins.filter(p => p.status === 'inactive');
   const errorPlugins = plugins.filter(p => p.status === 'error');
 
   const headerStyle: React.CSSProperties = {
-    padding: '2rem',
+    padding: '1rem 2rem',
     backgroundColor: '#ffffff',
     borderBottom: '1px solid #e5e7eb',
-    marginBottom: '2rem'
+    marginBottom: '1.5rem',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start'
   };
 
   const contentStyle: React.CSSProperties = {
@@ -30,19 +35,21 @@ export function DashboardView({
     margin: '0 auto'
   };
 
-  const statsGridStyle: React.CSSProperties = {
+  const miniStatsGridStyle: React.CSSProperties = {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    gap: '1rem',
-    marginBottom: '3rem'
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gap: '0.5rem',
+    width: '200px'
   };
 
-  const statCardStyle: React.CSSProperties = {
-    backgroundColor: '#ffffff',
-    padding: '1.5rem',
-    borderRadius: '8px',
+  const miniStatCardStyle: React.CSSProperties = {
+    backgroundColor: '#f8fafc',
+    padding: '0.75rem',
+    borderRadius: '6px',
     border: '1px solid #e5e7eb',
-    textAlign: 'center'
+    textAlign: 'center',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease'
   };
 
   const pluginGridStyle: React.CSSProperties = {
@@ -63,45 +70,104 @@ export function DashboardView({
     <div style={{ height: '100vh', overflowY: 'auto' }}>
       {/* Header */}
       <header style={headerStyle}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1f2937', marginBottom: '0.5rem' }}>
-          Dashboard
-        </h1>
-        <p style={{ color: '#6b7280', fontSize: '1.1rem' }}>
-          Overview of your plugin ecosystem
-        </p>
+        <div>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1f2937', marginBottom: '0.25rem' }}>
+            Dashboard
+          </h1>
+          <p style={{ color: '#6b7280', fontSize: '0.9rem' }}>
+            Overview of your plugin ecosystem
+          </p>
+        </div>
+        
+        {/* Mini Statistics Cards */}
+        <div style={miniStatsGridStyle}>
+          <div 
+            style={miniStatCardStyle}
+            onClick={() => onViewChange?.('plugins')}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#f0f9ff';
+              e.currentTarget.style.borderColor = '#bae6fd';
+              e.currentTarget.style.transform = 'translateY(-1px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#f8fafc';
+              e.currentTarget.style.borderColor = '#e5e7eb';
+              e.currentTarget.style.transform = 'translateY(0)';
+            }}
+            title="Click to view active plugins"
+          >
+            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#059669', marginBottom: '0.25rem' }}>
+              {activePlugins.length}
+            </div>
+            <div style={{ color: '#6b7280', fontSize: '0.6rem' }}>Active</div>
+          </div>
+          
+          <div 
+            style={miniStatCardStyle}
+            onClick={() => onViewChange?.('plugins')}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#f9fafb';
+              e.currentTarget.style.borderColor = '#d1d5db';
+              e.currentTarget.style.transform = 'translateY(-1px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#f8fafc';
+              e.currentTarget.style.borderColor = '#e5e7eb';
+              e.currentTarget.style.transform = 'translateY(0)';
+            }}
+            title="Click to view inactive plugins"
+          >
+            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#6b7280', marginBottom: '0.25rem' }}>
+              {inactivePlugins.length}
+            </div>
+            <div style={{ color: '#6b7280', fontSize: '0.6rem' }}>Inactive</div>
+          </div>
+          
+          <div 
+            style={miniStatCardStyle}
+            onClick={() => onViewChange?.('plugins')}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#fef2f2';
+              e.currentTarget.style.borderColor = '#fecaca';
+              e.currentTarget.style.transform = 'translateY(-1px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#f8fafc';
+              e.currentTarget.style.borderColor = '#e5e7eb';
+              e.currentTarget.style.transform = 'translateY(0)';
+            }}
+            title="Click to view plugins with errors"
+          >
+            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#dc2626', marginBottom: '0.25rem' }}>
+              {errorPlugins.length}
+            </div>
+            <div style={{ color: '#6b7280', fontSize: '0.6rem' }}>Errors</div>
+          </div>
+          
+          <div 
+            style={miniStatCardStyle}
+            onClick={() => onViewChange?.('plugins')}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#eff6ff';
+              e.currentTarget.style.borderColor = '#bfdbfe';
+              e.currentTarget.style.transform = 'translateY(-1px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#f8fafc';
+              e.currentTarget.style.borderColor = '#e5e7eb';
+              e.currentTarget.style.transform = 'translateY(0)';
+            }}
+            title="Click to view all plugins"
+          >
+            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#2563eb', marginBottom: '0.25rem' }}>
+              {plugins.length}
+            </div>
+            <div style={{ color: '#6b7280', fontSize: '0.6rem' }}>Total</div>
+          </div>
+        </div>
       </header>
 
       <div style={contentStyle}>
-        {/* Statistics Cards */}
-        <div style={statsGridStyle}>
-          <div style={statCardStyle}>
-            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#059669', marginBottom: '0.5rem' }}>
-              {activePlugins.length}
-            </div>
-            <div style={{ color: '#6b7280', fontSize: '0.875rem' }}>Active Plugins</div>
-          </div>
-          
-          <div style={statCardStyle}>
-            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#6b7280', marginBottom: '0.5rem' }}>
-              {inactivePlugins.length}
-            </div>
-            <div style={{ color: '#6b7280', fontSize: '0.875rem' }}>Inactive Plugins</div>
-          </div>
-          
-          <div style={statCardStyle}>
-            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#dc2626', marginBottom: '0.5rem' }}>
-              {errorPlugins.length}
-            </div>
-            <div style={{ color: '#6b7280', fontSize: '0.875rem' }}>Plugins with Errors</div>
-          </div>
-          
-          <div style={statCardStyle}>
-            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#2563eb', marginBottom: '0.5rem' }}>
-              {plugins.length}
-            </div>
-            <div style={{ color: '#6b7280', fontSize: '0.875rem' }}>Total Plugins</div>
-          </div>
-        </div>
 
         {/* Active Plugins Section */}
         {activePlugins.length > 0 && (

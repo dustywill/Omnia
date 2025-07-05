@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Integration Documentation</title>
+    <!-- Base ttCommander styles are already included on the page -->
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="layout.css" />
+  </head>
+  <body>
+    <header>
+      <div class="container full-width inner">
+        <div>
+          <h1>Integration Documentation</h1>
+          <p class="subtitle">Automate your project documentation workflow</p>
+        </div>
+        <button type="button" class="settings-button" aria-label="Settings">
+          ⚙
+        </button>
+      </div>
+    </header>
+
+    <main class="container full-width">
+      <section class="recent">
+        <div class="recent-header">
+          <span>Recent Projects</span>
+          <a href="setup.html" class="btn">New Project</a>
+        </div>
+        <div id="recent-projects"></div>
+      </section>
+      <section class="recent">
+        <div class="recent-header">Available Templates</div>
+        <div id="template-list"></div>
+      </section>
+    </main>
+
+    <script src="renderer.js"></script>
+  </body>
+</html>

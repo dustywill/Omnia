@@ -1,0 +1,1 @@
+- [ ] Apply the card Style from the Dashboard to this page. In this case, keep the Deactivate, configure and Deactivate buttons.

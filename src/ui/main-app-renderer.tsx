@@ -107,6 +107,7 @@ const MainApp: React.FC<{
               // TODO: Navigate to plugin settings
               console.log('Configure plugin:', pluginId);
             }}
+            onViewChange={handleViewChange}
           />
         )}
         

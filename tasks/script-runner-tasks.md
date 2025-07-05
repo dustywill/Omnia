@@ -1,0 +1,2 @@
+- [ ] First review the Script Runner UI in the ttCommander Context Generator Screenshot. That should give a general idea what the controls should be on this screen.
+- [ ] We will need a way to run the Scripts and a way to display tshe cript's output. I whave put the ttCommander Plugin Code in the Inspiiration folder for you to see what we had and what worked. Feel free to use as much or as little of this code, keeping to our Architecture rules.

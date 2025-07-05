@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sidebar, SidebarItem } from '../Sidebar/Sidebar.js';
+import { Sidebar } from '../Sidebar/Sidebar.js';
 import styles from './AppNavigation.module.css';
 
 export interface AppNavigationProps {
@@ -64,16 +64,18 @@ const OmniaIcon = () => (
   <div style={{
     width: '40px',
     height: '40px',
-    borderRadius: '10px',
-    background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
-    color: 'white',
-    fontSize: '18px',
-    fontWeight: 'bold'
+    justifyContent: 'center'
   }}>
-    O
+    <img 
+      src="./assets/omnia_logo.svg" 
+      alt="Omnia Logo" 
+      style={{
+        width: '40px',
+        height: '40px'
+      }}
+    />
   </div>
 );
 
@@ -119,51 +121,123 @@ export function AppNavigation({ currentView, onViewChange }: AppNavigationProps)
             padding: '16px 12px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '8px'
+            gap: '24px'
           }}>
-            <div style={{ 
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              textAlign: 'center'
-            }}>
-              <SidebarItem
-                active={currentView === 'dashboard'}
-                onClick={() => onViewChange('dashboard')}
-                icon={<DashboardIcon />}
+            <div 
+              style={{ 
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                textAlign: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                padding: '8px',
+                borderRadius: '8px',
+                transition: 'background-color 0.2s ease',
+                backgroundColor: currentView === 'dashboard' ? 'rgba(37, 99, 235, 0.1)' : 'transparent'
+              }}
+              onClick={() => onViewChange('dashboard')}
+              onMouseEnter={(e) => {
+                if (currentView !== 'dashboard') {
+                  e.currentTarget.style.backgroundColor = 'rgba(107, 114, 128, 0.05)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (currentView !== 'dashboard') {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <DashboardIcon />
+              </div>
+              <div 
+                style={{ 
+                  color: currentView === 'dashboard' ? '#2563eb' : '#6b7280',
+                  fontSize: '0.875rem',
+                  fontWeight: currentView === 'dashboard' ? '600' : '400'
+                }}
               >
                 Dashboard
-              </SidebarItem>
+              </div>
             </div>
             
-            <div style={{ 
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              textAlign: 'center'
-            }}>
-              <SidebarItem
-                active={currentView === 'plugins'}
-                onClick={() => onViewChange('plugins')}
-                icon={<PluginsIcon />}
+            <div 
+              style={{ 
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                textAlign: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                padding: '8px',
+                borderRadius: '8px',
+                transition: 'background-color 0.2s ease',
+                backgroundColor: currentView === 'plugins' ? 'rgba(37, 99, 235, 0.1)' : 'transparent'
+              }}
+              onClick={() => onViewChange('plugins')}
+              onMouseEnter={(e) => {
+                if (currentView !== 'plugins') {
+                  e.currentTarget.style.backgroundColor = 'rgba(107, 114, 128, 0.05)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (currentView !== 'plugins') {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <PluginsIcon />
+              </div>
+              <div 
+                style={{ 
+                  color: currentView === 'plugins' ? '#2563eb' : '#6b7280',
+                  fontSize: '0.875rem',
+                  fontWeight: currentView === 'plugins' ? '600' : '400'
+                }}
               >
                 Plugins
-              </SidebarItem>
+              </div>
             </div>
             
-            <div style={{ 
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              textAlign: 'center'
-            }}>
-              <SidebarItem
-                active={currentView === 'settings'}
-                onClick={() => onViewChange('settings')}
-                icon={<SettingsIcon />}
+            <div 
+              style={{ 
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                textAlign: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                padding: '8px',
+                borderRadius: '8px',
+                transition: 'background-color 0.2s ease',
+                backgroundColor: currentView === 'settings' ? 'rgba(37, 99, 235, 0.1)' : 'transparent'
+              }}
+              onClick={() => onViewChange('settings')}
+              onMouseEnter={(e) => {
+                if (currentView !== 'settings') {
+                  e.currentTarget.style.backgroundColor = 'rgba(107, 114, 128, 0.05)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (currentView !== 'settings') {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <SettingsIcon />
+              </div>
+              <div 
+                style={{ 
+                  color: currentView === 'settings' ? '#2563eb' : '#6b7280',
+                  fontSize: '0.875rem',
+                  fontWeight: currentView === 'settings' ? '600' : '400'
+                }}
               >
                 Settings
-              </SidebarItem>
+              </div>
             </div>
           </div>
           

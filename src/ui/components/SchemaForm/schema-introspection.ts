@@ -5,8 +5,13 @@
  * with proper types, validation, and constraints.
  */
 
-import { z } from 'zod';
+// Schema introspection using duck typing to avoid direct Zod imports
 import { SchemaFormField } from './SchemaForm.js';
+
+// Helper function to safely check Zod schema types
+function isZodType(schema: any, typeName: string): boolean {
+  return schema && schema._def && schema._def.typeName === typeName;
+}
 
 export interface SchemaIntrospectionResult {
   fields: SchemaFormField[];
@@ -17,12 +22,12 @@ export interface SchemaIntrospectionResult {
 /**
  * Extract comprehensive field information from Zod schema
  */
-export function introspectSchema(schema: z.ZodSchema<any>): SchemaIntrospectionResult {
+export function introspectSchema(schema: any): SchemaIntrospectionResult {
   const fields: SchemaFormField[] = [];
   const defaultValues: Record<string, any> = {};
   const dependencies: Record<string, string[]> = {};
 
-  if (schema instanceof z.ZodObject) {
+  if (isZodType(schema, 'ZodObject')) {
     const shape = schema.shape;
     
     Object.entries(shape).forEach(([key, fieldSchema]: [string, any]) => {
@@ -51,7 +56,7 @@ function analyzeField(key: string, fieldSchema: any): SchemaFormField {
 
   // Unwrap optional and nullable schemas
   let innerSchema = fieldSchema;
-  while (innerSchema instanceof z.ZodOptional || innerSchema instanceof z.ZodNullable) {
+  while (isZodType(innerSchema, 'ZodOptional') || isZodType(innerSchema, 'ZodNullable')) {
     innerSchema = innerSchema._def.innerType;
   }
 
@@ -70,7 +75,7 @@ function analyzeField(key: string, fieldSchema: any): SchemaFormField {
  * Analyze schema type and set field properties
  */
 function analyzeSchemaType(schema: any, field: SchemaFormField): void {
-  if (schema instanceof z.ZodString) {
+  if (isZodType(schema, 'ZodString')) {
     field.type = 'string';
     
     // Extract string constraints
@@ -94,7 +99,7 @@ function analyzeSchemaType(schema: any, field: SchemaFormField): void {
     }
   }
   
-  else if (schema instanceof z.ZodNumber) {
+  else if (isZodType(schema, 'ZodNumber')) {
     field.type = 'number';
     
     // Extract number constraints
@@ -115,12 +120,12 @@ function analyzeSchemaType(schema: any, field: SchemaFormField): void {
     }
   }
   
-  else if (schema instanceof z.ZodBoolean) {
+  else if (isZodType(schema, 'ZodBoolean')) {
     field.type = 'boolean';
     field.defaultValue = false;
   }
   
-  else if (schema instanceof z.ZodEnum) {
+  else if (isZodType(schema, 'ZodEnum')) {
     field.type = 'enum';
     field.options = schema._def.values.map((value: any) => ({
       label: formatLabel(value.toString()),
@@ -128,7 +133,7 @@ function analyzeSchemaType(schema: any, field: SchemaFormField): void {
     }));
   }
   
-  else if (schema instanceof z.ZodNativeEnum) {
+  else if (isZodType(schema, 'ZodNativeEnum')) {
     field.type = 'enum';
     field.options = Object.entries(schema._def.values).map(([label, value]) => ({
       label: formatLabel(label),
@@ -136,32 +141,32 @@ function analyzeSchemaType(schema: any, field: SchemaFormField): void {
     }));
   }
   
-  else if (schema instanceof z.ZodArray) {
+  else if (isZodType(schema, 'ZodArray')) {
     field.type = 'array';
     field.defaultValue = [];
     
     // Analyze array element type for better UX
     const elementType = schema._def.type;
-    if (elementType instanceof z.ZodString) {
+    if (isZodType(elementType, 'ZodString')) {
       field.placeholder = 'Enter comma-separated text values';
-    } else if (elementType instanceof z.ZodNumber) {
+    } else if (isZodType(elementType, 'ZodNumber')) {
       field.placeholder = 'Enter comma-separated numbers';
     }
   }
   
-  else if (schema instanceof z.ZodObject) {
+  else if (isZodType(schema, 'ZodObject')) {
     field.type = 'object';
     field.schema = schema;
   }
   
-  else if (schema instanceof z.ZodUnion) {
+  else if (isZodType(schema, 'ZodUnion')) {
     // Handle union types - use first option as primary type
     const firstOption = schema._def.options[0];
     analyzeSchemaType(firstOption, field);
     
     // Create enum-like options if all union members are literals
     const allLiterals = schema._def.options.every((option: any) => 
-      option instanceof z.ZodLiteral
+      isZodType(option, 'ZodLiteral')
     );
     
     if (allLiterals) {
@@ -173,13 +178,13 @@ function analyzeSchemaType(schema: any, field: SchemaFormField): void {
     }
   }
   
-  else if (schema instanceof z.ZodLiteral) {
+  else if (isZodType(schema, 'ZodLiteral')) {
     field.type = 'string';
     field.defaultValue = schema._def.value;
     field.placeholder = schema._def.value.toString();
   }
   
-  else if (schema instanceof z.ZodDefault) {
+  else if (isZodType(schema, 'ZodDefault')) {
     field.defaultValue = schema._def.defaultValue();
     analyzeSchemaType(schema._def.innerType, field);
   }
@@ -189,9 +194,9 @@ function analyzeSchemaType(schema: any, field: SchemaFormField): void {
  * Check if schema is optional
  */
 function isOptional(schema: any): boolean {
-  return schema instanceof z.ZodOptional || 
-         schema instanceof z.ZodNullable ||
-         (schema instanceof z.ZodDefault);
+  return isZodType(schema, 'ZodOptional') || 
+         isZodType(schema, 'ZodNullable') ||
+         isZodType(schema, 'ZodDefault');
 }
 
 /**
@@ -209,10 +214,10 @@ function formatLabel(key: string): string {
 /**
  * Extract default values from schema with defaults
  */
-export function extractDefaultValues(schema: z.ZodSchema<any>): Record<string, any> {
+export function extractDefaultValues(schema: any): Record<string, any> {
   const defaults: Record<string, any> = {};
   
-  if (schema instanceof z.ZodObject) {
+  if (isZodType(schema, 'ZodObject')) {
     const shape = schema.shape;
     
     Object.entries(shape).forEach(([key, fieldSchema]: [string, any]) => {
@@ -230,23 +235,23 @@ export function extractDefaultValues(schema: z.ZodSchema<any>): Record<string, a
  * Extract default value from individual field schema
  */
 function extractFieldDefault(schema: any): any {
-  if (schema instanceof z.ZodDefault) {
+  if (isZodType(schema, 'ZodDefault')) {
     return schema._def.defaultValue();
   }
   
-  if (schema instanceof z.ZodOptional || schema instanceof z.ZodNullable) {
+  if (isZodType(schema, 'ZodOptional') || isZodType(schema, 'ZodNullable')) {
     return extractFieldDefault(schema._def.innerType);
   }
   
-  if (schema instanceof z.ZodBoolean) {
+  if (isZodType(schema, 'ZodBoolean')) {
     return false;
   }
   
-  if (schema instanceof z.ZodArray) {
+  if (isZodType(schema, 'ZodArray')) {
     return [];
   }
   
-  if (schema instanceof z.ZodObject) {
+  if (isZodType(schema, 'ZodObject')) {
     return extractDefaultValues(schema);
   }
   
@@ -260,8 +265,9 @@ export function validateFieldValue(value: any, fieldSchema: any): { isValid: boo
   try {
     fieldSchema.parse(value);
     return { isValid: true };
-  } catch (error) {
-    if (error instanceof z.ZodError) {
+  } catch (error: any) {
+    // Check if it's a Zod error by examining structure
+    if (error && typeof error === 'object' && 'errors' in error && Array.isArray(error.errors)) {
       return { 
         isValid: false, 
         error: error.errors[0]?.message || 'Invalid value' 

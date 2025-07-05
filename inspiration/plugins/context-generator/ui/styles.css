@@ -1,0 +1,319 @@
+/**
+ * @file plugins/context-generator/ui/styles.css
+ * @description Styles for the Context Generator plugin UI.
+ * Inherits variables and base styles from the main application's stylesheet.
+ */
+
+/* --- Base Layout --- */
+
+/* --- Header Controls --- */
+.controls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding-bottom: 1rem;
+  flex-shrink: 0; /* Prevent this section from shrinking */
+}
+
+.theme-light .controls {
+  border-bottom: 1px solid var(--tt-color-border-light);
+}
+
+.theme-dark .controls {
+  border-bottom: 1px solid var(--tt-color-border-dark);
+}
+
+.folder-selection {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+  min-width: 0; /* Allow the path to shrink */
+}
+
+#selected-folder-path {
+  padding: 0.6rem;
+  border-radius: 4px;
+  font-family: monospace;
+  max-width: 50vw; /* Prevent it from taking too much space */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.theme-light #selected-folder-path {
+  background-color: var(--tt-palette--n95);
+  border: 1px solid var(--tt-palette--n80);
+  color: var(--tt-palette--n30);
+}
+
+.theme-dark #selected-folder-path {
+  background-color: var(--tt-palette--n10);
+  border: 1px solid var(--tt-palette--n40);
+  color: var(--tt-palette--n70);
+}
+
+/* General buttons in this plugin will use the main app's button style */
+/* We only need to ensure they are not taking up extra margin */
+.controls button {
+  margin-top: 0;
+}
+
+/* Container for generate and copy buttons inside the output panel */
+.output-buttons {
+  display: flex;
+  gap: 0.5em;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5em;
+  margin-top: 0.5em;
+}
+
+.filters label {
+  font-size: 0.9rem;
+}
+
+.filters input,
+.filters select,
+.filters button {
+  font-family: monospace;
+  padding: 0.2em 0.4em;
+}
+#filter-name-input {
+  width: 10em;
+}
+
+/* --- Main Content Area --- */
+.main-content {
+  display: flex;
+  flex-grow: 1;
+  height: 100%;
+  gap: 1.5rem;
+  min-height: 0; /* Critical for allowing flex children to scroll */
+}
+
+.tree-panel,
+.output-panel {
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px; /* Match main app's section style */
+  min-height: 0; /* allow inner content to scroll */
+}
+
+.theme-light .tree-panel,
+.theme-light .output-panel {
+  background-color: var(--tt-color-surface-light);
+  border: 1px solid var(--tt-color-border-light);
+}
+
+.theme-dark .tree-panel,
+.theme-dark .output-panel {
+  background-color: var(--tt-color-surface-dark);
+  border: 1px solid var(--tt-color-border-dark);
+}
+
+.tree-panel {
+  width: 40%;
+  flex-grow: 1;
+}
+
+.tree-search {
+  padding: 0.5em 1rem;
+}
+
+.tree-search input {
+  width: 100%;
+  padding: 0.25em 0.5em;
+  font-family: monospace;
+  box-sizing: border-box;
+}
+
+.output-panel {
+  width: 60%;
+  flex-grow: 1;
+}
+
+.tree-panel h3,
+.output-panel h3 {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.theme-light .tree-panel h3,
+.theme-light .output-panel h3 {
+  border-bottom: 1px solid var(--tt-color-border-light);
+  color: var(--tt-color-text-primary-light);
+}
+
+.theme-dark .tree-panel h3,
+.theme-dark .output-panel h3 {
+  border-bottom: 1px solid var(--tt-color-border-dark);
+  color: var(--tt-color-text-primary-dark);
+}
+
+/* --- File Tree Styling --- */
+#file-tree {
+  padding: 0.5em 1rem;
+  overflow: auto; /* Allow the tree itself to scroll */
+  flex-grow: 1;
+}
+
+#file-tree ul {
+  padding-left: 1.25em;
+  list-style-type: none;
+}
+
+#file-tree li {
+  padding: 0.15em 0;
+}
+
+.tree-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  cursor: default; /* Change cursor for labels */
+}
+
+.tree-item-label {
+  white-space: nowrap;
+}
+
+/* Icons for file/folder */
+.tree-item-label::before {
+  font-family: monospace; /* Or a dedicated icon font */
+  margin-right: 0.5em;
+}
+
+.tree-item-label.directory::before {
+  content: "📁";
+  color: var(--tt-palette--b50);
+}
+
+.tree-item input[type="checkbox"] {
+  margin: 0;
+}
+
+.theme-light .tree-item-label {
+  color: var(--tt-palette--n20);
+}
+
+.theme-dark .tree-item-label {
+  color: var(--tt-palette--n80);
+}
+
+/* --- Output Panel Styling --- */
+.output-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5em 1rem;
+  flex-shrink: 0;
+}
+
+.theme-light .output-actions {
+  border-bottom: 1px solid var(--tt-color-border-light);
+}
+
+.theme-dark .output-actions {
+  border-bottom: 1px solid var(--tt-color-border-dark);
+}
+
+#output-char-count {
+  font-size: 0.85rem;
+}
+
+.theme-light #output-char-count {
+  color: var(--tt-palette--n50);
+}
+
+.theme-dark #output-char-count {
+  color: var(--tt-palette--n60);
+}
+
+#progress-message {
+  padding: 0.5em 1rem;
+  font-size: 0.85rem;
+}
+
+.theme-light #progress-message {
+  color: var(--tt-palette--n50);
+}
+
+.theme-dark #progress-message {
+  color: var(--tt-palette--n60);
+}
+
+#output-textarea {
+  /* flex-grow: 1;
+  width: 100%; */
+  height: 100%;
+  min-height: 0;
+  border: none;
+  resize: none;
+  padding: 1rem;
+  font-family: monospace;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+
+#output-textarea:focus {
+  outline: none;
+}
+
+.theme-light #output-textarea {
+  background-color: var(--tt-palette--n95);
+  color: var(--tt-palette--n10);
+}
+
+.theme-dark #output-textarea {
+  background-color: var(--tt-palette--n10);
+  color: var(--tt-palette--n80);
+}
+
+/* Styling for the +/- toggle */
+.folder-toggle {
+  cursor: pointer;
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 1.2em;
+  width: 1em;
+  text-align: center;
+  margin-right: 0.25em;
+  flex-shrink: 0; /* Prevent it from shrinking */
+}
+
+/* When a folder's child list is collapsed, hide it */
+ul.collapsed {
+  display: none;
+}
+
+.error-text {
+  font-style: italic;
+}
+.theme-light .error-text {
+  color: var(--tt-palette--danger);
+}
+.theme-dark .error-text {
+  color: var(--tt-palette--r60);
+}
+
+li.search-match > .tree-item {
+  background-color: var(--tt-palette--highlight-alpha);
+}
+
+@media (max-width: 700px) {
+  .main-content {
+    flex-direction: column;
+  }
+  .tree-panel,
+  .output-panel {
+    width: 100%;
+  }
+}

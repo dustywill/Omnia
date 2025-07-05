@@ -1,0 +1,4 @@
+- [ ] Move the Plugin Version, Author and Plugin Type below the Button to open the tool.
+- [ ] Spread that line to be the full width of the button. Author Left Justified with left side of Button, Then Type centered on button and Author Right aligned with button.
+- [ ] Keep the 2x2 square of status cards in the toip left of the top banner for all windows. Make clicking on each of these to take you to the PLugins page with hteh appropriate filter in place.
+- [ ]

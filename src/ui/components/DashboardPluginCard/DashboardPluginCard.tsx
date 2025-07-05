@@ -1,5 +1,4 @@
 import React from 'react';
-import { Badge } from '../Badge/Badge.js';
 import { type PluginInfo } from '../../main-app-renderer.js';
 
 export interface DashboardPluginCardProps {
@@ -51,14 +50,8 @@ export function DashboardPluginCard({
   onPluginSelect,
   className = '' 
 }: DashboardPluginCardProps) {
-  const { id, name, description, version, author, status, permissions } = plugin;
+  const { id, name, description, version, author, status } = plugin;
   
-  const badgeVariant = {
-    active: 'success' as const,
-    inactive: 'secondary' as const,
-    error: 'danger' as const,
-    loading: 'info' as const,
-  };
   
   const statusText = {
     active: 'Active',
@@ -140,9 +133,6 @@ export function DashboardPluginCard({
             }}>
               {name}
             </h3>
-            <Badge variant={badgeVariant[status]} size="sm">
-              {statusText[status]}
-            </Badge>
           </div>
           
           <p style={{ 
@@ -159,63 +149,31 @@ export function DashboardPluginCard({
           </p>
         </div>
 
-        {/* Status indicator dot */}
-        <div style={{
-          width: '12px',
-          height: '12px',
-          borderRadius: '50%',
-          backgroundColor: status === 'active' ? '#10b981' : status === 'error' ? '#ef4444' : '#6b7280',
-          flexShrink: 0
-        }} />
+        {/* Status indicator LED */}
+        <div 
+          title={statusText[status]}
+          style={{
+            width: '14px',
+            height: '14px',
+            borderRadius: '50%',
+            backgroundColor: status === 'active' ? '#059669' : status === 'error' ? '#ef4444' : '#6b7280',
+            flexShrink: 0,
+            boxShadow: status === 'active' 
+              ? '0 0 6px rgba(5, 150, 105, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.3)' 
+              : status === 'error' 
+                ? '0 0 6px rgba(239, 68, 68, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.3)'
+                : '0 0 2px rgba(107, 114, 128, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.3)',
+            background: status === 'active' 
+              ? 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.6), #059669)' 
+              : status === 'error' 
+                ? 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.6), #ef4444)'
+                : 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.4), #6b7280)',
+            cursor: 'help'
+          }} 
+        />
       </div>
       
-      {/* Plugin metadata */}
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        gap: '16px', 
-        fontSize: '0.75rem', 
-        color: '#9ca3af',
-        marginBottom: '12px'
-      }}>
-        <span>v{version}</span>
-        {author && <span>by {author}</span>}
-        <span style={{ 
-          padding: '2px 6px', 
-          backgroundColor: '#f3f4f6', 
-          borderRadius: '4px',
-          color: '#374151',
-          fontWeight: '500'
-        }}>
-          {plugin.type}
-        </span>
-      </div>
       
-      {/* Permissions */}
-      {permissions && permissions.length > 0 && (
-        <div style={{ marginBottom: '12px' }}>
-          <p style={{ 
-            fontSize: '0.75rem', 
-            color: '#6b7280', 
-            margin: '0 0 6px 0',
-            fontWeight: '500'
-          }}>
-            Permissions:
-          </p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-            {permissions.slice(0, 3).map((permission, index) => (
-              <Badge key={index} variant="neutral" size="sm">
-                {permission}
-              </Badge>
-            ))}
-            {permissions.length > 3 && (
-              <Badge variant="neutral" size="sm">
-                +{permissions.length - 3} more
-              </Badge>
-            )}
-          </div>
-        </div>
-      )}
       
       {/* Error message */}
       {status === 'error' && (
@@ -243,7 +201,8 @@ export function DashboardPluginCard({
             borderRadius: '6px',
             color: '#0369a1',
             fontSize: '0.875rem',
-            fontWeight: '500'
+            fontWeight: '500',
+            marginBottom: '12px'
           }}>
             Click to open tool
           </div>
@@ -255,11 +214,60 @@ export function DashboardPluginCard({
             border: '1px solid #e5e7eb',
             borderRadius: '6px',
             color: '#6b7280',
-            fontSize: '0.875rem'
+            fontSize: '0.875rem',
+            marginBottom: '12px'
           }}>
             {status === 'inactive' ? 'Plugin is inactive' : 'Plugin has errors'}
           </div>
         )}
+
+        {/* Plugin metadata - spread across full width with specific alignment */}
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between',
+          fontSize: '0.75rem', 
+          color: '#9ca3af',
+          width: '100%'
+        }}>
+          {/* Author - Left aligned */}
+          <span style={{ 
+            textAlign: 'left',
+            flex: '0 0 auto',
+            maxWidth: '33%',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+          }}>
+            {author ? `by ${author}` : ''}
+          </span>
+          
+          {/* Type - Center aligned */}
+          <span style={{ 
+            textAlign: 'center',
+            flex: '0 0 auto',
+            padding: '2px 6px', 
+            backgroundColor: '#f3f4f6', 
+            borderRadius: '4px',
+            color: '#374151',
+            fontWeight: '500',
+            fontSize: '0.7rem'
+          }}>
+            {plugin.type}
+          </span>
+          
+          {/* Version - Right aligned */}
+          <span style={{ 
+            textAlign: 'right',
+            flex: '0 0 auto',
+            maxWidth: '33%',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+          }}>
+            v{version}
+          </span>
+        </div>
       </div>
     </div>
   );

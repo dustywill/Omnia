@@ -1,0 +1,63 @@
+{
+  type: "object",
+  title: "Context Generator Settings",
+  properties: {
+    enabled: {
+      type: "boolean",
+      title: "Enable Plugin",
+      description: "If unchecked, this plugin will be disabled on next startup.",
+      default: true,
+      format: "checkbox",
+    },
+    lastUsedFolderPath: {
+      type: "string",
+      title: "Last Used Folder Path",
+      description: "The last folder that was successfully scanned. Automatically saved.",
+      default: "",
+    },
+    lastFileRegex: {
+      type: "string",
+      title: "Last File Regex",
+      default: "",
+    },
+    lastFileFilterType: {
+      type: "string",
+      enum: ["include", "exclude"],
+      title: "File Regex Mode",
+      default: "include",
+    },
+    lastFolderRegex: {
+      type: "string",
+      title: "Last Folder Regex",
+      default: "",
+    },
+    lastFolderFilterType: {
+      type: "string",
+      enum: ["include", "exclude"],
+      title: "Folder Regex Mode",
+      default: "include",
+    },
+    lastMaxDepth: {
+      type: "integer",
+      title: "Last Max Depth",
+      description: "-1 means unlimited depth",
+      default: -1,
+    },
+    savedFilters: {
+      type: "object",
+      title: "Saved Filters",
+      description: "User-defined filter presets keyed by name.",
+      additionalProperties: {
+        type: "object",
+        properties: {
+          folderRegex: { type: "string" },
+          folderFilterType: { type: "string", enum: ["include", "exclude"] },
+          fileRegex: { type: "string" },
+          fileFilterType: { type: "string", enum: ["include", "exclude"] },
+          maxDepth: { type: "integer" },
+        },
+      },
+      default: {},
+    },
+  },
+}

@@ -13,6 +13,7 @@ async function copyAssets() {
   await fs.copyFile('src/preload.js', 'dist/preload.js');
   await fs.copyFile('dist.html', 'dist/index.html');
   await fs.copyFile('assets/omnia_logo.svg', 'dist/assets/omnia_logo.svg');
+  await fs.copyFile('assets/omnia_logo.ico', 'dist/assets/omnia_logo.ico');
   await fs.copyFile('src/ui/global.css', 'dist/ui/global.css');
   
   // Copy all CSS files from components

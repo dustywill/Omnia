@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plugin Settings</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="layout.css" />
+</head>
+<body>
+  <header>
+    <div class="container limited-width inner">
+      <a href="index.html" class="btn-outline btn back-button">Back</a>
+      <div>
+        <h1>Plugin Settings</h1>
+        <p class="subtitle">Manage Data Sources</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="container full-width">
+    <section class="card">
+      <div class="card-header">
+        <h2>Data Sources</h2>
+        <p class="subtitle">Add, edit, or remove endpoints</p>
+      </div>
+      <table id="data-source-table"></table>
+      <div class="text-right mt-1">
+        <button id="add-source-btn" class="btn" type="button">Add Data Source</button>
+      </div>
+    </section>
+
+    <section class="card mt-1-5">
+      <div class="card-header">
+        <h2>Template Path</h2>
+        <p class="subtitle">Location of the default markdown template</p>
+      </div>
+      <div class="grid two-col gap-1">
+        <input id="template-path-input" class="input-field" type="text" />
+        <div class="text-right">
+          <button id="browse-template-btn" class="btn" type="button">Browse...</button>
+        </div>
+      </div>
+      <div class="text-right mt-1">
+        <button id="save-template-path-btn" class="btn" type="button">Save Template Path</button>
+      </div>
+    </section>
+  </main>
+  <button id="back-to-top" class="btn back-to-top" type="button">Back to Top</button>
+  <script src="renderer.js"></script>
+</body>
+</html>

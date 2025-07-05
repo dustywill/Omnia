@@ -1,0 +1,2 @@
+- [ ] I want to shrink the height of the Top bar. across the board in all UI screens. It seems toot all. No need to include all the add-in information. That should bne access in the Plugins screen.
+- [ ] First review the COntext Generator UI in the ttCommander Context Generator Screenshot. Then try and emulate the components. I don't need them to be in exactly the same positions, but I want the controls. Especially the file Tree View. I think that may be something we provide from the Main application, but we can discuss this.

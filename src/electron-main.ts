@@ -149,6 +149,7 @@ export const createWindow = async (
   const win = new Win({
     width: 1200,
     height: 800,
+    icon: path.join(process.cwd(), "dist", "assets", "omnia_logo.ico"), // Set window icon
     webPreferences: {
       nodeIntegration: false, // Disable node integration for security
       contextIsolation: true, // Enable context isolation
