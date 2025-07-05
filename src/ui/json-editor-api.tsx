@@ -1,7 +1,7 @@
 import { loadNodeModule } from "./node-module-loader.js";
 import type { ZodType } from "zod";
 import React from "react";
-import { JsonEditor } from "./components/JsonEditor.js";
+import { JsonEditor } from "./components/JsonEditor/JsonEditor.js";
 
 export const openJsonEditor = async (
   filePath: string,

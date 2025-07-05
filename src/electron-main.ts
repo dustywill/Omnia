@@ -110,6 +110,31 @@ const setupIpcHandlers = (ipcMain?: IpcMain, logger?: Logger) => {
     return process.cwd();
   });
 
+  // Node module access
+  ipcMain.handle("require-zod", async () => {
+    try {
+      // Use dynamic import since require might not be available in Electron context
+      const zod = await import("zod");
+      logger?.info("Loaded zod module successfully");
+      return zod;
+    } catch (error) {
+      logger?.error(`Error loading zod: ${error}`);
+      throw error;
+    }
+  });
+
+  ipcMain.handle("require-json5", async () => {
+    try {
+      // Use dynamic import since require might not be available in Electron context
+      const json5 = await import("json5");
+      logger?.info("Loaded json5 module successfully");
+      return json5;
+    } catch (error) {
+      logger?.error(`Error loading json5: ${error}`);
+      throw error;
+    }
+  });
+
   // Your existing load-sample-data handler
   ipcMain.handle(
     "load-sample-data",

@@ -47,6 +47,10 @@ const electronAPI = {
 
   // Other utilities
   getCwd: () => safeInvoke("get-cwd"),
+
+  // Node modules for renderer
+  requireZod: () => safeInvoke("require-zod"),
+  requireJson5: () => safeInvoke("require-json5"),
 };
 sanitizeForIpc("electronAPI", electronAPI);
 contextBridge.exposeInMainWorld("electronAPI", electronAPI);

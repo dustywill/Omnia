@@ -3,8 +3,9 @@ import { loadNodeModule } from '../node-module-loader.js';
 import { SettingsManager } from '../../core/settings-manager.js';
 import { type PluginInfo } from '../main-app-renderer.js';
 import { SchemaForm } from '../components/SchemaForm/SchemaForm.js';
-import { JsonEditor } from '../components/JsonEditor.js';
+import { JsonEditor } from '../components/JsonEditor/JsonEditor.js';
 import { Button } from '../components/Button/Button.js';
+import styles from './SettingsView.module.css';
 
 // We'll initialize the demo schema dynamically to avoid direct zod imports
 let DemoConfigSchema: any = null;
@@ -13,7 +14,9 @@ let defaultDemoConfig: any = null;
 const initializeDemoSchema = async () => {
   if (DemoConfigSchema) return DemoConfigSchema;
   
-  const z = await loadNodeModule<typeof import('zod')>('zod');
+  try {
+    const zodModule = await loadNodeModule<typeof import('zod')>('zod');
+    const z = zodModule.z || zodModule.default || zodModule;
   
   DemoConfigSchema = z.object({
     displaySettings: z.object({
@@ -43,18 +46,35 @@ const initializeDemoSchema = async () => {
     }).describe('Advanced configuration options')
   });
 
-  defaultDemoConfig = DemoConfigSchema.parse({});
-  return DemoConfigSchema;
+    defaultDemoConfig = DemoConfigSchema.parse({});
+    return DemoConfigSchema;
+  } catch (error) {
+    console.error('Failed to load Zod for demo schema:', error);
+    // Return a simple fallback schema
+    return {
+      parse: () => ({}),
+      safeParse: () => ({ success: true, data: {} })
+    };
+  }
 };
+
+type SettingsSection = 'app-config' | 'demo-config' | 'plugin-config' | 'system-info';
 
 export interface SettingsViewProps {
   settingsManager: SettingsManager;
   plugins: PluginInfo[];
+  navigationTarget?: {
+    pluginId: string;
+    focusEditor?: boolean;
+  } | null;
 }
 
-export function SettingsView({ settingsManager, plugins }: SettingsViewProps) {
+export function SettingsView({ settingsManager, plugins, navigationTarget }: SettingsViewProps) {
+  // Navigation state
+  const [activeSection, setActiveSection] = useState<SettingsSection>('app-config');
+  
   // Actual app configuration (JSON)
-  const [appConfig, setAppConfig] = useState<string>('');
+  const [appConfig, setAppConfig] = useState<string>('{}');
   
   // Demo configuration (typed object)
   const [demoConfig, setDemoConfig] = useState<any>(null);
@@ -68,6 +88,7 @@ export function SettingsView({ settingsManager, plugins }: SettingsViewProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [autoOpenedPlugin, setAutoOpenedPlugin] = useState<string | null>(null);
 
   // Initialize demo schema and load app configuration
   useEffect(() => {
@@ -82,7 +103,10 @@ export function SettingsView({ settingsManager, plugins }: SettingsViewProps) {
         
         // Load app configuration
         const config = await settingsManager.loadAppConfig();
-        setAppConfig(JSON.stringify(config, null, 2));
+        console.log('[SettingsView] Loaded app config:', config);
+        const configJson = JSON.stringify(config, null, 2);
+        console.log('[SettingsView] Stringified app config:', configJson);
+        setAppConfig(configJson);
       } catch (error) {
         console.error('Failed to initialize:', error);
         setAppConfig('{}');
@@ -97,7 +121,7 @@ export function SettingsView({ settingsManager, plugins }: SettingsViewProps) {
   useEffect(() => {
     const loadPluginConfig = async () => {
       if (!selectedPluginId) {
-        setSelectedPluginConfig('');
+        setSelectedPluginConfig('{}');
         return;
       }
       
@@ -118,6 +142,23 @@ export function SettingsView({ settingsManager, plugins }: SettingsViewProps) {
     };
     loadPluginConfig();
   }, [selectedPluginId, plugins]);
+
+  // Handle navigation target (auto-open plugin configuration)
+  useEffect(() => {
+    if (navigationTarget?.pluginId && navigationTarget.pluginId !== autoOpenedPlugin) {
+      console.log('[SettingsView] Auto-opening plugin configuration:', navigationTarget.pluginId);
+      setSelectedPluginId(navigationTarget.pluginId);
+      setActiveSection('plugin-config');
+      setAutoOpenedPlugin(navigationTarget.pluginId);
+    }
+  }, [navigationTarget, autoOpenedPlugin]);
+
+  // Clear auto-opened state when user manually selects a different plugin
+  useEffect(() => {
+    if (selectedPluginId !== autoOpenedPlugin && autoOpenedPlugin) {
+      setAutoOpenedPlugin(null);
+    }
+  }, [selectedPluginId, autoOpenedPlugin]);
 
   const handleSaveAppConfig = async () => {
     try {
@@ -167,277 +208,283 @@ export function SettingsView({ settingsManager, plugins }: SettingsViewProps) {
       alert('Failed to save configuration. Please check the JSON format.');
     }
   };
-  const headerStyle: React.CSSProperties = {
-    padding: '1rem 2rem',
-    backgroundColor: '#ffffff',
-    borderBottom: '1px solid #e5e7eb',
-    marginBottom: '1.5rem'
-  };
+  const renderSidebarContent = () => {
+    const sidebarItems = [
+      {
+        id: 'app-config' as SettingsSection,
+        label: 'Application Settings',
+        icon: '⚙️',
+        section: 'Core Settings'
+      },
+      {
+        id: 'demo-config' as SettingsSection,
+        label: 'Demo Configuration',
+        icon: '🚀',
+        section: 'Core Settings'
+      },
+      {
+        id: 'plugin-config' as SettingsSection,
+        label: 'Plugin Settings',
+        icon: '🔌',
+        section: 'Plugin Management',
+        badge: plugins.length.toString()
+      },
+      {
+        id: 'system-info' as SettingsSection,
+        label: 'System Information',
+        icon: '📊',
+        section: 'System'
+      }
+    ];
 
-  const contentStyle: React.CSSProperties = {
-    padding: '0 2rem 2rem 2rem',
-    maxWidth: '800px',
-    margin: '0 auto'
-  };
+    const sections = ['Core Settings', 'Plugin Management', 'System'];
 
-  const sectionStyle: React.CSSProperties = {
-    backgroundColor: '#ffffff',
-    border: '1px solid #e5e7eb',
-    borderRadius: '8px',
-    padding: '1.5rem',
-    marginBottom: '2rem'
-  };
-
-  const sectionHeaderStyle: React.CSSProperties = {
-    fontSize: '1.25rem',
-    fontWeight: '600',
-    marginBottom: '1rem',
-    color: '#1f2937'
-  };
-
-  return (
-    <div style={{ height: '100vh', overflowY: 'auto' }}>
-      {/* Header */}
-      <header style={headerStyle}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1f2937', marginBottom: '0.25rem' }}>
-          Settings
-        </h1>
-        <p style={{ color: '#6b7280', fontSize: '0.9rem' }}>
-          Configure your application preferences
-        </p>
-      </header>
-
-      <div style={contentStyle}>
-        {/* Enhanced Schema Form Demo */}
-        {demoSchema && demoConfig && (
-          <section style={{ marginBottom: '2rem' }}>
-            <SchemaForm
-              title="🚀 Enhanced Schema Form Demo"
-              description="This demonstrates the new schema-driven form capabilities with form/JSON hybrid mode. Toggle between views to see both form fields and raw JSON editing."
-              schema={demoSchema}
-              initialValues={demoConfig}
-              onSubmit={handleSaveDemoConfig}
-              mode="hybrid"
-              defaultMode="form"
-              submitLabel="Save Demo Configuration"
-              loading={isSaving}
-              compact={false}
-            />
-            
-            {saveMessage && saveMessage.includes('Demo') && (
-              <div style={{
-                marginTop: '1rem',
-                padding: '0.75rem 1rem',
-                borderRadius: '6px',
-                backgroundColor: '#d1fae5',
-                color: '#065f46',
-                border: '1px solid #a7f3d0',
-                fontSize: '0.875rem'
-              }}>
-                {saveMessage}
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* Application Settings */}
-        <section style={sectionStyle}>
-          <h2 style={sectionHeaderStyle}>Application Configuration (JSON)</h2>
-          <div style={{ marginBottom: '1rem' }}>
-            <p style={{ color: '#6b7280', marginBottom: '1rem' }}>
-              Edit the main application configuration (config/app.json5) in raw JSON format.
-            </p>
-            {isLoading ? (
-              <div style={{ color: '#6b7280' }}>Loading configuration...</div>
-            ) : (
-              <div>
-                <div style={{ 
-                  border: '1px solid #e5e7eb', 
-                  borderRadius: '6px', 
-                  overflow: 'hidden',
-                  marginBottom: '1rem'
-                }}>
-                  <JsonEditor
-                    initialContent={appConfig}
-                    onChange={setAppConfig}
-                  />
-                </div>
-                <Button 
-                  onClick={handleSaveAppConfig}
-                  variant="primary"
-                  size="sm"
-                >
-                  Save Application Configuration
-                </Button>
-              </div>
-            )}
-            
-            {saveMessage && saveMessage.includes('Application') && (
-              <div style={{
-                marginTop: '1rem',
-                padding: '0.75rem 1rem',
-                borderRadius: '6px',
-                backgroundColor: saveMessage.includes('success') ? '#d1fae5' : '#fef2f2',
-                color: saveMessage.includes('success') ? '#065f46' : '#991b1b',
-                border: `1px solid ${saveMessage.includes('success') ? '#a7f3d0' : '#fecaca'}`,
-                fontSize: '0.875rem'
-              }}>
-                {saveMessage}
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* Plugin Settings */}
-        <section style={sectionStyle}>
-          <h2 style={sectionHeaderStyle}>Plugin Settings</h2>
-          <div style={{ marginBottom: '1.5rem' }}>
-            <p style={{ color: '#6b7280', marginBottom: '1rem' }}>
-              Configure individual plugin settings. Found {plugins.length} plugins.
-            </p>
-            
-            {/* Plugin Selection Grid */}
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', 
-              gap: '1rem',
-              marginBottom: '1.5rem'
-            }}>
-              {plugins.map((plugin) => (
+    return (
+      <div className={styles.sidebar}>
+        {sections.map(section => (
+          <div key={section} className={styles.sidebarSection}>
+            <h3 className={styles.sidebarSectionTitle}>{section}</h3>
+            {sidebarItems
+              .filter(item => item.section === section)
+              .map(item => (
                 <div
-                  key={plugin.id}
-                  style={{
-                    cursor: 'pointer',
-                    border: selectedPluginId === plugin.id ? '2px solid #2563eb' : '1px solid #e5e7eb',
-                    backgroundColor: selectedPluginId === plugin.id ? '#f0f9ff' : '#ffffff',
-                    borderRadius: '8px',
-                    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onClick={() => setSelectedPluginId(plugin.id)}
+                  key={item.id}
+                  className={`${styles.sidebarItem} ${activeSection === item.id ? styles.active : ''}`}
+                  onClick={() => setActiveSection(item.id)}
                 >
-                  <div style={{ padding: '1rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                      <div style={{
-                        width: '10px',
-                        height: '10px',
-                        borderRadius: '50%',
-                        backgroundColor: plugin.status === 'active' ? '#059669' : plugin.status === 'error' ? '#ef4444' : '#6b7280',
-                        flexShrink: 0
-                      }} />
-                      <h3 style={{ 
-                        fontSize: '1rem', 
-                        fontWeight: '600', 
-                        color: '#1f2937', 
-                        margin: 0 
-                      }}>
-                        {plugin.name}
-                      </h3>
+                  <span className={styles.sidebarItemIcon}>{item.icon}</span>
+                  <span className={styles.sidebarItemText}>{item.label}</span>
+                  {item.badge && (
+                    <span className={styles.sidebarItemBadge}>{item.badge}</span>
+                  )}
+                </div>
+              ))}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const renderMainContent = () => {
+    switch (activeSection) {
+      case 'app-config':
+        return (
+          <div className={styles.contentSection}>
+            <div className={styles.contentHeader}>
+              <h2 className={styles.contentTitle}>Application Configuration</h2>
+              <p className={styles.contentDescription}>
+                Edit the main application configuration (config/app.json5) in raw JSON format.
+              </p>
+            </div>
+            <div className={styles.contentBody}>
+              {isLoading ? (
+                <div className="text-gray-500">Loading configuration...</div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="border border-gray-200 rounded-lg overflow-hidden">
+                    <JsonEditor
+                      initialContent={appConfig}
+                      onChange={setAppConfig}
+                    />
+                  </div>
+                  <Button 
+                    onClick={handleSaveAppConfig}
+                    variant="primary"
+                    size="sm"
+                  >
+                    Save Application Configuration
+                  </Button>
+                  
+                  {saveMessage && saveMessage.includes('Application') && (
+                    <div className={`p-3 rounded-md text-sm ${
+                      saveMessage.includes('success') 
+                        ? 'bg-green-50 text-green-700 border border-green-200' 
+                        : 'bg-red-50 text-red-700 border border-red-200'
+                    }`}>
+                      {saveMessage}
                     </div>
-                    <p style={{ 
-                      color: '#6b7280', 
-                      fontSize: '0.875rem', 
-                      margin: '0 0 0.5rem 0',
-                      lineHeight: '1.4'
-                    }}>
-                      {plugin.description}
-                    </p>
-                    <div style={{ 
-                      display: 'flex', 
-                      gap: '0.5rem', 
-                      fontSize: '0.75rem', 
-                      color: '#9ca3af' 
-                    }}>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        );
+
+      case 'demo-config':
+        return (
+          <div className={styles.contentSection}>
+            <div className={styles.contentHeader}>
+              <h2 className={styles.contentTitle}>Demo Configuration</h2>
+              <p className={styles.contentDescription}>
+                Schema-driven form with hybrid form/JSON editing mode. Toggle between views to see both form fields and raw JSON editing.
+              </p>
+            </div>
+            <div className={styles.contentBody}>
+              {demoSchema && demoConfig ? (
+                <div>
+                  <SchemaForm
+                    title="Configuration Settings"
+                    description=""
+                    schema={demoSchema}
+                    initialValues={demoConfig}
+                    onSubmit={handleSaveDemoConfig}
+                    mode="hybrid"
+                    defaultMode="form"
+                    submitLabel="Save Demo Configuration"
+                    loading={isSaving}
+                    compact={false}
+                  />
+                  
+                  {saveMessage && saveMessage.includes('Demo') && (
+                    <div className="mt-4 p-3 bg-green-50 text-green-700 border border-green-200 rounded-md text-sm">
+                      {saveMessage}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-gray-500">Loading demo configuration...</div>
+              )}
+            </div>
+          </div>
+        );
+
+      case 'plugin-config':
+        return (
+          <div className={styles.contentSection}>
+            <div className={styles.contentHeader}>
+              <h2 className={styles.contentTitle}>Plugin Settings</h2>
+              <p className={styles.contentDescription}>
+                Configure individual plugin settings. Found {plugins.length} plugins.
+              </p>
+            </div>
+            <div className={styles.contentBody}>
+              {/* Plugin Selection Grid */}
+              <div className={styles.pluginGrid}>
+                {plugins.map((plugin) => (
+                  <div
+                    key={plugin.id}
+                    className={`${styles.pluginCard} ${selectedPluginId === plugin.id ? styles.selected : ''}`}
+                    onClick={() => setSelectedPluginId(plugin.id)}
+                  >
+                    <div className={styles.pluginCardHeader}>
+                      <div className={`${styles.pluginStatus} ${styles[plugin.status] || styles.inactive}`} />
+                      <div>
+                        <h3 className={styles.pluginName}>{plugin.name}</h3>
+                        <p className={styles.pluginDescription}>{plugin.description}</p>
+                      </div>
+                    </div>
+                    <div className={styles.pluginMeta}>
                       <span>{plugin.type}</span>
                       <span>v{plugin.version}</span>
                       {plugin.author && <span>by {plugin.author}</span>}
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Plugin Configuration Editor */}
-            {selectedPluginId && (
-              <div style={{ 
-                border: '1px solid #e5e7eb', 
-                borderRadius: '8px', 
-                padding: '1.5rem', 
-                backgroundColor: '#f9fafb' 
-              }}>
-                <h3 style={{ 
-                  fontSize: '1.125rem', 
-                  fontWeight: '600', 
-                  color: '#1f2937', 
-                  marginBottom: '1rem' 
-                }}>
-                  {plugins.find(p => p.id === selectedPluginId)?.name} Configuration
-                </h3>
-                {isLoading ? (
-                  <div style={{ color: '#6b7280' }}>Loading plugin configuration...</div>
-                ) : (
-                  <div>
-                    <div style={{ 
-                      border: '1px solid #e5e7eb', 
-                      borderRadius: '6px', 
-                      overflow: 'hidden',
-                      marginBottom: '1rem',
-                      backgroundColor: '#ffffff'
-                    }}>
-                      <JsonEditor
-                        initialContent={selectedPluginConfig}
-                        onChange={setSelectedPluginConfig}
-                      />
-                    </div>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <Button 
-                        onClick={handleSavePluginConfig}
-                        variant="primary"
-                        size="sm"
-                      >
-                        Save Plugin Configuration
-                      </Button>
-                      <Button 
-                        onClick={() => setSelectedPluginId(null)}
-                        variant="secondary"
-                        size="sm"
-                      >
-                        Close Editor
-                      </Button>
-                    </div>
-                  </div>
-                )}
+                ))}
               </div>
-            )}
-          </div>
-        </section>
 
-        {/* System Information */}
-        <section style={sectionStyle}>
-          <h2 style={sectionHeaderStyle}>System Information</h2>
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: '1fr 2fr', 
-            gap: '0.5rem',
-            fontSize: '0.875rem'
-          }}>
-            <div style={{ fontWeight: '500', color: '#374151' }}>Version:</div>
-            <div style={{ color: '#6b7280' }}>0.1.0</div>
-            
-            <div style={{ fontWeight: '500', color: '#374151' }}>Environment:</div>
-            <div style={{ color: '#6b7280' }}>
-              {typeof window !== 'undefined' && (window as any).electronAPI ? 'Electron' : 'Web'}
-            </div>
-            
-            <div style={{ fontWeight: '500', color: '#374151' }}>Total Plugins:</div>
-            <div style={{ color: '#6b7280' }}>{plugins.length}</div>
-            
-            <div style={{ fontWeight: '500', color: '#374151' }}>Active Plugins:</div>
-            <div style={{ color: '#6b7280' }}>
-              {plugins.filter(p => p.status === 'active').length}
+              {/* Plugin Configuration Editor */}
+              {selectedPluginId && (
+                <div className="mt-6 p-6 bg-gray-50 border border-gray-200 rounded-lg">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                    {plugins.find(p => p.id === selectedPluginId)?.name} Configuration
+                  </h3>
+                  {isLoading ? (
+                    <div className="text-gray-500">Loading plugin configuration...</div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
+                        <JsonEditor
+                          label=""
+                          description="Edit the JSON configuration for this plugin."
+                          initialContent={selectedPluginConfig}
+                          onChange={setSelectedPluginConfig}
+                          placeholder="Enter plugin configuration in JSON format..."
+                          showLineNumbers={true}
+                          showValidationErrors={true}
+                          height="400px"
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <Button 
+                          onClick={handleSavePluginConfig}
+                          variant="primary"
+                          size="sm"
+                        >
+                          Save Plugin Configuration
+                        </Button>
+                        <Button 
+                          onClick={() => setSelectedPluginId(null)}
+                          variant="secondary"
+                          size="sm"
+                        >
+                          Close Editor
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
-        </section>
+        );
+
+      case 'system-info':
+        return (
+          <div className={styles.contentSection}>
+            <div className={styles.contentHeader}>
+              <h2 className={styles.contentTitle}>System Information</h2>
+              <p className={styles.contentDescription}>
+                View application and environment details.
+              </p>
+            </div>
+            <div className={styles.contentBody}>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="font-medium text-gray-700">Version:</div>
+                <div className="text-gray-600">0.1.0</div>
+                
+                <div className="font-medium text-gray-700">Environment:</div>
+                <div className="text-gray-600">
+                  {typeof window !== 'undefined' && (window as any).electronAPI ? 'Electron' : 'Web'}
+                </div>
+                
+                <div className="font-medium text-gray-700">Total Plugins:</div>
+                <div className="text-gray-600">{plugins.length}</div>
+                
+                <div className="font-medium text-gray-700">Active Plugins:</div>
+                <div className="text-gray-600">
+                  {plugins.filter(p => p.status === 'active').length}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return (
+          <div className={styles.emptyState}>
+            <h3 className={styles.emptyStateTitle}>Select a section</h3>
+            <p className={styles.emptyStateDescription}>
+              Choose a section from the sidebar to view and edit settings.
+            </p>
+          </div>
+        );
+    }
+  };
+
+  return (
+    <div className={styles.settingsView}>
+      {/* Header */}
+      <header className={styles.header}>
+        <h1 className={styles.title}>Settings</h1>
+        <p className={styles.subtitle}>Configure your application preferences</p>
+      </header>
+
+      {/* Content */}
+      <div className={styles.content}>
+        {renderSidebarContent()}
+        <main className={styles.mainContent}>
+          {renderMainContent()}
+        </main>
       </div>
     </div>
   );

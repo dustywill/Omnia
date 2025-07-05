@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { loadNodeModule } from '../../src/ui/node-module-loader.js';
 import { Card } from '../../src/ui/components/Card/Card.js';
 import { Button } from '../../src/ui/components/Button/Button.js';
+import { JsonEditor } from '../../src/ui/components/JsonEditor/JsonEditor.js';
 // @ts-ignore
 import { createSchemas } from './config-schema.js';
 
@@ -428,6 +429,7 @@ const CustomerLinksPlugin: React.FC<CustomerLinksPluginProps> = ({ config: provi
   const [generatedHtml, setGeneratedHtml] = useState<string>('');
   const [editingData, setEditingData] = useState<string>('');
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [isDataValid, setIsDataValid] = useState(true);
 
   useEffect(() => {
     loadData();
@@ -480,12 +482,38 @@ const CustomerLinksPlugin: React.FC<CustomerLinksPluginProps> = ({ config: provi
     }
   };
 
+  const handleValidationChange = (valid: boolean, error?: string) => {
+    setIsDataValid(valid);
+    // Optionally set error state if needed for display
+    if (!valid && error) {
+      console.warn('[CustomerLinks] Validation error:', error);
+    }
+  };
+
   const handleSaveData = async () => {
+    if (!isDataValid) {
+      setError('Cannot save invalid JSON. Please fix validation errors first.');
+      setSaveStatus('error');
+      setTimeout(() => setSaveStatus('idle'), 3000);
+      return;
+    }
+
     try {
       setSaveStatus('saving');
       
-      // Parse and validate the JSON
+      // Parse the JSON (already validated by JsonEditor)
       const parsedData = JSON.parse(editingData);
+      
+      // Additional validation for customer sites structure
+      if (!Array.isArray(parsedData)) {
+        throw new Error('Data must be an array of customer groups');
+      }
+      
+      for (const group of parsedData) {
+        if (!group.CustomerName || !Array.isArray(group.sites)) {
+          throw new Error('Each customer group must have CustomerName and sites array');
+        }
+      }
       
       // Save to file
       await saveCustomerSites(config.configFilePath, parsedData);
@@ -493,13 +521,14 @@ const CustomerLinksPlugin: React.FC<CustomerLinksPluginProps> = ({ config: provi
       // Update local state
       setCustomerGroups(parsedData);
       setSaveStatus('saved');
+      setError(null);
       
       setTimeout(() => setSaveStatus('idle'), 2000);
       
     } catch (err) {
       console.error('Failed to save data:', err);
       setSaveStatus('error');
-      setError('Failed to save: ' + (err instanceof Error ? err.message : 'Invalid JSON'));
+      setError('Failed to save: ' + (err instanceof Error ? err.message : 'Unknown error'));
       setTimeout(() => setSaveStatus('idle'), 3000);
     }
   };
@@ -618,38 +647,60 @@ const CustomerLinksPlugin: React.FC<CustomerLinksPluginProps> = ({ config: provi
               <p>Edit the JSON data for customer sites. Validate and save your changes.</p>
             </div>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              {saveStatus === 'saving' && <span style={{ color: '#666' }}>Saving...</span>}
-              {saveStatus === 'saved' && <span style={{ color: '#28a745' }}>✓ Saved</span>}
-              {saveStatus === 'error' && <span style={{ color: '#dc2626' }}>✗ Error</span>}
+              {saveStatus === 'saving' && <span style={{ color: '#666', fontSize: '14px' }}>Saving...</span>}
+              {saveStatus === 'saved' && <span style={{ color: '#059669', fontSize: '14px', fontWeight: '500' }}>✓ Saved successfully</span>}
+              {saveStatus === 'error' && <span style={{ color: '#dc2626', fontSize: '14px', fontWeight: '500' }}>✗ Save failed</span>}
+              {!isDataValid && <span style={{ color: '#f59e0b', fontSize: '14px', fontWeight: '500' }}>⚠ Validation errors</span>}
               <Button 
                 onClick={handleSaveData}
                 variant="action"
-                disabled={saveStatus === 'saving'}
+                disabled={saveStatus === 'saving' || !isDataValid}
+                title={!isDataValid ? 'Fix validation errors before saving' : ''}
               >
-                Save Changes
+                {saveStatus === 'saving' ? 'Saving...' : 'Save Changes'}
               </Button>
             </div>
           </div>
           
-          <textarea
-            value={editingData}
-            onChange={(e) => setEditingData(e.target.value)}
-            style={{
-              width: '100%',
-              height: '600px',
-              fontFamily: 'monospace',
-              fontSize: '12px',
-              padding: '15px',
-              border: '1px solid #ccc',
-              borderRadius: '4px',
-              backgroundColor: '#f8f9fa'
-            }}
+          <JsonEditor
+            label="Customer Sites JSON Data"
+            description="Edit the customer sites data structure. Each customer group should contain a CustomerName and sites array."
+            initialContent={editingData}
+            onChange={setEditingData}
+            onValidationChange={handleValidationChange}
             placeholder="Enter customer sites JSON data..."
+            height="600px"
+            showLineNumbers={true}
+            showValidationErrors={true}
           />
           
-          <div style={{ marginTop: '10px', fontSize: '0.9em', color: '#666' }}>
-            <strong>Schema:</strong> Array of customer groups, each with CustomerName and sites array.
-            Each site should have: Location, Label, LogoFile, IPAddress, CIDR, Link
+          <div style={{ 
+            marginTop: '1rem', 
+            padding: '1rem',
+            backgroundColor: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            borderRadius: '8px',
+            fontSize: '0.875rem', 
+            color: '#475569'
+          }}>
+            <div style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#1e293b' }}>Data Structure Schema:</div>
+            <div style={{ fontFamily: 'monospace', backgroundColor: '#ffffff', padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
+              <pre style={{ margin: 0, fontSize: 'inherit' }}>{`[
+  {
+    "CustomerName": "string",
+    "sites": [
+      {
+        "Location": "string",
+        "Label": "string",
+        "LogoFile": "string",
+        "IPAddress": "string",
+        "CIDR": number,
+        "Link": "string"
+      }
+    ]
+  }
+]`}</pre>
+            </div>
           </div>
         </div>
       )}

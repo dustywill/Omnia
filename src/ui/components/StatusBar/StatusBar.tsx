@@ -1,28 +1,26 @@
 import React from 'react';
+import styles from './StatusBar.module.css';
 
 export interface StatusBarProps {
   activePlugins: number;
   totalPlugins: number;
   errorPlugins: number;
   currentView: string;
+  onStatusClick?: (filter: 'active' | 'inactive' | 'error') => void;
+  selectedPlugin?: {
+    version: string;
+    author?: string;
+    type: string;
+    permissions?: string[];
+  } | null;
 }
 
-export function StatusBar({ activePlugins, totalPlugins, errorPlugins, currentView }: StatusBarProps) {
+export function StatusBar({ activePlugins, totalPlugins, errorPlugins, currentView, onStatusClick, selectedPlugin }: StatusBarProps) {
   // Don't show plugin counts on dashboard
   if (currentView === 'dashboard') {
     return (
-      <div style={{
-        height: '32px',
-        backgroundColor: '#f8fafc',
-        borderTop: '1px solid #e5e7eb',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 16px',
-        fontSize: '0.75rem',
-        color: '#6b7280'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div className={styles.statusBar}>
+        <div className={styles.readyStatus}>
           <span>Ready</span>
         </div>
         <div>
@@ -33,46 +31,30 @@ export function StatusBar({ activePlugins, totalPlugins, errorPlugins, currentVi
   }
 
   return (
-    <div style={{
-      height: '32px',
-      backgroundColor: '#f8fafc',
-      borderTop: '1px solid #e5e7eb',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: '0 16px',
-      fontSize: '0.75rem',
-      color: '#6b7280'
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <div style={{ 
-            width: '8px', 
-            height: '8px', 
-            borderRadius: '50%', 
-            backgroundColor: '#10b981' 
-          }} />
+    <div className={styles.statusBar}>
+      <div className={styles.leftSection}>
+        <span 
+          className={`${styles.statusItem} ${onStatusClick ? styles.clickable : ''}`}
+          onClick={() => onStatusClick?.('active')}
+        >
+          <div className={`${styles.statusIndicator} ${styles.active}`} />
           {activePlugins} Active
         </span>
         
-        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <div style={{ 
-            width: '8px', 
-            height: '8px', 
-            borderRadius: '50%', 
-            backgroundColor: '#6b7280' 
-          }} />
+        <span 
+          className={`${styles.statusItem} ${onStatusClick ? styles.clickable : ''}`}
+          onClick={() => onStatusClick?.('inactive')}
+        >
+          <div className={`${styles.statusIndicator} ${styles.inactive}`} />
           {totalPlugins - activePlugins} Inactive
         </span>
         
         {errorPlugins > 0 && (
-          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <div style={{ 
-              width: '8px', 
-              height: '8px', 
-              borderRadius: '50%', 
-              backgroundColor: '#dc2626' 
-            }} />
+          <span 
+            className={`${styles.statusItem} ${onStatusClick ? styles.clickable : ''}`}
+            onClick={() => onStatusClick?.('error')}
+          >
+            <div className={`${styles.statusIndicator} ${styles.error}`} />
             {errorPlugins} Errors
           </span>
         )}
@@ -80,10 +62,21 @@ export function StatusBar({ activePlugins, totalPlugins, errorPlugins, currentVi
         <span>Total: {totalPlugins}</span>
       </div>
       
-      <div>
+      <div className={styles.rightSection}>
         {currentView === 'plugins' && 'Plugin Management'}
         {currentView === 'settings' && 'System Settings'}
-        {currentView === 'plugin-detail' && 'Plugin Details'}
+        {currentView === 'logs' && 'Application Logs'}
+        {currentView === 'plugin-detail' && selectedPlugin && (
+          <>
+            <span>Version: {selectedPlugin.version}</span>
+            {selectedPlugin.author && <span>Author: {selectedPlugin.author}</span>}
+            <span>Type: {selectedPlugin.type}</span>
+            {selectedPlugin.permissions && selectedPlugin.permissions.length > 0 && (
+              <span>Permissions: {selectedPlugin.permissions.join(', ')}</span>
+            )}
+          </>
+        )}
+        {currentView === 'plugin-detail' && !selectedPlugin && 'Plugin Details'}
       </div>
     </div>
   );

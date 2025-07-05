@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import styles from './AppHeader.module.css';
 
 export interface AppHeaderProps {
   className?: string;
@@ -12,16 +13,16 @@ export interface AppHeaderProps {
 
 export function AppHeader({ className = '' }: AppHeaderProps) {
   return (
-    <header className={`appHeader ${className}`}>
-      <div className="logoContainer">
+    <header className={`${styles.appHeader} ${className}`}>
+      <div className={styles.logoContainer}>
         <img 
           src="./assets/omnia_logo.svg" 
           alt="Omnia Logo" 
-          className="logo"
+          className={styles.logo}
         />
-        <div className="branding">
-          <h1 className="title">Omnia</h1>
-          <p className="subtitle">Plugin-Based Development Platform</p>
+        <div className={styles.branding}>
+          <h1 className={styles.title}>Omnia</h1>
+          <p className={styles.subtitle}>Plugin-Based Development Platform</p>
         </div>
       </div>
     </header>

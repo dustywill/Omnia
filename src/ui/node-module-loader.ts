@@ -105,15 +105,15 @@ export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
         return (() => []) as T;
 
       case "json5":
-        console.log(`[loadNodeModule] Loading JSON5 via Electron require...`);
+        console.log(`[loadNodeModule] Loading JSON5 via Electron IPC...`);
         try {
-          if (typeof window !== 'undefined' && (window as any).require) {
-            const json5 = (window as any).require('json5');
-            console.log(`[loadNodeModule] JSON5 loaded successfully:`, json5);
+          if ((window as any).electronAPI && (window as any).electronAPI.requireJson5) {
+            const json5 = await (window as any).electronAPI.requireJson5();
+            console.log(`[loadNodeModule] JSON5 loaded successfully via IPC:`, json5);
             return json5 as T;
           }
         } catch (err) {
-          console.error(`[loadNodeModule] Failed to load json5 via Electron require:`, err);
+          console.error(`[loadNodeModule] Failed to load json5 via Electron IPC:`, err);
         }
         console.warn(`[loadNodeModule] JSON5 not available, using JSON fallback`);
         // Return a JSON5-compatible parser as fallback
@@ -164,15 +164,15 @@ export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
         } as T;
 
       case "zod":
-        console.log(`[loadNodeModule] Loading Zod via Electron require...`);
+        console.log(`[loadNodeModule] Loading Zod via Electron IPC...`);
         try {
-          if (typeof window !== 'undefined' && (window as any).require) {
-            const zod = (window as any).require('zod');
-            console.log(`[loadNodeModule] Zod loaded successfully:`, zod);
+          if ((window as any).electronAPI && (window as any).electronAPI.requireZod) {
+            const zod = await (window as any).electronAPI.requireZod();
+            console.log(`[loadNodeModule] Zod loaded successfully via IPC:`, zod);
             return zod as T;
           }
         } catch (err) {
-          console.error(`[loadNodeModule] Failed to load zod via Electron require:`, err);
+          console.error(`[loadNodeModule] Failed to load zod via Electron IPC:`, err);
         }
         // Fallback - return empty object which will cause the error we're seeing
         console.warn(`[loadNodeModule] Zod not available in Electron renderer, returning empty object`);

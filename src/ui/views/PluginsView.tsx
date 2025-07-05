@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from '../components/Button/Button.js';
 import { Input } from '../components/Input/Input.js';
 import { type PluginInfo } from '../main-app-renderer.js';
+import styles from './PluginsView.module.css';
 
 export interface PluginsViewProps {
   plugins: PluginInfo[];
@@ -9,40 +10,14 @@ export interface PluginsViewProps {
   onPluginToggle: (pluginId: string) => void;
   onPluginConfigure: (pluginId: string) => void;
   onPluginRemove: (pluginId: string) => void;
+  initialFilter?: 'all' | 'active' | 'inactive' | 'error';
 }
-
-// Plugin type to color mapping (from DashboardPluginCard)
-const getPluginTypeColor = (pluginType: string) => {
-  switch (pluginType) {
-    case 'simple':
-      return 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)'; // Cyan
-    case 'configured':
-      return 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)'; // Purple
-    case 'hybrid':
-      return 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'; // Amber
-    default:
-      return 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)'; // Gray
-  }
-};
 
 const getPluginIcon = (pluginName: string, pluginType: string) => {
   const letter = pluginName.charAt(0).toUpperCase();
-  const background = getPluginTypeColor(pluginType);
   
   return (
-    <div style={{
-      width: '48px',
-      height: '48px',
-      borderRadius: '12px',
-      background,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: 'white',
-      fontSize: '20px',
-      fontWeight: 'bold',
-      flexShrink: 0
-    }}>
+    <div className={`${styles.pluginIcon} ${styles[pluginType] || styles.simple}`}>
       {letter}
     </div>
   );
@@ -73,88 +48,26 @@ function PluginManagementCard({
     loading: 'Loading...',
   };
 
-  const cardStyle: React.CSSProperties = {
-    backgroundColor: '#ffffff',
-    border: '1px solid #e5e7eb',
-    borderRadius: '12px',
-    padding: '20px',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease-in-out',
-    position: 'relative',
-    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column'
-  };
-
   const handleCardClick = () => {
     if (status === 'active') {
       onPluginSelect(id);
     }
   };
-
-  const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.currentTarget.style.transform = 'translateY(-2px)';
-    e.currentTarget.style.boxShadow = '0 10px 25px 0 rgba(0, 0, 0, 0.1), 0 4px 6px 0 rgba(0, 0, 0, 0.05)';
-    e.currentTarget.style.borderColor = '#d1d5db';
-  };
-
-  const handleMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.currentTarget.style.transform = 'translateY(0)';
-    e.currentTarget.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)';
-    e.currentTarget.style.borderColor = '#e5e7eb';
-  };
   
   return (
     <div 
-      style={cardStyle}
+      className={`bg-white border border-gray-200 rounded-xl p-5 ${styles.pluginCard} ${status === 'loading' ? styles.loading : ''}`}
       onClick={handleCardClick}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
     >
-      {/* Loading indicator */}
-      {status === 'loading' && (
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '3px',
-          background: 'linear-gradient(90deg, #3b82f6, #1e40af)',
-          borderRadius: '12px 12px 0 0',
-          animation: 'pulse 2s infinite'
-        }} />
-      )}
-      
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', marginBottom: '16px' }}>
+      <div className={styles.pluginHeader}>
         {getPluginIcon(name, plugin.type)}
         
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-            <h3 style={{ 
-              fontSize: '1.125rem', 
-              fontWeight: '600', 
-              color: '#1f2937',
-              margin: 0,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
-            }}>
-              {name}
-            </h3>
-          </div>
-          
-          <p style={{ 
-            fontSize: '0.875rem', 
-            color: '#6b7280',
-            margin: 0,
-            lineHeight: '1.4',
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden'
-          }}>
+        <div className={styles.pluginInfo}>
+          <h3 className={styles.pluginName}>
+            {name}
+          </h3>
+          <p className={styles.pluginDescription}>
             {description}
           </p>
         </div>
@@ -162,73 +75,29 @@ function PluginManagementCard({
         {/* Status indicator LED */}
         <div 
           title={statusText[status]}
-          style={{
-            width: '14px',
-            height: '14px',
-            borderRadius: '50%',
-            backgroundColor: status === 'active' ? '#059669' : status === 'error' ? '#ef4444' : '#6b7280',
-            flexShrink: 0,
-            boxShadow: status === 'active' 
-              ? '0 0 6px rgba(5, 150, 105, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.3)' 
-              : status === 'error' 
-                ? '0 0 6px rgba(239, 68, 68, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.3)'
-                : '0 0 2px rgba(107, 114, 128, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.3)',
-            background: status === 'active' 
-              ? 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.6), #059669)' 
-              : status === 'error' 
-                ? 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.6), #ef4444)'
-                : 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.4), #6b7280)',
-            cursor: 'help'
-          }} 
+          className={`${styles.statusLed} ${styles[status] || ''}`}
         />
       </div>
       
       {/* Plugin metadata */}
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        gap: '16px', 
-        fontSize: '0.75rem', 
-        color: '#9ca3af',
-        marginBottom: '16px'
-      }}>
+      <div className={styles.pluginMetadata}>
         <span>v{version}</span>
         {author && <span>by {author}</span>}
-        <span style={{ 
-          padding: '2px 6px', 
-          backgroundColor: '#f3f4f6', 
-          borderRadius: '4px',
-          color: '#374151',
-          fontWeight: '500'
-        }}>
+        <span className={`${styles.badge} ${styles[plugin.type] || styles.simple}`}>
           {plugin.type}
         </span>
       </div>
       
       {/* Error message */}
       {status === 'error' && (
-        <div style={{
-          backgroundColor: '#fef2f2',
-          border: '1px solid #fecaca',
-          borderRadius: '6px',
-          padding: '8px 12px',
-          marginBottom: '16px'
-        }}>
-          <span style={{ color: '#dc2626', fontSize: '0.875rem', fontWeight: '500' }}>
-            ⚠ Plugin failed to load
-          </span>
+        <div className={styles.errorAlert}>
+          <span className={styles.icon}>⚠</span>
+          <p className={styles.message}>Plugin failed to load</p>
         </div>
       )}
       
       {/* Action buttons */}
-      <div style={{ 
-        marginTop: 'auto', 
-        paddingTop: '16px',
-        borderTop: '1px solid #e5e7eb',
-        display: 'flex',
-        gap: '8px',
-        flexWrap: 'wrap'
-      }}>
+      <div className={`${styles.pluginActions} mt-auto pt-4 border-t border-gray-200 flex gap-2 flex-wrap`}>
         <Button
           variant={status === 'active' ? 'secondary' : 'primary'}
           size="sm"
@@ -237,7 +106,7 @@ function PluginManagementCard({
             onPluginToggle(id);
           }}
           disabled={status === 'loading'}
-          style={{ flex: 1, minWidth: '80px' }}
+          className="flex-1 min-w-20"
         >
           {status === 'active' ? 'Deactivate' : 'Activate'}
         </Button>
@@ -250,7 +119,7 @@ function PluginManagementCard({
             onPluginConfigure(id);
           }}
           disabled={status === 'loading' || status === 'error'}
-          style={{ flex: 1, minWidth: '80px' }}
+          className="flex-1 min-w-20"
         >
           Configure
         </Button>
@@ -263,7 +132,7 @@ function PluginManagementCard({
             onPluginRemove(id);
           }}
           disabled={status === 'loading'}
-          style={{ minWidth: '70px' }}
+          className="min-w-18"
         >
           Remove
         </Button>
@@ -271,17 +140,7 @@ function PluginManagementCard({
       
       {/* Click instruction for active plugins */}
       {status === 'active' && (
-        <div style={{
-          textAlign: 'center',
-          padding: '8px',
-          backgroundColor: '#f0f9ff',
-          border: '1px solid #bae6fd',
-          borderRadius: '6px',
-          color: '#0369a1',
-          fontSize: '0.75rem',
-          fontWeight: '500',
-          marginTop: '8px'
-        }}>
+        <div className="text-center p-2 bg-blue-50 border border-blue-200 rounded-md text-blue-700 text-xs font-medium mt-2">
           Click card to open tool
         </div>
       )}
@@ -294,10 +153,11 @@ export function PluginsView({
   onPluginSelect, 
   onPluginToggle, 
   onPluginConfigure,
-  onPluginRemove 
+  onPluginRemove,
+  initialFilter = 'all'
 }: PluginsViewProps) {
   const [searchTerm, setSearchTerm] = React.useState('');
-  const [filterStatus, setFilterStatus] = React.useState<'all' | 'active' | 'inactive' | 'error'>('all');
+  const [filterStatus, setFilterStatus] = React.useState<'all' | 'active' | 'inactive' | 'error'>(initialFilter);
 
   const filteredPlugins = plugins.filter(plugin => {
     const matchesSearch = plugin.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -306,43 +166,16 @@ export function PluginsView({
     return matchesSearch && matchesFilter;
   });
 
-  const headerStyle: React.CSSProperties = {
-    padding: '1rem 2rem',
-    backgroundColor: '#ffffff',
-    borderBottom: '1px solid #e5e7eb',
-    marginBottom: '1.5rem'
-  };
-
-  const contentStyle: React.CSSProperties = {
-    padding: '0 2rem 2rem 2rem',
-    maxWidth: '1200px',
-    margin: '0 auto'
-  };
-
-  const filtersStyle: React.CSSProperties = {
-    display: 'flex',
-    gap: '1rem',
-    alignItems: 'center',
-    marginBottom: '2rem',
-    flexWrap: 'wrap'
-  };
-
-  const pluginGridStyle: React.CSSProperties = {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
-    gap: '1.5rem'
-  };
-
   return (
-    <div style={{ height: '100vh', overflowY: 'auto' }}>
+    <div className="h-screen overflow-y-auto">
       {/* Header */}
-      <header style={headerStyle}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <header className="p-4 px-8 bg-white border-b border-gray-200 mb-6">
+        <div className="flex justify-between items-start">
           <div>
-            <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1f2937', marginBottom: '0.25rem' }}>
+            <h1 className="text-2xl font-bold text-gray-800 mb-1">
               Plugins
             </h1>
-            <p style={{ color: '#6b7280', fontSize: '0.9rem' }}>
+            <p className="text-gray-500 text-sm">
               Manage your plugin collection
             </p>
           </div>
@@ -353,10 +186,10 @@ export function PluginsView({
         </div>
       </header>
 
-      <div style={contentStyle}>
+      <div className="px-8 pb-8 max-w-7xl mx-auto">
         {/* Filters */}
-        <div style={filtersStyle}>
-          <div style={{ flex: 1, minWidth: '300px' }}>
+        <div className={styles.filterSection}>
+          <div className="flex-1 min-w-80">
             <Input
               type="search"
               placeholder="Search plugins..."
@@ -365,7 +198,7 @@ export function PluginsView({
             />
           </div>
           
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div className={styles.filterRow}>
             <Button
               variant={filterStatus === 'all' ? 'action' : 'ghost'}
               size="sm"
@@ -399,7 +232,7 @@ export function PluginsView({
 
         {/* Plugin Grid */}
         {filteredPlugins.length > 0 ? (
-          <div style={pluginGridStyle}>
+          <div className={styles.pluginGrid}>
             {filteredPlugins.map((plugin) => (
               <PluginManagementCard
                 key={plugin.id}
@@ -412,17 +245,13 @@ export function PluginsView({
             ))}
           </div>
         ) : (
-          <div style={{ 
-            textAlign: 'center', 
-            padding: '4rem 2rem',
-            color: '#6b7280'
-          }}>
-            <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>
+          <div className={styles.emptyState}>
+            <h3 className="text-xl mb-4 text-gray-700">
               {searchTerm || filterStatus !== 'all' 
                 ? 'No plugins match your criteria' 
                 : 'No Plugins Found'}
             </h3>
-            <p>
+            <p className="text-gray-500">
               {searchTerm || filterStatus !== 'all'
                 ? 'Try adjusting your search or filter criteria.'
                 : 'Add some plugins to get started with Omnia.'}

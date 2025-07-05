@@ -4,9 +4,9 @@
   background: linear-gradient(135deg, #1e6de6 0%, #3d89f5 50%, #89b9fb 100%);
   padding: 20px 40px;
   box-shadow: 0 2px 8px rgba(13, 55, 120, 0.2);
-  margin-bottom: 24px;
   position: relative;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .appHeader::before {
@@ -30,7 +30,7 @@
 }
 
 .logo {
-  height: 64px;
+  height: 128px;
   width: auto;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
   transition: transform 0.3s ease;
@@ -73,7 +73,7 @@
   }
   
   .logo {
-    height: 48px;
+    height: 96px;
   }
   
   .title {

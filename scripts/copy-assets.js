@@ -19,7 +19,7 @@ async function copyAssets() {
   // Copy all CSS files from components
   const componentDirs = [
     'AppHeader', 'AppNavigation', 'AppSettings', 'Card', 'PluginCard',
-    'PluginSettings', 'SchemaForm', 'SettingsForm', 'SettingsPage', 'Sidebar'
+    'PluginSettings', 'SchemaForm', 'SettingsForm', 'SettingsPage', 'Sidebar', 'JsonEditor', 'StatusBar'
   ];
   
   for (const dir of componentDirs) {
@@ -47,8 +47,7 @@ async function copyAssets() {
   // Copy other CSS files
   const otherCssFiles = [
     'src/ui/components/CardGrid.css',
-    'src/ui/components/FileScanner.css',
-    'src/ui/components/JsonEditor.css'
+    'src/ui/components/FileScanner.css'
   ];
   
   for (const cssFile of otherCssFiles) {
@@ -90,6 +89,27 @@ async function copyAssets() {
       }
     } catch (err) {
       console.warn(`Could not process plugin directory ${pluginDir}:`, err.message);
+    }
+  }
+  
+  // Copy CSS files from views
+  const viewCssFiles = [
+    'PluginsView.module.css',
+    'SettingsView.module.css', 
+    'LogsView.module.css'
+  ];
+  
+  await fs.mkdir('dist/ui/views', { recursive: true });
+  
+  for (const cssFile of viewCssFiles) {
+    const srcFile = `src/ui/views/${cssFile}`;
+    const destFile = `dist/ui/views/${cssFile}`;
+    
+    try {
+      await fs.copyFile(srcFile, destFile);
+      console.log(`Copied ${srcFile} -> ${destFile}`);
+    } catch (err) {
+      console.warn(`Could not copy ${cssFile}:`, err.message);
     }
   }
   

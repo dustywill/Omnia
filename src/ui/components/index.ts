@@ -44,3 +44,7 @@ export type { PluginSettingsProps } from './PluginSettings/PluginSettings.js';
 
 export { SettingsPage } from './SettingsPage/SettingsPage.js';
 export type { SettingsPageProps } from './SettingsPage/SettingsPage.js';
+
+// JSON Editor Component
+export { JsonEditor } from './JsonEditor/JsonEditor.js';
+export type { JsonEditorProps } from './JsonEditor/JsonEditor.js';

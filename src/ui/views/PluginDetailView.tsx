@@ -1,6 +1,5 @@
 import React from 'react';
 import { Button } from '../components/Button/Button.js';
-import { Badge } from '../components/Badge/Badge.js';
 import { type PluginInfo } from '../main-app-renderer.js';
 import { EnhancedPluginManager } from '../../core/enhanced-plugin-manager.js';
 import { ServiceRegistry } from '../../core/service-registry.js';
@@ -12,6 +11,7 @@ export interface PluginDetailViewProps {
   serviceRegistry: ServiceRegistry;
   settingsManager: SettingsManager;
   onBack: () => void;
+  onConfigure?: (pluginId: string) => void;
 }
 
 const PluginComponent: React.FC<{
@@ -151,14 +151,9 @@ export function PluginDetailView({
   pluginManager, 
   serviceRegistry, 
   settingsManager, 
-  onBack 
+  onBack,
+  onConfigure 
 }: PluginDetailViewProps) {
-  const badgeVariant = {
-    active: 'success' as const,
-    inactive: 'secondary' as const,
-    error: 'danger' as const,
-    loading: 'info' as const,
-  };
 
   const headerStyle: React.CSSProperties = {
     padding: '2rem',
@@ -178,11 +173,8 @@ export function PluginDetailView({
       <header style={headerStyle}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
           <Button variant="ghost" size="sm" onClick={onBack}>
-            ← Back to Plugins
+            ← Back to Dashboard
           </Button>
-          <Badge variant={badgeVariant[plugin.status]} size="sm">
-            {plugin.status}
-          </Badge>
         </div>
         
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -193,42 +185,18 @@ export function PluginDetailView({
             <p style={{ color: '#6b7280', fontSize: '1.1rem', marginBottom: '1rem' }}>
               {plugin.description}
             </p>
-            
-            <div style={{ display: 'flex', gap: '2rem', fontSize: '0.875rem', color: '#6b7280' }}>
-              <span><strong>Version:</strong> {plugin.version}</span>
-              {plugin.author && <span><strong>Author:</strong> {plugin.author}</span>}
-              <span><strong>Type:</strong> {plugin.type}</span>
-            </div>
           </div>
           
           <div style={{ display: 'flex', gap: '1rem' }}>
-            <Button variant="secondary" size="md">
-              Configure
-            </Button>
             <Button 
-              variant={plugin.status === 'active' ? 'danger' : 'action'} 
+              variant="secondary" 
               size="md"
+              onClick={() => onConfigure?.(plugin.id)}
             >
-              {plugin.status === 'active' ? 'Deactivate' : 'Activate'}
+              Configure
             </Button>
           </div>
         </div>
-        
-        {/* Permissions */}
-        {plugin.permissions && plugin.permissions.length > 0 && (
-          <div style={{ marginTop: '1rem' }}>
-            <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.5rem' }}>
-              <strong>Permissions:</strong>
-            </p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-              {plugin.permissions.map((permission, index) => (
-                <Badge key={index} variant="neutral" size="sm">
-                  {permission}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        )}
       </header>
 
       {/* Plugin Content */}

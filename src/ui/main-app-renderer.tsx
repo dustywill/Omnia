@@ -1,14 +1,17 @@
 import React from 'react';
 import { createRoot, type Root } from 'react-dom/client';
+import { AppHeader } from './components/AppHeader/AppHeader.js';
 import { AppNavigation } from './components/AppNavigation/AppNavigation.js';
 import { StatusBar } from './components/StatusBar/StatusBar.js';
 import { DashboardView } from './views/DashboardView.js';
 import { PluginsView } from './views/PluginsView.js';
 import { SettingsView } from './views/SettingsView.js';
+import { LogsView } from './views/LogsView.js';
 import { PluginDetailView } from './views/PluginDetailView.js';
 import { EnhancedPluginManager } from '../core/enhanced-plugin-manager.js';
 import { ServiceRegistry } from '../core/service-registry.js';
 import { SettingsManager } from '../core/settings-manager.js';
+import { NavigationService } from '../core/navigation-service.js';
 import { createEventBus } from '../core/event-bus.js';
 import { loadNodeModule } from './node-module-loader.js';
 
@@ -18,7 +21,7 @@ export type MainAppRendererOptions = {
   configPath?: string;
 };
 
-export type AppView = 'dashboard' | 'plugins' | 'settings' | 'plugin-detail';
+export type AppView = 'dashboard' | 'plugins' | 'settings' | 'logs' | 'plugin-detail';
 
 export type PluginInfo = {
   id: string;
@@ -40,24 +43,58 @@ const MainApp: React.FC<{
   pluginManager: EnhancedPluginManager;
   serviceRegistry: ServiceRegistry;
   settingsManager: SettingsManager;
-}> = ({ pluginInfos, pluginManager, serviceRegistry, settingsManager }) => {
+  navigationService: NavigationService;
+}> = ({ pluginInfos, pluginManager, serviceRegistry, settingsManager, navigationService }) => {
   const [currentView, setCurrentView] = React.useState<AppView>('dashboard');
   const [selectedPluginId, setSelectedPluginId] = React.useState<string | null>(null);
+  const [settingsTarget, setSettingsTarget] = React.useState<{
+    pluginId: string;
+    focusEditor?: boolean;
+  } | null>(null);
+  const [pluginFilter, setPluginFilter] = React.useState<'all' | 'active' | 'inactive' | 'error'>('all');
 
-  const handleViewChange = (view: 'dashboard' | 'plugins' | 'settings') => {
-    setCurrentView(view);
-    setSelectedPluginId(null);
+  // Subscribe to navigation changes
+  React.useEffect(() => {
+    const unsubscribe = navigationService.on('navigation:change', (state) => {
+      setCurrentView(state.currentView);
+      setSelectedPluginId(state.selectedPluginId || null);
+      setSettingsTarget(state.settingsTarget || null);
+    });
+
+    return unsubscribe;
+  }, [navigationService]);
+
+  // Initialize navigation from URL on mount
+  React.useEffect(() => {
+    navigationService.setupBrowserNavigation();
+  }, [navigationService]);
+
+  const handleViewChange = (view: 'dashboard' | 'plugins' | 'settings' | 'logs') => {
+    // Reset filter when navigating to plugins view normally
+    if (view === 'plugins') {
+      setPluginFilter('all');
+    }
+    navigationService.navigateTo(view);
   };
 
   const handlePluginSelect = (pluginId: string) => {
-    setSelectedPluginId(pluginId);
-    setCurrentView('plugin-detail');
+    navigationService.navigateToPluginDetail(pluginId);
   };
 
+  const handlePluginConfigure = (pluginId: string, source: 'plugins' | 'plugin-detail' | 'dashboard' = 'plugins') => {
+    navigationService.navigateToPluginConfig(pluginId, source);
+  };
 
   const handleBackToPlugins = () => {
-    setCurrentView('plugins');
-    setSelectedPluginId(null);
+    if (!navigationService.navigateBack()) {
+      // Fallback to dashboard view if no history
+      navigationService.navigateTo('dashboard');
+    }
+  };
+
+  const handleStatusClick = (filter: 'active' | 'inactive' | 'error') => {
+    setPluginFilter(filter);
+    navigationService.navigateTo('plugins');
   };
 
   const selectedPlugin = selectedPluginId 
@@ -88,6 +125,7 @@ const MainApp: React.FC<{
 
   return (
     <div style={mainStyle}>
+      <AppHeader />
       <div style={appBodyStyle}>
         <AppNavigation 
           currentView={currentView === 'plugin-detail' ? 'plugins' : currentView} 
@@ -103,10 +141,7 @@ const MainApp: React.FC<{
               // TODO: Implement plugin toggle
               console.log('Toggle plugin:', pluginId);
             }}
-            onPluginConfigure={(pluginId) => {
-              // TODO: Navigate to plugin settings
-              console.log('Configure plugin:', pluginId);
-            }}
+            onPluginConfigure={(pluginId) => handlePluginConfigure(pluginId, 'dashboard')}
             onViewChange={handleViewChange}
           />
         )}
@@ -119,14 +154,12 @@ const MainApp: React.FC<{
               // TODO: Implement plugin toggle
               console.log('Toggle plugin:', pluginId);
             }}
-            onPluginConfigure={(pluginId) => {
-              // TODO: Navigate to plugin settings
-              console.log('Configure plugin:', pluginId);
-            }}
+            onPluginConfigure={(pluginId) => handlePluginConfigure(pluginId, 'plugins')}
             onPluginRemove={(pluginId) => {
               // TODO: Implement plugin removal
               console.log('Remove plugin:', pluginId);
             }}
+            initialFilter={pluginFilter}
           />
         )}
         
@@ -134,6 +167,13 @@ const MainApp: React.FC<{
           <SettingsView 
             settingsManager={settingsManager}
             plugins={pluginInfos}
+            navigationTarget={settingsTarget}
+          />
+        )}
+        
+        {currentView === 'logs' && (
+          <LogsView 
+            plugins={pluginInfos.map(p => ({ id: p.id, name: p.name }))}
           />
         )}
         
@@ -144,6 +184,7 @@ const MainApp: React.FC<{
             serviceRegistry={serviceRegistry}
             settingsManager={settingsManager}
             onBack={handleBackToPlugins}
+            onConfigure={(pluginId) => handlePluginConfigure(pluginId, 'plugin-detail')}
           />
         )}
         </main>
@@ -154,6 +195,13 @@ const MainApp: React.FC<{
         totalPlugins={pluginInfos.length}
         errorPlugins={errorPlugins}
         currentView={currentView}
+        onStatusClick={handleStatusClick}
+        selectedPlugin={selectedPlugin ? {
+          version: selectedPlugin.version,
+          author: selectedPlugin.author,
+          type: selectedPlugin.type,
+          permissions: selectedPlugin.permissions
+        } : null}
       />
     </div>
   );
@@ -178,6 +226,9 @@ export const initMainAppRenderer = async (
     warn: async (message: string) => console.warn(message),
     error: async (message: string) => console.error(message)
   });
+  
+  console.log('[initMainAppRenderer] Initializing navigation service');
+  const navigationService = new NavigationService();
   
   console.log('[initMainAppRenderer] Initializing plugin manager');
   const pluginManager = new EnhancedPluginManager({
@@ -298,6 +349,7 @@ export const initMainAppRenderer = async (
     pluginManager,
     serviceRegistry,
     settingsManager,
+    navigationService,
   }));
   
   console.log('[initMainAppRenderer] Main application renderer initialized successfully');
