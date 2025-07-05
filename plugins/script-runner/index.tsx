@@ -170,23 +170,45 @@ export class ScriptExecutionService {
       const fs = await loadNodeModule<typeof import('fs/promises')>('fs/promises');
       const path = await loadNodeModule<typeof import('path')>('path');
       
+      // Try to create scripts directory if it doesn't exist
+      try {
+        await fs.mkdir(this.config.scriptsDirectory, { recursive: true });
+      } catch (mkdirError) {
+        // Directory might already exist, continue
+      }
+      
       const files = await fs.readdir(this.config.scriptsDirectory, { withFileTypes: true });
       const scripts: Script[] = [];
       
       for (const file of files) {
-        if (file.isFile() && this.config.allowedExtensions.some((ext: string) => file.name.endsWith(ext))) {
-          const scriptPath = path.join(this.config.scriptsDirectory, file.name);
-          const id = path.basename(file.name, path.extname(file.name));
-          
-          scripts.push({
-            id,
-            name: this.formatScriptName(id),
-            description: `Script: ${file.name}`,
-            path: scriptPath,
-            category: 'discovered',
-            parameters: []
-          });
+        try {
+          // Check if file has isFile method, fallback to stat if not
+          const isFile = typeof file.isFile === 'function' 
+            ? file.isFile() 
+            : (await fs.stat(path.join(this.config.scriptsDirectory, file.name))).isFile();
+            
+          if (isFile && this.config.allowedExtensions.some((ext: string) => file.name.endsWith(ext))) {
+            const scriptPath = path.join(this.config.scriptsDirectory, file.name);
+            const id = path.basename(file.name, path.extname(file.name));
+            
+            scripts.push({
+              id,
+              name: this.formatScriptName(id),
+              description: `Script: ${file.name}`,
+              path: scriptPath,
+              category: 'discovered',
+              parameters: []
+            });
+          }
+        } catch (fileError) {
+          console.warn(`[ScriptRunner] Error processing file ${file.name}:`, fileError);
+          continue;
         }
+      }
+      
+      // If no scripts found, add some sample scripts
+      if (scripts.length === 0) {
+        return this.getFallbackScripts();
       }
       
       return scripts;

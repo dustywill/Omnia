@@ -53,12 +53,34 @@ export const scanCustomerSites = async (filePath: string): Promise<CustomerSite[
   const fs = await loadNodeModule<typeof import('fs/promises')>('fs/promises');
   const text = await fs.readFile(filePath, 'utf8');
   
+  let rawData: any;
   try {
     const JSON5 = await loadNodeModule<any>('json5');
-    return JSON5.parse(text);
+    rawData = JSON5.parse(text);
   } catch {
-    return JSON.parse(text);
+    rawData = JSON.parse(text);
   }
+  
+  // Transform the data structure if it's the nested format
+  if (Array.isArray(rawData) && rawData.length > 0 && rawData[0].CustomerName) {
+    // Transform nested structure to flat CustomerSite array
+    const sites: CustomerSite[] = [];
+    rawData.forEach((customer: any) => {
+      if (customer.sites && Array.isArray(customer.sites)) {
+        customer.sites.forEach((site: any) => {
+          sites.push({
+            id: `${customer.CustomerName}-${site.Label}`.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+            name: `${customer.CustomerName} - ${site.Label}`,
+            url: `http://${site.IPAddress}${site.Link || ''}`
+          });
+        });
+      }
+    });
+    return sites;
+  }
+  
+  // Return as-is if it's already the expected format
+  return rawData;
 };
 
 export const generateCustomerLinksHtml = (
