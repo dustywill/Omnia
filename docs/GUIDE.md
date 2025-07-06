@@ -63,6 +63,7 @@ This file serves as the central navigation map for all Omnia documentation. Use 
 
 #### Testing Strategy
 - **[UI_TESTING.md](./testing/UI_TESTING.md)** - UI component testing approaches
+- **[UI_COMPONENT_TEST_PLAN.md](./testing/UI_COMPONENT_TEST_PLAN.md)** - Checklist for validating each UI component
 - **[INTEGRATION_TESTING.md](./testing/INTEGRATION_TESTING.md)** - System integration tests
 - **[PLUGIN_TESTING.md](./testing/PLUGIN_TESTING.md)** - Plugin testing patterns
 
