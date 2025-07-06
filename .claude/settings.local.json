@@ -50,7 +50,11 @@
       "Bash(if ! grep -q \"engine:\" \"$manifest\")",
       "Bash(fi)",
       "Bash(if ! grep -q \"uiContributions:\" \"$manifest\")",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(npm start)",
+      "Bash(cat:*)",
+      "Bash(electron dist/electron-main.js)",
+      "Bash(cp:*)"
     ],
     "deny": []
   }

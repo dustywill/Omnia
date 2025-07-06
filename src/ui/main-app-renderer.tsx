@@ -164,6 +164,7 @@ const MainApp: React.FC<{
           <SettingsView 
             settingsManager={settingsManager}
             plugins={pluginInfos}
+            pluginManager={pluginManager}
             navigationTarget={settingsTarget}
           />
         )}

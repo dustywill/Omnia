@@ -274,6 +274,7 @@ export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
                   element,
                   parse: (v: any) => Array.isArray(v) ? v : [],
                   optional: () => createChainableMock('array:optional'),
+                  default: (_val: any) => createChainableMock('array:default'),
                   describe: (_description: string) => createChainableMock('array:describe'),
                 }),
                 enum: (values: any[]) => ({

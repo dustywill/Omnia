@@ -3,8 +3,7 @@ import { loadNodeModule } from '../node-module-loader.js';
 import { SettingsManager } from '../../core/settings-manager.js';
 import { type PluginInfo } from '../main-app-renderer.js';
 import { SchemaForm } from '../components/SchemaForm/SchemaForm.js';
-import { JsonEditor } from '../components/JsonEditor/JsonEditor.js';
-import { Button } from '../components/Button/Button.js';
+import { PluginSettings } from '../components/PluginSettings/PluginSettings.js';
 import styles from './SettingsView.module.css';
 
 // We'll initialize the demo schema dynamically to avoid direct zod imports
@@ -42,7 +41,7 @@ const initializeDemoSchema = async () => {
       debugMode: z.boolean().default(false).describe('Enable detailed logging and debug features'),
       experimentalFeatures: z.boolean().default(false).describe('Enable experimental features (may be unstable)'),
       customApiEndpoint: z.string().url().optional().describe('Custom API endpoint URL'),
-      tags: z.array(z.string()).default(() => ['production']).describe('Environment tags')
+      tags: z.array(z.string()).default(['production']).describe('Environment tags')
     }).describe('Advanced configuration options')
   });
 
@@ -63,26 +62,26 @@ type SettingsSection = 'app-config' | 'demo-config' | 'plugin-config' | 'system-
 export interface SettingsViewProps {
   settingsManager: SettingsManager;
   plugins: PluginInfo[];
+  pluginManager?: any; // EnhancedPluginManager - using any to avoid import issues
   navigationTarget?: {
     pluginId: string;
     focusEditor?: boolean;
   } | null;
 }
 
-export function SettingsView({ settingsManager, plugins, navigationTarget }: SettingsViewProps) {
+export function SettingsView({ settingsManager, plugins, pluginManager, navigationTarget }: SettingsViewProps) {
   // Navigation state
   const [activeSection, setActiveSection] = useState<SettingsSection>('app-config');
   
-  // Actual app configuration (JSON)
-  const [appConfig, setAppConfig] = useState<string>('{}');
+  // App configuration (typed object and schema)
+  const [appConfig, setAppConfig] = useState<any>(null);
+  const [appConfigSchema, setAppConfigSchema] = useState<any>(null);
   
   // Demo configuration (typed object)
   const [demoConfig, setDemoConfig] = useState<any>(null);
   const [demoSchema, setDemoSchema] = useState<any>(null);
   
-  // Plugin configuration
-  const [selectedPluginConfig, setSelectedPluginConfig] = useState<string>('');
-  const [selectedPluginId, setSelectedPluginId] = useState<string | null>(null);
+  // Plugin configuration (handled by PluginSettings component)
   
   // UI state
   const [isLoading, setIsLoading] = useState(false);
@@ -90,16 +89,21 @@ export function SettingsView({ settingsManager, plugins, navigationTarget }: Set
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [autoOpenedPlugin, setAutoOpenedPlugin] = useState<string | null>(null);
 
-  // Initialize demo schema and load app configuration
+  // Initialize schemas and load configurations
   useEffect(() => {
     const initialize = async () => {
       try {
         setIsLoading(true);
         
         // Initialize demo schema
-        const schema = await initializeDemoSchema();
-        setDemoSchema(schema);
+        const demoSchemaInstance = await initializeDemoSchema();
+        setDemoSchema(demoSchemaInstance);
         setDemoConfig(defaultDemoConfig);
+        
+        // Load app configuration schema
+        const { createAppConfigSchemas } = await import('../../lib/schemas/app-config.js');
+        const appSchemas = await createAppConfigSchemas();
+        setAppConfigSchema(appSchemas.AppConfigSchema);
         
         // Load app configuration
         const config = await settingsManager.loadAppConfig();
@@ -107,11 +111,10 @@ export function SettingsView({ settingsManager, plugins, navigationTarget }: Set
         if (typeof process !== 'undefined' && process.env?.NODE_ENV === 'development') {
           console.debug('[SettingsView] Loaded app config:', config);
         }
-        const configJson = JSON.stringify(config, null, 2);
-        setAppConfig(configJson);
+        setAppConfig(config);
       } catch (error) {
         console.error('Failed to initialize:', error);
-        setAppConfig('{}');
+        setAppConfig({});
       } finally {
         setIsLoading(false);
       }
@@ -119,60 +122,35 @@ export function SettingsView({ settingsManager, plugins, navigationTarget }: Set
     initialize();
   }, [settingsManager]);
 
-  // Load plugin configuration when selected
-  useEffect(() => {
-    const loadPluginConfig = async () => {
-      if (!selectedPluginId) {
-        setSelectedPluginConfig('{}');
-        return;
-      }
-      
-      try {
-        setIsLoading(true);
-        const plugin = plugins.find(p => p.id === selectedPluginId);
-        if (plugin?.config) {
-          setSelectedPluginConfig(JSON.stringify(plugin.config, null, 2));
-        } else {
-          setSelectedPluginConfig('{}');
-        }
-      } catch (error) {
-        console.error('Failed to load plugin config:', error);
-        setSelectedPluginConfig('{}');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadPluginConfig();
-  }, [selectedPluginId, plugins]);
+  // Plugin configuration is now handled by PluginSettings component
 
   // Handle navigation target (auto-open plugin configuration)
   useEffect(() => {
     if (navigationTarget?.pluginId && 
-        navigationTarget.pluginId !== autoOpenedPlugin && 
-        selectedPluginId !== navigationTarget.pluginId) {
+        navigationTarget.pluginId !== autoOpenedPlugin) {
       console.log('[SettingsView] Auto-opening plugin configuration:', navigationTarget.pluginId);
-      setSelectedPluginId(navigationTarget.pluginId);
       setActiveSection('plugin-config');
       setAutoOpenedPlugin(navigationTarget.pluginId);
     }
-  }, [navigationTarget?.pluginId, autoOpenedPlugin, selectedPluginId]);
+  }, [navigationTarget?.pluginId, autoOpenedPlugin]);
 
-  // Clear auto-opened state when user manually selects a different plugin
-  useEffect(() => {
-    if (selectedPluginId && selectedPluginId !== autoOpenedPlugin && autoOpenedPlugin) {
-      setAutoOpenedPlugin(null);
+  const handleSaveAppConfig = async (config: any, isValid: boolean) => {
+    if (!isValid) {
+      setSaveMessage('Please fix validation errors before saving.');
+      return;
     }
-  }, [selectedPluginId, autoOpenedPlugin]);
 
-  const handleSaveAppConfig = async () => {
     try {
-      const config = JSON.parse(appConfig);
+      setIsSaving(true);
       await settingsManager.saveAppConfig(config);
+      setAppConfig(config); // Update local state
       setSaveMessage('Application configuration saved successfully!');
       setTimeout(() => setSaveMessage(null), 3000);
     } catch (error) {
       console.error('Failed to save app config:', error);
-      setSaveMessage('Failed to save configuration. Please check the JSON format.');
+      setSaveMessage('Failed to save configuration: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -198,20 +176,7 @@ export function SettingsView({ settingsManager, plugins, navigationTarget }: Set
     }
   };
 
-  const handleSavePluginConfig = async () => {
-    if (!selectedPluginId) return;
-    
-    try {
-      const config = JSON.parse(selectedPluginConfig);
-      // For now, we'll use a generic schema (we'd need the actual plugin schema in a real implementation)
-      const genericSchema = { parse: (data: any) => data };
-      await settingsManager.savePluginConfig(selectedPluginId, config, genericSchema);
-      alert('Plugin configuration saved successfully!');
-    } catch (error) {
-      console.error('Failed to save plugin config:', error);
-      alert('Failed to save configuration. Please check the JSON format.');
-    }
-  };
+  // Plugin configuration saving is now handled by PluginSettings component
   const renderSidebarContent = () => {
     const sidebarItems = [
       {
@@ -241,18 +206,8 @@ export function SettingsView({ settingsManager, plugins, navigationTarget }: Set
       }
     ];
 
-    // Add individual plugins under Plugin Settings section
-    const pluginItems = plugins.map(plugin => ({
-      id: `plugin-${plugin.id}` as SettingsSection,
-      label: plugin.name,
-      icon: '🔧',
-      section: 'Plugin Settings',
-      isPlugin: true,
-      pluginId: plugin.id,
-      pluginStatus: plugin.status
-    }));
-
-    const allItems = [...sidebarItems, ...pluginItems];
+    // Plugin selection is now handled within PluginSettings component
+    const allItems = sidebarItems;
     const sections = ['Core Settings', 'Plugin Settings', 'System'];
 
     return (
@@ -265,24 +220,13 @@ export function SettingsView({ settingsManager, plugins, navigationTarget }: Set
               .map(item => (
                 <div
                   key={item.id}
-                  className={`${styles.sidebarItem} ${activeSection === item.id ? styles.active : ''} ${(item as any).isPlugin ? styles.pluginItem : ''}`}
-                  onClick={() => {
-                    if ((item as any).isPlugin) {
-                      // Handle plugin-specific item click
-                      setSelectedPluginId((item as any).pluginId);
-                      setActiveSection('plugin-config');
-                    } else {
-                      setActiveSection(item.id);
-                    }
-                  }}
+                  className={`${styles.sidebarItem} ${activeSection === item.id ? styles.active : ''}`}
+                  onClick={() => setActiveSection(item.id)}
                 >
                   <span className={styles.sidebarItemIcon}>{item.icon}</span>
                   <span className={styles.sidebarItemText}>{item.label}</span>
                   {(item as any).badge && (
                     <span className={styles.sidebarItemBadge}>{(item as any).badge}</span>
-                  )}
-                  {(item as any).isPlugin && (
-                    <span className={`${styles.pluginStatus} ${styles[(item as any).pluginStatus] || styles.inactive}`} />
                   )}
                 </div>
               ))}
@@ -300,30 +244,29 @@ export function SettingsView({ settingsManager, plugins, navigationTarget }: Set
             <div className={styles.contentHeader}>
               <h2 className={styles.contentTitle}>Application Configuration</h2>
               <p className={styles.contentDescription}>
-                Edit the main application configuration (config/app.json5) in raw JSON format.
+                Configure main application settings using a schema-driven form with validation.
               </p>
             </div>
             <div className={styles.contentBody}>
               {isLoading ? (
                 <div className="text-gray-500">Loading configuration...</div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="border border-gray-200 rounded-lg overflow-hidden">
-                    <JsonEditor
-                      initialContent={appConfig}
-                      onChange={setAppConfig}
-                    />
-                  </div>
-                  <Button 
-                    onClick={handleSaveAppConfig}
-                    variant="primary"
-                    size="sm"
-                  >
-                    Save Application Configuration
-                  </Button>
+              ) : appConfigSchema && appConfig ? (
+                <div>
+                  <SchemaForm
+                    title="Application Settings"
+                    description=""
+                    schema={appConfigSchema}
+                    initialValues={appConfig}
+                    onSubmit={handleSaveAppConfig}
+                    mode="hybrid"
+                    defaultMode="form"
+                    submitLabel="Save Application Configuration"
+                    loading={isSaving}
+                    compact={false}
+                  />
                   
                   {saveMessage && saveMessage.includes('Application') && (
-                    <div className={`p-3 rounded-md text-sm ${
+                    <div className={`mt-4 p-3 rounded-md text-sm ${
                       saveMessage.includes('success') 
                         ? 'bg-green-50 text-green-700 border border-green-200' 
                         : 'bg-red-50 text-red-700 border border-red-200'
@@ -332,6 +275,8 @@ export function SettingsView({ settingsManager, plugins, navigationTarget }: Set
                     </div>
                   )}
                 </div>
+              ) : (
+                <div className="text-gray-500">Loading application configuration...</div>
               )}
             </div>
           </div>
@@ -376,81 +321,21 @@ export function SettingsView({ settingsManager, plugins, navigationTarget }: Set
         );
 
       case 'plugin-config':
-        return (
+        return pluginManager ? (
+          <PluginSettings
+            settingsManager={settingsManager}
+            pluginManager={pluginManager}
+            onSettingsChange={(pluginId, settings) => {
+              console.log('Plugin settings changed:', pluginId, settings);
+            }}
+          />
+        ) : (
           <div className={styles.contentSection}>
             <div className={styles.contentHeader}>
               <h2 className={styles.contentTitle}>Plugin Settings</h2>
               <p className={styles.contentDescription}>
-                Configure individual plugin settings. Found {plugins.length} plugins.
+                Plugin manager not available. Please try refreshing the page.
               </p>
-            </div>
-            <div className={styles.contentBody}>
-              {/* Plugin Selection Grid */}
-              <div className={styles.pluginGrid}>
-                {plugins.map((plugin) => (
-                  <div
-                    key={plugin.id}
-                    className={`${styles.pluginCard} ${selectedPluginId === plugin.id ? styles.selected : ''}`}
-                    onClick={() => setSelectedPluginId(plugin.id)}
-                  >
-                    <div className={styles.pluginCardHeader}>
-                      <div className={`${styles.pluginStatus} ${styles[plugin.status] || styles.inactive}`} />
-                      <div>
-                        <h3 className={styles.pluginName}>{plugin.name}</h3>
-                        <p className={styles.pluginDescription}>{plugin.description}</p>
-                      </div>
-                    </div>
-                    <div className={styles.pluginMeta}>
-                      <span>{plugin.type}</span>
-                      <span>v{plugin.version}</span>
-                      {plugin.author && <span>by {plugin.author}</span>}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Plugin Configuration Editor */}
-              {selectedPluginId && (
-                <div className="mt-6 p-6 bg-gray-50 border border-gray-200 rounded-lg">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                    {plugins.find(p => p.id === selectedPluginId)?.name} Configuration
-                  </h3>
-                  {isLoading ? (
-                    <div className="text-gray-500">Loading plugin configuration...</div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
-                        <JsonEditor
-                          label=""
-                          description="Edit the JSON configuration for this plugin."
-                          initialContent={selectedPluginConfig}
-                          onChange={setSelectedPluginConfig}
-                          placeholder="Enter plugin configuration in JSON format..."
-                          showLineNumbers={true}
-                          showValidationErrors={true}
-                          height="400px"
-                        />
-                      </div>
-                      <div className="flex gap-2">
-                        <Button 
-                          onClick={handleSavePluginConfig}
-                          variant="primary"
-                          size="sm"
-                        >
-                          Save Plugin Configuration
-                        </Button>
-                        <Button 
-                          onClick={() => setSelectedPluginId(null)}
-                          variant="secondary"
-                          size="sm"
-                        >
-                          Close Editor
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
           </div>
         );

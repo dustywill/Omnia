@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { z } from 'zod';
+import { loadNodeModule } from '../../node-module-loader.js';
 import { SchemaForm } from '../SchemaForm/SchemaForm.js';
 import { Card } from '../Card/Card.js';
 import { Badge } from '../Badge/Badge.js';
@@ -27,7 +27,7 @@ export interface PluginSettingsProps {
 interface PluginConfig {
   enabled: boolean;
   settings: Record<string, any>;
-  schema?: z.ZodSchema<any>;
+  schema?: any; // ZodSchema loaded dynamically
 }
 
 export function PluginSettings({ 
@@ -86,7 +86,7 @@ export function PluginSettings({
       const config: PluginConfig = {
         enabled: registryEntry?.enabled ?? true,
         settings: {},
-        schema: createPluginSchema(selectedPlugin!)
+        schema: await createPluginSchema(selectedPlugin!)
       };
 
       setPluginConfig(config);
@@ -347,30 +347,42 @@ export function PluginSettings({
 /**
  * Create a schema for plugin configuration based on plugin type
  */
-function createPluginSchema(plugin: LoadedPlugin): z.ZodSchema<any> {
+async function createPluginSchema(plugin: LoadedPlugin): Promise<any> {
   // This would normally be loaded from the plugin's schema file
   // For now, create a basic schema based on plugin type
   
-  switch (plugin.manifest.type) {
-    case 'simple':
-      return z.object({});
-      
-    case 'configured':
-      return z.object({
-        title: z.string().min(1).default(plugin.manifest.name).describe('Display title'),
-        enabled: z.boolean().default(true).describe('Enable this plugin feature'),
-        refreshInterval: z.number().min(1000).max(60000).default(5000).describe('Refresh interval in milliseconds'),
-      });
-      
-    case 'advanced':
-      return z.object({
-        logLevel: z.enum(['error', 'warn', 'info', 'debug']).default('info').describe('Plugin logging level'),
-        maxRetries: z.number().min(0).max(10).default(3).describe('Maximum retry attempts'),
-        timeout: z.number().min(1000).max(30000).default(10000).describe('Operation timeout in milliseconds'),
-        enableMetrics: z.boolean().default(false).describe('Enable performance metrics collection'),
-      });
-      
-    default:
-      return z.object({});
+  try {
+    const zodModule = await loadNodeModule<typeof import('zod')>('zod');
+    const z = zodModule.z || zodModule.default || zodModule;
+    
+    switch (plugin.manifest.type) {
+      case 'simple':
+        return z.object({});
+        
+      case 'configured':
+        return z.object({
+          title: z.string().min(1).default(plugin.manifest.name).describe('Display title'),
+          enabled: z.boolean().default(true).describe('Enable this plugin feature'),
+          refreshInterval: z.number().min(1000).max(60000).default(5000).describe('Refresh interval in milliseconds'),
+        });
+        
+      case 'advanced':
+        return z.object({
+          logLevel: z.enum(['error', 'warn', 'info', 'debug']).default('info').describe('Plugin logging level'),
+          maxRetries: z.number().min(0).max(10).default(3).describe('Maximum retry attempts'),
+          timeout: z.number().min(1000).max(30000).default(10000).describe('Operation timeout in milliseconds'),
+          enableMetrics: z.boolean().default(false).describe('Enable performance metrics collection'),
+        });
+        
+      default:
+        return z.object({});
+    }
+  } catch (error) {
+    console.error('Failed to load Zod for plugin schema:', error);
+    // Return a simple fallback schema
+    return {
+      parse: () => ({}),
+      safeParse: () => ({ success: true, data: {} })
+    };
   }
 }
