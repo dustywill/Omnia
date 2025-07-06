@@ -1,0 +1,233 @@
+/**
+ * @file plugins/com.example.as-built-documenter/ui/styles.css
+ * @description Styles for the As-Built Documenter plugin UI.
+ */
+
+/* Inherits variables from the main style.css */
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+#ip-address-input {
+  padding: 0 0.6rem 0 0.6rem;
+  border-radius: var(--tt-border-radius);
+  border: 1px solid var(--tt-color-border-light);
+  min-width: 250px;
+}
+
+#template-select-main {
+  padding: 0 0.6rem 0 0.6rem;
+  border-radius: var(--tt-border-radius);
+  border: 1px solid var(--tt-color-border-light);
+  min-width: 200px;
+}
+
+#template-select-generate {
+  padding: 0 0.6rem 0 0.6rem;
+  border-radius: var(--tt-border-radius);
+  border: 1px solid var(--tt-color-border-light);
+  min-width: 200px;
+}
+
+.theme-dark #template-select-main {
+  background-color: var(--tt-palette--n10);
+  border-color: var(--tt-palette--n40);
+  color: var(--tt-palette--n80);
+}
+
+.theme-dark #template-select-generate {
+  background-color: var(--tt-palette--n10);
+  border-color: var(--tt-palette--n40);
+  color: var(--tt-palette--n80);
+}
+
+.theme-dark #ip-address-input {
+  background-color: var(--tt-palette--n10);
+  border-color: var(--tt-palette--n40);
+  color: var(--tt-palette--n80);
+}
+
+#generate-doc-btn {
+  margin-top: auto; /* Aligns button with the input field if label makes it taller */
+}
+
+#open-editor-btn {
+  margin-top: auto; /* Aligns button with the Generate button */
+}
+
+#copy-template-btn {
+  margin-top: auto; /* Aligns button with the other controls */
+}
+
+.output-section {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid var(--tt-color-border-light);
+  border-radius: 8px;
+  background-color: var(--tt-color-surface-light);
+}
+
+.theme-dark .output-section {
+  border-color: var(--tt-color-border-dark);
+  background-color: var(--tt-color-surface-dark);
+}
+
+.output-section h3,
+.output-actions {
+  padding: 0 1rem 0 0.75rem;
+  margin: 0;
+  border-bottom: 1px solid var(--tt-color-border-light);
+  flex-shrink: 0;
+}
+
+.output-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.output-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+#status-message {
+  font-style: italic;
+}
+
+.theme-dark .output-section h3,
+.theme-dark .output-actions {
+  border-bottom-color: var(--tt-color-border-dark);
+}
+
+#output-textarea {
+  flex-grow: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border: none;
+  resize: none;
+  padding: 0 1rem 0 1rem;
+  font-family: monospace;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+  background-color: transparent;
+  color: inherit;
+}
+
+#output-textarea:focus {
+  outline: none;
+}
+
+/* Error summary section below the generated document */
+#error-summary {
+  padding: 0 1rem 0 0.75rem;
+  border-top: 1px solid var(--tt-color-border-light);
+  color: var(--tt-palette--danger);
+  white-space: pre-wrap;
+  font-size: 0.85rem;
+  display: none;
+}
+
+.container {
+  flex-direction: row;
+}
+
+.theme-dark #error-summary {
+  border-top-color: var(--tt-color-border-dark);
+}
+
+/* --- Modal Prompt/Confirm Styling --- */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--tt-palette--dark-alpha);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  padding: 0 2rem 0 1.5rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+}
+.theme-light .modal-content {
+  background-color: var(--tt-color-surface-light);
+  border: 1px solid var(--tt-color-border-light);
+}
+.theme-dark .modal-content {
+  background-color: var(--tt-color-surface-dark);
+  border: 1px solid var(--tt-color-border-dark);
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--tt-color-border-light);
+  padding-bottom: 0.5rem;
+}
+.theme-dark .modal-content h3 {
+  border-bottom-color: var(--tt-color-border-dark);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1rem;
+  align-items: center;
+}
+.form-grid label {
+  font-weight: 600;
+  text-align: right;
+}
+.theme-light .form-grid label {
+  color: var(--tt-palette--n30);
+}
+.theme-dark .form-grid label {
+  color: var(--tt-palette--n70);
+}
+
+.form-grid input[type="text"] {
+  padding: 0 0.5rem 0 0.5rem;
+  border-radius: 4px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.theme-light .form-grid input {
+  background-color: var(--tt-palette--n95);
+  border: 1px solid var(--tt-palette--n80);
+}
+.theme-dark .form-grid input {
+  background-color: var(--tt-palette--n10);
+  border: 1px solid var(--tt-palette--n40);
+  color: var(--tt-palette--n90);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--tt-color-border-light);
+}
+.theme-dark .modal-actions {
+  border-top-color: var(--tt-color-border-dark);
+}

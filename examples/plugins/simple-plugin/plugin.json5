@@ -1,0 +1,10 @@
+{
+  id: "example-simple-plugin",
+  name: "Simple Example Plugin",
+  version: "1.0.0",
+  description: "A simple plugin that displays a hello world message",
+  author: "Omnia Team",
+  type: "simple",
+  main: "index.tsx",
+  permissions: []
+}

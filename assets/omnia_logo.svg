@@ -1,0 +1,890 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 277.37378 180.57979"
+   version="1.1"
+   id="svg95"
+   sodipodi:docname="omnia_logo_updated.svg"
+   inkscape:version="1.2.2 (732a01da63, 2022-12-09)"
+   width="277.37378"
+   height="180.57979"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview97"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="2.9342857"
+     inkscape:cx="38.851022"
+     inkscape:cy="138.02337"
+     inkscape:window-width="3840"
+     inkscape:window-height="2054"
+     inkscape:window-x="3829"
+     inkscape:window-y="-11"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg95" />
+  <defs
+     id="defs49">
+    <!-- Gradients using your color palette - blues and yellows only -->
+    <radialGradient
+       id="sphereGradient"
+       cx="130.92"
+       cy="130.92"
+       r="77.279999"
+       fx="130.92"
+       fy="130.92"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-13.434415,-64.147972)">
+      <stop
+         offset="0%"
+         style="stop-color:#89b9fb;stop-opacity:1"
+         id="stop2" />
+      <stop
+         offset="40%"
+         style="stop-color:#3d89f5;stop-opacity:1"
+         id="stop4" />
+      <stop
+         offset="70%"
+         style="stop-color:#1e6de6;stop-opacity:1"
+         id="stop6" />
+      <stop
+         offset="100%"
+         style="stop-color:#0d3778;stop-opacity:1"
+         id="stop8" />
+    </radialGradient>
+    <linearGradient
+       id="orbit1Gradient"
+       x1="0"
+       y1="0"
+       x2="1"
+       y2="0">
+      <stop
+         offset="0%"
+         style="stop-color:#64a1f7;stop-opacity:0.8"
+         id="stop11" />
+      <stop
+         offset="50%"
+         style="stop-color:#b3d3fe;stop-opacity:0.4"
+         id="stop13" />
+      <stop
+         offset="100%"
+         style="stop-color:#64a1f7;stop-opacity:0.8"
+         id="stop15" />
+    </linearGradient>
+    <linearGradient
+       id="orbit2Gradient"
+       x1="0"
+       y1="0"
+       x2="1"
+       y2="0">
+      <stop
+         offset="0%"
+         style="stop-color:#1555b2;stop-opacity:0.7"
+         id="stop18" />
+      <stop
+         offset="50%"
+         style="stop-color:#3d89f5;stop-opacity:0.3"
+         id="stop20" />
+      <stop
+         offset="100%"
+         style="stop-color:#1555b2;stop-opacity:0.7"
+         id="stop22" />
+    </linearGradient>
+    <linearGradient
+       id="orbit3Gradient"
+       x1="0"
+       y1="0"
+       x2="1"
+       y2="0">
+      <stop
+         offset="0%"
+         style="stop-color:#ffcd08;stop-opacity:0.6"
+         id="stop25" />
+      <stop
+         offset="50%"
+         style="stop-color:#ffe752;stop-opacity:0.3"
+         id="stop27" />
+      <stop
+         offset="100%"
+         style="stop-color:#ffcd08;stop-opacity:0.6"
+         id="stop29" />
+    </linearGradient>
+    <radialGradient
+       id="nodeGradient"
+       cx="0.30000001"
+       cy="0.30000001"
+       r="0.69999999">
+      <stop
+         offset="0%"
+         style="stop-color:#fff9b3;stop-opacity:1"
+         id="stop32" />
+      <stop
+         offset="50%"
+         style="stop-color:#ffcd08;stop-opacity:1"
+         id="stop34" />
+      <stop
+         offset="100%"
+         style="stop-color:#e5b000;stop-opacity:1"
+         id="stop36" />
+    </radialGradient>
+    <!-- 3D shadow filters - fixed for circular shadows -->
+    <filter
+       style="color-interpolation-filters:sRGB"
+       inkscape:label="Drop Shadow"
+       id="filter1157"
+       x="-0.08"
+       y="-0.13398637"
+       width="1.2266667"
+       height="1.379628">
+      <feFlood
+         flood-opacity="0.498039"
+         flood-color="rgb(0,0,0)"
+         result="flood"
+         id="feFlood1147" />
+      <feComposite
+         in="flood"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite1"
+         id="feComposite1149" />
+      <feGaussianBlur
+         in="composite1"
+         stdDeviation="3"
+         result="blur"
+         id="feGaussianBlur1151" />
+      <feOffset
+         dx="6"
+         dy="6"
+         result="offset"
+         id="feOffset1153" />
+      <feComposite
+         in="SourceGraphic"
+         in2="offset"
+         operator="over"
+         result="composite2"
+         id="feComposite1155" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB"
+       inkscape:label="Drop Shadow"
+       id="filter1169"
+       x="-0.034166667"
+       y="-0.20571429"
+       width="1.0933333"
+       height="1.6114281">
+      <feFlood
+         flood-opacity="0.498039"
+         flood-color="rgb(0,0,0)"
+         result="flood"
+         id="feFlood1159" />
+      <feComposite
+         in="flood"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite1"
+         id="feComposite1161" />
+      <feGaussianBlur
+         in="composite1"
+         stdDeviation="3"
+         result="blur"
+         id="feGaussianBlur1163" />
+      <feOffset
+         dx="6"
+         dy="6"
+         result="offset"
+         id="feOffset1165" />
+      <feComposite
+         in="SourceGraphic"
+         in2="offset"
+         operator="over"
+         result="composite2"
+         id="feComposite1167" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB"
+       inkscape:label="Drop Shadow"
+       id="filter1181"
+       x="-0.05125"
+       y="-0.40999957"
+       width="1.14"
+       height="2.0699996">
+      <feFlood
+         flood-opacity="0.498039"
+         flood-color="rgb(0,0,0)"
+         result="flood"
+         id="feFlood1171" />
+      <feComposite
+         in="flood"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite1"
+         id="feComposite1173" />
+      <feGaussianBlur
+         in="composite1"
+         stdDeviation="3"
+         result="blur"
+         id="feGaussianBlur1175" />
+      <feOffset
+         dx="6"
+         dy="6"
+         result="offset"
+         id="feOffset1177" />
+      <feComposite
+         in="SourceGraphic"
+         in2="offset"
+         operator="over"
+         result="composite2"
+         id="feComposite1179" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB"
+       inkscape:label="Drop Shadow"
+       id="filter1193"
+       x="-0.05125"
+       y="-0.36"
+       width="1.14"
+       height="2.0699996">
+      <feFlood
+         flood-opacity="0.498039"
+         flood-color="rgb(0,0,0)"
+         result="flood"
+         id="feFlood1183" />
+      <feComposite
+         in="flood"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite1"
+         id="feComposite1185" />
+      <feGaussianBlur
+         in="composite1"
+         stdDeviation="3"
+         result="blur"
+         id="feGaussianBlur1187" />
+      <feOffset
+         dx="6"
+         dy="6"
+         result="offset"
+         id="feOffset1189" />
+      <feComposite
+         in="SourceGraphic"
+         in2="offset"
+         operator="over"
+         result="composite2"
+         id="feComposite1191" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB"
+       inkscape:label="Drop Shadow"
+       id="filter1205"
+       x="-0.034166667"
+       y="-0.23428528"
+       width="1.0933333"
+       height="1.6114281">
+      <feFlood
+         flood-opacity="0.498039"
+         flood-color="rgb(0,0,0)"
+         result="flood"
+         id="feFlood1195" />
+      <feComposite
+         in="flood"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite1"
+         id="feComposite1197" />
+      <feGaussianBlur
+         in="composite1"
+         stdDeviation="3"
+         result="blur"
+         id="feGaussianBlur1199" />
+      <feOffset
+         dx="6"
+         dy="6"
+         result="offset"
+         id="feOffset1201" />
+      <feComposite
+         in="SourceGraphic"
+         in2="offset"
+         operator="over"
+         result="composite2"
+         id="feComposite1203" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB"
+       inkscape:label="Drop Shadow"
+       id="filter1217"
+       x="-0.041"
+       y="-0.32799957"
+       width="1.112"
+       height="1.8559996">
+      <feFlood
+         flood-opacity="0.498039"
+         flood-color="rgb(0,0,0)"
+         result="flood"
+         id="feFlood1207" />
+      <feComposite
+         in="flood"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite1"
+         id="feComposite1209" />
+      <feGaussianBlur
+         in="composite1"
+         stdDeviation="3"
+         result="blur"
+         id="feGaussianBlur1211" />
+      <feOffset
+         dx="6"
+         dy="6"
+         result="offset"
+         id="feOffset1213" />
+      <feComposite
+         in="SourceGraphic"
+         in2="offset"
+         operator="over"
+         result="composite2"
+         id="feComposite1215" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB"
+       inkscape:label="Drop Shadow"
+       id="filter1229"
+       x="-0.041"
+       y="-0.288"
+       width="1.112"
+       height="1.8559996">
+      <feFlood
+         flood-opacity="0.498039"
+         flood-color="rgb(0,0,0)"
+         result="flood"
+         id="feFlood1219" />
+      <feComposite
+         in="flood"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite1"
+         id="feComposite1221" />
+      <feGaussianBlur
+         in="composite1"
+         stdDeviation="3"
+         result="blur"
+         id="feGaussianBlur1223" />
+      <feOffset
+         dx="6"
+         dy="6"
+         result="offset"
+         id="feOffset1225" />
+      <feComposite
+         in="SourceGraphic"
+         in2="offset"
+         operator="over"
+         result="composite2"
+         id="feComposite1227" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB"
+       inkscape:label="Drop Shadow"
+       id="filter1241"
+       x="-0.72"
+       y="-0.72"
+       width="3.04"
+       height="3.04">
+      <feFlood
+         flood-opacity="0.498039"
+         flood-color="rgb(0,0,0)"
+         result="flood"
+         id="feFlood1231" />
+      <feComposite
+         in="flood"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite1"
+         id="feComposite1233" />
+      <feGaussianBlur
+         in="composite1"
+         stdDeviation="3"
+         result="blur"
+         id="feGaussianBlur1235" />
+      <feOffset
+         dx="6"
+         dy="6"
+         result="offset"
+         id="feOffset1237" />
+      <feComposite
+         in="SourceGraphic"
+         in2="offset"
+         operator="over"
+         result="composite2"
+         id="feComposite1239" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB"
+       inkscape:label="Drop Shadow"
+       id="filter1253"
+       x="-0.6"
+       y="-0.6"
+       width="2.7"
+       height="2.7">
+      <feFlood
+         flood-opacity="0.498039"
+         flood-color="rgb(0,0,0)"
+         result="flood"
+         id="feFlood1243" />
+      <feComposite
+         in="flood"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite1"
+         id="feComposite1245" />
+      <feGaussianBlur
+         in="composite1"
+         stdDeviation="3"
+         result="blur"
+         id="feGaussianBlur1247" />
+      <feOffset
+         dx="6"
+         dy="6"
+         result="offset"
+         id="feOffset1249" />
+      <feComposite
+         in="SourceGraphic"
+         in2="offset"
+         operator="over"
+         result="composite2"
+         id="feComposite1251" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB"
+       inkscape:label="Drop Shadow"
+       id="filter1265"
+       x="-0.9"
+       y="-0.9"
+       width="3.55"
+       height="3.55">
+      <feFlood
+         flood-opacity="0.498039"
+         flood-color="rgb(0,0,0)"
+         result="flood"
+         id="feFlood1255" />
+      <feComposite
+         in="flood"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite1"
+         id="feComposite1257" />
+      <feGaussianBlur
+         in="composite1"
+         stdDeviation="3"
+         result="blur"
+         id="feGaussianBlur1259" />
+      <feOffset
+         dx="6"
+         dy="6"
+         result="offset"
+         id="feOffset1261" />
+      <feComposite
+         in="SourceGraphic"
+         in2="offset"
+         operator="over"
+         result="composite2"
+         id="feComposite1263" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB"
+       inkscape:label="Drop Shadow"
+       id="filter1277"
+       x="-0.72"
+       y="-0.72"
+       width="3.04"
+       height="3.04">
+      <feFlood
+         flood-opacity="0.498039"
+         flood-color="rgb(0,0,0)"
+         result="flood"
+         id="feFlood1267" />
+      <feComposite
+         in="flood"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite1"
+         id="feComposite1269" />
+      <feGaussianBlur
+         in="composite1"
+         stdDeviation="3"
+         result="blur"
+         id="feGaussianBlur1271" />
+      <feOffset
+         dx="6"
+         dy="6"
+         result="offset"
+         id="feOffset1273" />
+      <feComposite
+         in="SourceGraphic"
+         in2="offset"
+         operator="over"
+         result="composite2"
+         id="feComposite1275" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB"
+       inkscape:label="Drop Shadow"
+       id="filter1289"
+       x="-1.2"
+       y="-1.2"
+       width="4.4"
+       height="4.4">
+      <feFlood
+         flood-opacity="0.498039"
+         flood-color="rgb(0,0,0)"
+         result="flood"
+         id="feFlood1279" />
+      <feComposite
+         in="flood"
+         in2="SourceGraphic"
+         operator="in"
+         result="composite1"
+         id="feComposite1281" />
+      <feGaussianBlur
+         in="composite1"
+         stdDeviation="3"
+         result="blur"
+         id="feGaussianBlur1283" />
+      <feOffset
+         dx="6"
+         dy="6"
+         result="offset"
+         id="feOffset1285" />
+      <feComposite
+         in="SourceGraphic"
+         in2="offset"
+         operator="over"
+         result="composite2"
+         id="feComposite1287" />
+    </filter>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#orbit3Gradient"
+       id="linearGradient2072"
+       x1="10.10681"
+       y1="230.36353"
+       x2="131.75941"
+       y2="230.36353"
+       gradientTransform="scale(2.1569616,0.46361513)"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#orbit2Gradient"
+       id="linearGradient2074"
+       x1="19.092722"
+       y1="255.71213"
+       x2="120.67696"
+       y2="255.71213"
+       gradientTransform="scale(2.189316,0.45676367)"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#orbit1Gradient"
+       id="linearGradient2076"
+       x1="29.442602"
+       y1="255.65813"
+       x2="116.34116"
+       y2="255.65813"
+       gradientTransform="scale(2.0989992,0.47641752)"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#orbit3Gradient"
+       id="linearGradient2078"
+       x1="10.10681"
+       y1="308.0141"
+       x2="131.75941"
+       y2="308.0141"
+       gradientTransform="scale(2.1569616,0.46361513)"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#orbit2Gradient"
+       id="linearGradient2080"
+       x1="19.092722"
+       y1="312.63431"
+       x2="120.67696"
+       y2="312.63431"
+       gradientTransform="scale(2.189316,0.45676367)"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#orbit1Gradient"
+       id="linearGradient2082"
+       x1="29.442602"
+       y1="299.73709"
+       x2="116.34116"
+       y2="299.73709"
+       gradientTransform="scale(2.0989992,0.47641752)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#nodeGradient"
+       id="radialGradient2084"
+       cx="47.32"
+       cy="147.32001"
+       r="19.879999"
+       fx="47.32"
+       fy="147.32001"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#nodeGradient"
+       id="radialGradient2086"
+       cx="26.92"
+       cy="146.92"
+       r="21.279999"
+       fx="26.92"
+       fy="146.92"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#nodeGradient"
+       id="radialGradient2088"
+       cx="266.51999"
+       cy="146.52"
+       r="22.68"
+       fx="266.51999"
+       fy="146.52"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#nodeGradient"
+       id="radialGradient2090"
+       cx="246.92"
+       cy="146.92"
+       r="21.279999"
+       fx="246.92"
+       fy="146.92"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#nodeGradient"
+       id="radialGradient2092"
+       cx="228.39999"
+       cy="148.39999"
+       r="5.5999999"
+       fx="228.39999"
+       fy="148.39999"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(16.877197,-195.25482)" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#nodeGradient"
+       id="radialGradient2094"
+       cx="67.720001"
+       cy="147.72"
+       r="18.48"
+       fx="67.720001"
+       fy="147.72"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#sphereGradient"
+       id="radialGradient3883"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(2.2433769,-0.14813794,0.04671813,0.70749172,-132.54305,17.532869)"
+       cx="86.957001"
+       cy="235.20432"
+       fx="86.957001"
+       fy="235.20432"
+       r="77.279999" />
+  </defs>
+  <text
+     text-anchor="middle"
+     font-family="Arial, sans-serif"
+     font-size="36px"
+     font-weight="bold"
+     fill="#1555b2"
+     id="text93"
+     style="letter-spacing:8px;filter:url(#filter1157);font-variation-settings:normal;opacity:1;vector-effect:none;fill:url(#radialGradient3883);fill-opacity:1;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;-inkscape-stroke:none;stop-color:#000000;stop-opacity:1"
+     transform="translate(-1.7288256,-2.1479723)"><textPath
+       xlink:href="#circle65-0"
+       startOffset="50%"
+       id="textPath1133"
+       style="fill:url(#radialGradient3883)">OMNIA</textPath></text>
+  <!-- Back portions of orbits (behind the sphere) -->
+  <path
+     d="m 30,150 a 120,35 0 0 1 240,0"
+     fill="none"
+     stroke="url(#orbit3Gradient)"
+     stroke-width="2"
+     opacity="0.3"
+     transform="rotate(15,386.90887,66.903759)"
+     id="path51"
+     style="display:inline;stroke:url(#linearGradient2072);filter:url(#filter1205)" />
+  <path
+     d="m 50,150 a 100,25 0 0 1 200,0"
+     fill="none"
+     stroke="url(#orbit2Gradient)"
+     stroke-width="2"
+     opacity="0.4"
+     transform="rotate(-30,23.581057,142.99497)"
+     id="path53"
+     style="display:inline;stroke:url(#linearGradient2074);filter:url(#filter1217)" />
+  <path
+     d="m 70,150 a 80,20 0 0 1 160,0"
+     fill="none"
+     stroke-width="2"
+     opacity="0.5"
+     transform="rotate(45,220.71623,101.70924)"
+     id="path55"
+     style="display:inline;stroke:url(#linearGradient2076);filter:url(#filter1181)"
+     stroke="url(#orbit1Gradient)" />
+  <!-- Back orbital nodes (behind sphere) -->
+  <!-- Central sphere with 3D effect -->
+  <circle
+     cx="136.56558"
+     cy="85.852028"
+     r="45"
+     fill="url(#sphereGradient)"
+     filter="url(#glow)"
+     id="circle63"
+     style="fill:url(#sphereGradient);filter:url(#filter1157)" />
+  <!-- Inner core details -->
+  <circle
+     cx="136.56558"
+     cy="85.852028"
+     r="30"
+     fill="none"
+     stroke="#dbe9ff"
+     stroke-width="2"
+     opacity="0.8"
+     id="circle65" />
+  <path
+     id="circle65-0"
+     style="opacity:0.8;fill:none;stroke:none;stroke-width:5.14415"
+     d="M 140.31437,12.438697 A 77.16211,77.16211 0 0 0 63.152254,89.600808 77.16211,77.16211 0 0 0 140.31437,166.76292 77.16211,77.16211 0 0 0 217.47648,89.600808 77.16211,77.16211 0 0 0 140.31437,12.438697 Z" />
+  <circle
+     cx="136.56558"
+     cy="85.852028"
+     r="20"
+     fill="none"
+     stroke="#ffffff"
+     stroke-width="1.5"
+     opacity="0.6"
+     id="circle67" />
+  <!-- Central highlight for 3D sphere effect -->
+  <!-- Front portions of orbits (in front of the sphere) -->
+  <path
+     d="M 270,150 A 120,35 0 0 1 30,150"
+     fill="none"
+     stroke="url(#orbit3Gradient)"
+     stroke-width="2"
+     opacity="0.8"
+     transform="rotate(15,386.90887,66.903759)"
+     id="path73"
+     style="stroke:url(#linearGradient2078);filter:url(#filter1169)" />
+  <path
+     d="M 250,150 A 100,25 0 0 1 50,150"
+     fill="none"
+     stroke="url(#orbit2Gradient)"
+     stroke-width="2"
+     opacity="0.9"
+     transform="rotate(-30,23.581057,142.99497)"
+     id="path75"
+     style="stroke:url(#linearGradient2080);filter:url(#filter1229)" />
+  <path
+     d="M 230,150 A 80,20 0 0 1 70,150"
+     fill="none"
+     stroke="url(#orbit1Gradient)"
+     stroke-width="2"
+     opacity="1"
+     transform="rotate(45,220.71623,101.70924)"
+     id="path77"
+     style="stroke:url(#linearGradient2082);filter:url(#filter1193)" />
+  <!-- Front orbital nodes (in front of sphere) -->
+  <!-- Subtle connection lines from center -->
+  <!-- OMNIA text below the sphere -->
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Throw Away"
+     style="display:inline"
+     transform="translate(-13.434415,-0.14797226)">
+    <circle
+       cx="130"
+       cy="66"
+       r="6"
+       fill="#ffffff"
+       opacity="0.6"
+       id="circle71"
+       style="fill:#ffffff;fill-opacity:0.5" />
+    <circle
+       cx="135"
+       cy="71"
+       r="12"
+       fill="#ffffff"
+       opacity="0.4"
+       id="circle69"
+       style="fill:#ffffff;fill-opacity:0.5" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer1"
+     inkscape:label="ObitingCircles"
+     transform="translate(-13.434415,-0.14797226)">
+    <circle
+       cx="50"
+       cy="150"
+       r="4"
+       fill="url(#nodeGradient)"
+       opacity="0.7"
+       transform="rotate(-30,30.574384,118)"
+       id="circle59"
+       style="fill:url(#radialGradient2084);filter:url(#filter1265)" />
+    <circle
+       cx="30"
+       cy="150"
+       r="5"
+       fill="url(#nodeGradient)"
+       opacity="0.6"
+       transform="rotate(15,393.0641,118)"
+       id="circle57"
+       style="fill:url(#radialGradient2086);filter:url(#filter1277)" />
+    <circle
+       cx="270"
+       cy="150"
+       r="6"
+       fill="url(#nodeGradient)"
+       transform="rotate(15,393.0641,118)"
+       id="circle79"
+       style="fill:url(#radialGradient2088);filter:url(#filter1253)" />
+    <circle
+       cx="250"
+       cy="150"
+       r="5"
+       fill="url(#nodeGradient)"
+       transform="rotate(-30,30.574384,118)"
+       id="circle81"
+       style="fill:url(#radialGradient2090);filter:url(#filter1241)" />
+    <circle
+       cx="246.87717"
+       cy="-45.254833"
+       r="4"
+       fill="url(#nodeGradient)"
+       transform="rotate(45)"
+       id="circle83"
+       style="fill:url(#radialGradient2092)" />
+    <circle
+       cx="70"
+       cy="150"
+       r="3"
+       fill="url(#nodeGradient)"
+       opacity="0.8"
+       transform="rotate(45,227.25482,118)"
+       id="circle61"
+       style="fill:url(#radialGradient2094);filter:url(#filter1289)" />
+  </g>
+</svg>

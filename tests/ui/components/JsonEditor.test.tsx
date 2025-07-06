@@ -4,13 +4,8 @@ import userEvent from '@testing-library/user-event';
 import { z } from 'zod';
 import fs from 'fs/promises';
 import path from 'path';
-import { fileURLToPath } from 'url';
-
 import { JsonEditor } from '../../../src/ui/components/JsonEditor.js';
 import { openJsonEditor } from '../../../src/ui/json-editor-api.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 describe('JsonEditor component', () => {
   it('opens and edits JSON files without schema', async () => {
@@ -61,7 +56,7 @@ describe('JsonEditor component', () => {
   });
 
   it('opens a file with schema via API', async () => {
-    const tempPath = path.join(__dirname, 'temp.json');
+    const tempPath = path.join(process.cwd(), 'temp.json');
     await fs.writeFile(tempPath, '{"foo":"bar"}', 'utf8');
     const schema = z.object({ foo: z.string() });
     const element = await openJsonEditor(tempPath, schema);

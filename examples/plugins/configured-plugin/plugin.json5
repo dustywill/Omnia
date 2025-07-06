@@ -1,0 +1,11 @@
+{
+  id: "example-configured-plugin",
+  name: "Configured Example Plugin",
+  version: "1.0.0",
+  description: "A configured plugin that displays customizable messages",
+  author: "Omnia Team",
+  type: "configured",
+  main: "index.tsx",
+  permissions: ["settings:read"],
+  configSchema: "config-schema.js"
+}

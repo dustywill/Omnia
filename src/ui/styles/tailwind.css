@@ -1,0 +1,134 @@
+/*
+ * Tailwind CSS Base Styles with Omnia Design System
+ */
+
+@import './variables.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styles with design system variables */
+@layer base {
+  html {
+    font-family: var(--tt-font-family-sans);
+  }
+  
+  body {
+    background-color: var(--tt-color-background);
+    color: var(--tt-color-text-primary);
+    font-size: var(--tt-font-size-base);
+    line-height: 1.5;
+  }
+  
+  /* Ensure proper color transitions for theme switching */
+  * {
+    transition: background-color 200ms ease-in-out, 
+                border-color 200ms ease-in-out, 
+                color 200ms ease-in-out;
+  }
+}
+
+/* Component layer for reusable patterns */
+@layer components {
+  /* Button variants using design system colors */
+  .btn-primary {
+    @apply bg-primary text-white hover:bg-blue-20 px-4 py-2 rounded-lg font-medium transition-colors;
+  }
+  
+  .btn-secondary {
+    @apply bg-neutral-80 text-neutral-20 hover:bg-neutral-70 px-4 py-2 rounded-lg font-medium transition-colors;
+  }
+  
+  .btn-action {
+    @apply bg-action text-white hover:bg-blue-30 px-4 py-2 rounded-lg font-medium transition-colors;
+  }
+  
+  .btn-success {
+    @apply bg-success text-white hover:bg-green-30 px-4 py-2 rounded-lg font-medium transition-colors;
+  }
+  
+  .btn-warning {
+    @apply bg-warning text-white hover:bg-orange-30 px-4 py-2 rounded-lg font-medium transition-colors;
+  }
+  
+  .btn-danger {
+    @apply bg-danger text-white hover:bg-red-30 px-4 py-2 rounded-lg font-medium transition-colors;
+  }
+  
+  /* Card component using design system */
+  .card {
+    background-color: var(--tt-color-surface);
+    border: 1px solid var(--tt-color-border);
+    border-radius: var(--tt-radius-lg);
+    box-shadow: var(--tt-shadow-md);
+  }
+  
+  /* Input component using design system */
+  .input {
+    background-color: var(--tt-color-surface);
+    border: 1px solid var(--tt-color-border);
+    border-radius: var(--tt-radius-md);
+    padding: var(--tt-space-3) var(--tt-space-4);
+    color: var(--tt-color-text-primary);
+  }
+  
+  .input:focus {
+    outline: none;
+    border-color: var(--tt-color-action);
+    box-shadow: 0 0 0 3px rgba(30, 109, 230, 0.1);
+  }
+  
+  /* Sidebar navigation styles */
+  .sidebar {
+    background-color: var(--tt-color-surface);
+    border-right: 1px solid var(--tt-color-border);
+  }
+  
+  .sidebar-item {
+    padding: var(--tt-space-3) var(--tt-space-4);
+    color: var(--tt-color-text-secondary);
+    border-radius: var(--tt-radius-md);
+    transition: all 200ms ease-in-out;
+  }
+  
+  .sidebar-item:hover {
+    background-color: var(--tt-color-background);
+    color: var(--tt-color-text-primary);
+  }
+  
+  .sidebar-item.active {
+    background-color: var(--tt-color-action);
+    color: white;
+  }
+}
+
+/* Utility layer for design system specific utilities */
+@layer utilities {
+  /* Theme-aware text colors */
+  .text-theme-primary {
+    color: var(--tt-color-text-primary);
+  }
+  
+  .text-theme-secondary {
+    color: var(--tt-color-text-secondary);
+  }
+  
+  /* Theme-aware background colors */
+  .bg-theme-surface {
+    background-color: var(--tt-color-surface);
+  }
+  
+  .bg-theme-background {
+    background-color: var(--tt-color-background);
+  }
+  
+  /* Theme-aware border colors */
+  .border-theme {
+    border-color: var(--tt-color-border);
+  }
+  
+  /* Design system shadows */
+  .shadow-theme {
+    box-shadow: var(--tt-shadow-md);
+  }
+}

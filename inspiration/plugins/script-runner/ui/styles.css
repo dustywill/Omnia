@@ -1,0 +1,355 @@
+/**
+ * @file plugins/script-runner/ui/styles.css
+ * @description Styles for the Script Runner plugin UI.
+ */
+
+/* This plugin's HTML needs to link to the main style.css to inherit variables */
+
+/* --- Base Layout --- */
+/*
+.container {
+  overflow: hidden; // Prevent the container from scrolling
+}
+*/
+
+/* Wrapper for the two panels */
+.main-content {
+  display: flex;
+  flex-grow: 1;
+  height: 100%;
+  gap: 1.5rem;
+  min-height: 0;
+}
+
+/* --- Panel Styling (two-column layout) --- */
+.script-panel,
+.output-panel {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  border-radius: 8px;
+  min-height: 0; /* Critical for enabling child scrolling in a flex container */
+}
+
+.script-panel {
+  width: 40%;
+}
+.output-panel {
+  width: 60%;
+}
+
+/* Applying theme colors to the panels */
+.theme-light .script-panel,
+.theme-light .output-panel {
+  background-color: var(--tt-color-surface-light);
+  border: 1px solid var(--tt-color-border-light);
+}
+.theme-dark .script-panel,
+.theme-dark .output-panel {
+  background-color: var(--tt-color-surface-dark);
+  border: 1px solid var(--tt-color-border-dark);
+}
+
+/* --- Panel Header --- */
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  flex-shrink: 0; /* Prevent header from shrinking */
+}
+.panel-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.theme-light .panel-header {
+  border-bottom: 1px solid var(--tt-color-border-light);
+}
+.theme-dark .panel-header {
+  border-bottom: 1px solid var(--tt-color-border-dark);
+}
+
+.panel-header button {
+  margin: 0; /* Remove default button margins */
+  padding: 0.2em 0.6em;
+  font-size: 0.8em;
+}
+
+/* --- Panel Content (the scrollable areas) --- */
+.panel-content {
+  flex-grow: 1;
+  min-height: 0;
+  overflow-y: auto; /* Enable vertical scrolling */
+  padding: 1rem;
+}
+
+#output-pre {
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-size: 0.9rem;
+}
+
+.theme-light #output-pre {
+  color: var(--tt-palette--n20);
+}
+.theme-dark #output-pre {
+  color: var(--tt-palette--n80);
+}
+
+/* --- Script Group and Button Styling --- */
+.script-group {
+  margin-bottom: 1.5rem;
+}
+
+.script-group h4 {
+  margin: 0 0 0.5rem 0;
+  padding-bottom: 0.25rem;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.theme-light .script-group h4 {
+  border-bottom: 1px solid var(--tt-palette--n80);
+  color: var(--tt-palette--n40);
+}
+.theme-dark .script-group h4 {
+  border-bottom: 1px solid var(--tt-palette--n40);
+  color: var(--tt-palette--n60);
+}
+
+.script-button-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+}
+
+.theme-light .script-button-container:hover {
+  background-color: var(--tt-palette--n95);
+}
+.theme-dark .script-button-container:hover {
+  background-color: var(--tt-palette--n20);
+}
+
+.script-button {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.script-description {
+  font-size: 0.9rem;
+}
+.theme-light .script-description {
+  color: var(--tt-palette--n30);
+}
+.theme-dark .script-description {
+  color: var(--tt-palette--n70);
+}
+
+.placeholder-text {
+  font-style: italic;
+}
+.theme-light .placeholder-text {
+  color: var(--tt-palette--n50);
+}
+.theme-dark .placeholder-text {
+  color: var(--tt-palette--n60);
+}
+
+.error-text {
+  font-style: italic;
+}
+.theme-light .error-text {
+  color: var(--tt-palette--danger);
+}
+.theme-dark .error-text {
+  color: var(--tt-palette--r60);
+}
+
+.configure-button {
+  background-color: var(
+    --tt-palette--g50
+  ) !important; /* A nice green to stand out */
+}
+.configure-button:hover {
+  background-color: var(--tt-palette--g40) !important;
+}
+
+/* --- Add to end of plugins/script-runner/ui/styles.css --- */
+
+/* --- Configuration Modal Styling --- */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Use shared palette variable for overlay color */
+  background-color: var(--tt-palette--dark-alpha);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  padding: 1.5rem 2rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+}
+.theme-light .modal-content {
+  background-color: var(--tt-color-surface-light);
+  border: 1px solid var(--tt-color-border-light);
+}
+.theme-dark .modal-content {
+  background-color: var(--tt-color-surface-dark);
+  border: 1px solid var(--tt-color-border-dark);
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--tt-color-border-light);
+  padding-bottom: 0.5rem;
+}
+.theme-dark .modal-content h3 {
+  border-bottom-color: var(--tt-color-border-dark);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1rem;
+  align-items: center;
+}
+
+.form-grid label {
+  font-weight: 600;
+  text-align: right;
+}
+.theme-light .form-grid label {
+  color: var(--tt-palette--n30);
+}
+.theme-dark .form-grid label {
+  color: var(--tt-palette--n70);
+}
+
+.form-grid input[type="text"],
+.form-grid input[type="checkbox"] {
+  padding: 0.5rem;
+  border-radius: 4px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.theme-light .form-grid input {
+  background-color: var(--tt-palette--n95);
+  border: 1px solid var(--tt-palette--n80);
+}
+.theme-dark .form-grid input {
+  background-color: var(--tt-palette--n10);
+  border: 1px solid var(--tt-palette--n40);
+  color: var(--tt-palette--n90);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--tt-color-border-light);
+}
+.theme-dark .modal-actions {
+  border-top-color: var(--tt-color-border-dark);
+}
+
+/* --- Add to end of plugins/script-runner/ui/styles.css --- */
+
+/* Container for the two action buttons */
+.script-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  margin-left: auto; /* push actions to the right */
+}
+
+/* Adjust the main button container to accommodate the new actions div */
+.script-button-container {
+  justify-content: flex-start; /* let .script-actions handle alignment */
+}
+
+/* Make the customize button a different color to distinguish it */
+.script-button-customize {
+  background-color: var(--tt-palette--n50) !important;
+}
+.script-button-customize:hover {
+  background-color: var(--tt-palette--n40) !important;
+}
+
+/* Edit button styling */
+.script-button-edit {
+  background-color: var(--tt-palette--b50) !important;
+}
+.script-button-edit:hover {
+  background-color: var(--tt-palette--b40) !important;
+}
+
+/* Remove button styling */
+.script-button-remove {
+  background-color: var(--tt-palette--r50) !important;
+}
+.script-button-remove:hover {
+  background-color: var(--tt-palette--r40) !important;
+}
+
+/* Filter input in header */
+#script-filter-input {
+  padding: 0.3rem 0.5rem;
+  border-radius: 4px;
+  min-width: 40%;
+}
+.theme-light #script-filter-input {
+  background-color: var(--tt-palette--n95);
+  border: 1px solid var(--tt-palette--n80);
+  color: var(--tt-palette--n20);
+}
+.theme-dark #script-filter-input {
+  background-color: var(--tt-palette--n10);
+  border: 1px solid var(--tt-palette--n40);
+  color: var(--tt-palette--n90);
+}
+
+/* Execution status indicator */
+.execution-status {
+  margin-left: 0.5rem;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+.theme-light .execution-status[data-status="success"] {
+  color: var(--tt-palette--g50);
+}
+.theme-dark .execution-status[data-status="success"] {
+  color: var(--tt-palette--g40);
+}
+.theme-light .execution-status[data-status="failure"] {
+  color: var(--tt-palette--r50);
+}
+.theme-dark .execution-status[data-status="failure"] {
+  color: var(--tt-palette--r40);
+}
+
+@media (max-width: 700px) {
+  .main-content {
+    flex-direction: column;
+  }
+  .script-panel,
+  .output-panel {
+    width: 100%;
+  }
+}

@@ -1,0 +1,47 @@
+{
+  id: "script-runner",
+  name: "Script Runner",
+  version: "2.0.0",
+  description: "Execute PowerShell scripts with parameters and real-time output. Provides both UI and service capabilities for script execution.",
+  author: "Omnia Team",
+  type: "hybrid",
+  main: "index.js",
+  services: [
+    {
+      name: "script-execution",
+      description: "Execute scripts with parameters and return output",
+      methods: {
+        executeScript: {
+          description: "Execute a script with parameters",
+          parameters: {
+            scriptPath: "string",
+            parameters: "string[]"
+          },
+          returnType: "ExecutionResult"
+        },
+        getAvailableScripts: {
+          description: "Get list of available scripts",
+          parameters: {},
+          returnType: "Script[]"
+        },
+        validateScriptPath: {
+          description: "Validate if script path is allowed",
+          parameters: {
+            scriptPath: "string"
+          },
+          returnType: "boolean"
+        }
+      }
+    }
+  ],
+  engine: {
+    ttCommanderVersion: ">=0.1.0"
+  },
+  permissions: [
+    "filesystem:read",
+    "filesystem:write", 
+    "system:exec"
+  ],
+  uiContributions: {},
+  configSchema: "config-schema.js"
+}

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project Setup</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="layout.css" />
+</head>
+<body>
+  <header>
+    <div class="container limited-width inner">
+      <a href="index.html" class="btn-outline btn back-button">Back</a>
+      <div>
+        <h1>Project Setup</h1>
+        <p class="subtitle">Configure your integration project documentation</p>
+      </div>
+      <button type="button" class="settings-button" aria-label="Settings">⚙</button>
+    </div>
+  </header>
+
+  <main class="container full-width">
+    <div class="grid mt-1-5 page-inner" id="setup-container">
+      <section class="card">
+        <div class="card-header">
+          <h2>Project Information</h2>
+          <p class="subtitle">Basic details about your project</p>
+        </div>
+        <div class="grid gap-1">
+          <div>
+            <label for="project-name-input">Project Name</label>
+            <input id="project-name-input" type="text" class="input-field" placeholder="e.g., PDMS Integration - Client A" />
+          </div>
+          <div>
+            <label for="project-desc-input">Project Description</label>
+            <textarea id="project-desc-input" class="textarea-80 input-field"></textarea>
+          </div>
+          <div>
+            <label for="customer-name-input">Customer Name</label>
+            <input id="customer-name-input" type="text" class="input-field" />
+          </div>
+          <div>
+            <label for="integrator-name-input">Your Name</label>
+            <input id="integrator-name-input" type="text" class="input-field" />
+          </div>
+          <div>
+            <label for="custom-tags-input">Additional Tags (key=value per line)</label>
+            <textarea id="custom-tags-input" class="textarea-80 input-field" placeholder="site=Line1"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Target Device</h2>
+          <p class="subtitle">Enter the IP address of the device</p>
+        </div>
+        <div class="grid gap-1">
+          <div>
+            <label for="ip-address-input">IP Address</label>
+            <input id="ip-address-input" type="text" class="input-field" placeholder="e.g., 192.168.1.100" />
+          </div>
+          <div>
+            <label for="template-select-setup">Template</label>
+            <select id="template-select-setup" class="input-field"></select>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Data Sources</h2>
+          <p class="subtitle">Select which global sources apply to this project</p>
+        </div>
+        <div id="data-source-list" class="grid gap-0-5"></div>
+      </section>
+
+
+      <div class="text-right span-full">
+        <a href="index.html" class="btn-outline btn">Cancel</a>
+        <button id="save-project-btn" class="btn" type="button">Save Project Configuration</button>
+      </div>
+    </div>
+  </main>
+  <button id="back-to-top" class="btn back-to-top" type="button">Back to Top</button>
+  <script src="renderer.js"></script>
+</body>
+</html>

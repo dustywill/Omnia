@@ -1,0 +1,16 @@
+{
+  id: "com.as-built-documenter",
+  name: "As-Built Documenter",
+  version: "0.1.0",
+  description: "Generates as-built documentation from various data sources.",
+  author: "ttCommander",
+  main: "index.js",
+  configurationSchema: "config.schema.json5",
+  engine: {
+    ttCommanderVersion: ">=0.1.0",
+  },
+  ui: {
+    tabName: "As-Built",
+    entrypoint: "ui/index.html",
+  },
+}

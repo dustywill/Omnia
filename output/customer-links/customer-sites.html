@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Application Links</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap" rel="stylesheet">
+    <style>
+        :root {
+    --tt-palette--n95: #eceeee;
+    --tt-palette--n90: #e3e7e8;
+    --tt-palette--n80: #caced3;
+    --tt-palette--n70: #aeb4bc;
+    --tt-palette--n60: #929aa5;
+    --tt-palette--n50: #76818e;
+    --tt-palette--n40: #5e6773;
+    --tt-palette--n30: #454e59;
+    --tt-palette--n20: #2e343d;
+    --tt-palette--n10: #15191e;
+    --tt-palette--b95: #e5efff;
+    --tt-palette--b90: #dbe9ff;
+    --tt-palette--b80: #b3d3fe;
+    --tt-palette--b70: #89b9fb;
+    --tt-palette--b60: #64a1f7;
+    --tt-palette--b50: #3d89f5;
+    --tt-palette--b40: #1e6de6;
+    --tt-palette--b30: #1555b2;
+    --tt-palette--b20: #0d3778;
+    --tt-palette--b10: #051d42;
+    --tt-palette--white: #fff;
+    --tt-palette--black: #000;
+    --tt-palette--light: #fffd;
+    --tt-palette--dark : #000c;
+    --tt-palette--hilight: #fff3;
+    --tt-palette--lolight: #0002;
+    --tt-palette--action : var(--tt-palette--b40);
+    --tt-palette--neutral: var(--tt-palette--n40);
+    --tt-palette--link   : var(--tt-palette--b40);
+    --tt-palette--brand-primary: #1555b2;
+    --tt-palette--brand-accent : #ffcd08;
+}
+
+body {
+  font-family: "Nunito Sans", sans-serif;
+  background-color: var(--tt-palette--n95);
+  color: var(--tt-palette--n10);
+  margin: 0;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+h1 {
+  color: var(--tt-palette--brand-primary);
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.customer-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.customer-card {
+  background-color: var(--tt-palette--white);
+  border: 1px solid var(--tt-palette--n80);
+  border-radius: 8px;
+  box-shadow: 0 2px 5px var(--tt-palette--lolight);
+  padding: 0;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.customer-header {
+  font-size: 1.5em;
+  color: var(--tt-palette--n20);
+  margin: 0;
+  padding: 15px 20px;
+  border-bottom: 2px solid var(--tt-palette--brand-accent);
+  position: relative;
+}
+
+.customer-header.collapsible-trigger {
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.customer-header.collapsible-trigger:hover {
+  background-color: var(--tt-palette--n90);
+}
+
+.customer-header.collapsible-trigger.active {
+  background-color: var(--tt-palette--b90);
+  color: var(--tt-palette--b20);
+}
+
+.customer-header.collapsible-trigger::after {
+  content: "\25B6";
+  font-size: 0.8em;
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%) rotate(0deg);
+  transition: transform 0.3s ease;
+  color: var(--tt-palette--action);
+}
+
+.customer-header.collapsible-trigger.active::after {
+  transform: translateY(-50%) rotate(90deg);
+}
+
+.site-list {
+  list-style: none;
+  padding: 15px 20px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--tt-palette--n95);
+}
+
+.site-item {
+  overflow: hidden;
+}
+
+.site-item.extra-site {
+  transition: max-height 0.4s ease-out, opacity 0.4s ease-out, margin-top 0.4s ease-out;
+  margin-top: 10px;
+}
+
+.site-item.extra-site.collapsed {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.site-item.extra-site.collapsed .site-link {
+  visibility: hidden;
+}
+
+.site-item.extra-site:not(.collapsed) .site-link {
+  visibility: visible;
+}
+
+.site-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 10px;
+  border: 1px solid var(--tt-palette--n80);
+  border-radius: 6px;
+  background-color: var(--tt-palette--white);
+  color: var(--tt-palette--link);
+  text-decoration: none;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.site-link:hover,
+.site-link:focus {
+  background-color: var(--tt-palette--b90);
+  color: var(--tt-palette--b10);
+  box-shadow: 0 1px 3px var(--tt-palette--hilight);
+  outline: none;
+}
+
+.site-logo-container {
+  width: 100px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  background-color: var(--tt-palette--white);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.site-logo {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.site-logo-placeholder {
+  font-size: 0.9em;
+  color: var(--tt-palette--n50);
+}
+
+.site-label {
+  font-size: 0.9em;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+[data-tooltip] {
+  position: relative;
+  cursor: pointer;
+}
+
+[data-tooltip]::before,
+[data-tooltip]::after {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+[data-tooltip]::before {
+  content: "";
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent var(--tt-palette--n20) transparent;
+  bottom: 100%;
+  margin-bottom: 0px;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  background-color: var(--tt-palette--n20);
+  color: var(--tt-palette--n95);
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  white-space: nowrap;
+  bottom: 100%;
+  margin-bottom: 5px;
+}
+
+[data-tooltip]:hover::before,
+[data-tooltip]:hover::after {
+  visibility: visible;
+  opacity: 1;
+}
+    </style>
+</head>
+<body>
+    <h1>Customer Application Links</h1>
+    <div class="customer-grid">
+              <div class="customer-card">
+        <h2 class="customer-header collapsible-trigger">AER</h2>
+        <ul class="site-list">
+      <li class="site-item first-site">
+        <a href="http://172.25.30.26/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="AER - 2030 Chenault">
+          <div class="site-logo-container"><img src="http://172.25.30.26/images/aer-logo.png" alt="2030 Logo" class="site-logo"></div>
+          <span class="site-label">2030</span>
+        </a>
+      </li>
+      <li class="site-item extra-site collapsed">
+        <a href="http://172.25.30.27/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="AER - 3405 - 3420 Wiley post">
+          <div class="site-logo-container"><img src="http://172.25.30.27/images/aer-logo.PNG" alt="3420 Wiley Post Logo" class="site-logo"></div>
+          <span class="site-label">3420 Wiley Post</span>
+        </a>
+      </li></ul>
+      </div>
+      <div class="customer-card">
+        <h2 class="customer-header collapsible-trigger">AGS</h2>
+        <ul class="site-list">
+      <li class="site-item first-site">
+        <a href="http://172.25.26.97/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="AGS - 352">
+          <div class="site-logo-container"><img src="http://172.25.26.97/images/Tiercon.png" alt="352 - Tiercon Logo" class="site-logo"></div>
+          <span class="site-label">352 - Tiercon</span>
+        </a>
+      </li>
+      <li class="site-item extra-site collapsed">
+        <a href="http://172.25.26.67/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="AGS - Sterling">
+          <div class="site-logo-container"><img src="http://172.25.26.67/images/logo.jpg" alt="Sterling Logo" class="site-logo"></div>
+          <span class="site-label">Sterling</span>
+        </a>
+      </li>
+      <li class="site-item extra-site collapsed">
+        <a href="http://172.25.26.117/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="AGS - Tiercon - 591">
+          <div class="site-logo-container"><img src="http://172.25.26.117/images/Tiercon.png" alt="Tiercon - 591 Logo" class="site-logo"></div>
+          <span class="site-label">Tiercon - 591</span>
+        </a>
+      </li>
+      <li class="site-item extra-site collapsed">
+        <a href="http://172.25.26.122/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="AGS - Tiercon Coplas">
+          <div class="site-logo-container"><img src="http://172.25.26.122/images/Tiercon.png" alt="Tiercon Coplas Logo" class="site-logo"></div>
+          <span class="site-label">Tiercon Coplas</span>
+        </a>
+      </li>
+      <li class="site-item extra-site collapsed">
+        <a href="http://172.25.26.77/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="AGS - Oshwa">
+          <div class="site-logo-container"><img src="http://172.25.26.77/images/logo.jpg" alt="Oshwa Logo" class="site-logo"></div>
+          <span class="site-label">Oshwa</span>
+        </a>
+      </li>
+      <li class="site-item extra-site collapsed">
+        <a href="http://172.25.26.114/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="AGS - Cambridge">
+          <div class="site-logo-container"><img src="http://172.25.26.114/images/logo.jpg" alt="AGES - Cambridge Logo" class="site-logo"></div>
+          <span class="site-label">AGES - Cambridge</span>
+        </a>
+      </li>
+      <li class="site-item extra-site collapsed">
+        <a href="http://172.25.26.118/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="AGS - Windsor">
+          <div class="site-logo-container"><img src="http://172.25.26.118/images/logo.jpg" alt="AGES - Windsor Logo" class="site-logo"></div>
+          <span class="site-label">AGES - Windsor</span>
+        </a>
+      </li></ul>
+      </div>
+      <div class="customer-card">
+        <h2 class="customer-header collapsible-trigger">BASCO</h2>
+        <ul class="site-list">
+      <li class="site-item first-site">
+        <a href="http://172.25.30.19/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="BASCO - Auburn">
+          <div class="site-logo-container"><img src="http://172.25.30.19/images/vanguard.png" alt="Auburn Logo" class="site-logo"></div>
+          <span class="site-label">Auburn</span>
+        </a>
+      </li>
+      <li class="site-item extra-site collapsed">
+        <a href="http://172.25.30.21/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="BASCO - Statesboro, GA">
+          <div class="site-logo-container"><img src="http://172.25.30.21/images/vanguard.png" alt="Statesboro Logo" class="site-logo"></div>
+          <span class="site-label">Statesboro</span>
+        </a>
+      </li></ul>
+      </div>
+      <div class="customer-card">
+        <h2 class="customer-header">BWI</h2>
+        <ul class="site-list">
+      <li class="site-item first-site">
+        <a href="http://172.25.26.111/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="BWI">
+          <div class="site-logo-container"><img src="http://172.25.26.111/images/BWI-Group.svg" alt="BWI Logo" class="site-logo"></div>
+          <span class="site-label">BWI</span>
+        </a>
+      </li></ul>
+      </div>
+      <div class="customer-card">
+        <h2 class="customer-header">Elma</h2>
+        <ul class="site-list">
+      <li class="site-item first-site">
+        <a href="http://172.25.26.141/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="Elma - Atlanta, GA">
+          <div class="site-logo-container"><img src="http://172.25.26.141/images/ElmaLogo.svg" alt="Elma Logo" class="site-logo"></div>
+          <span class="site-label">Elma</span>
+        </a>
+      </li></ul>
+      </div>
+      <div class="customer-card">
+        <h2 class="customer-header">Fehrer</h2>
+        <ul class="site-list">
+      <li class="site-item first-site">
+        <a href="http://172.25.26.90/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="Fehrer Automotive">
+          <div class="site-logo-container"><img src="http://172.25.26.90/images/FehrerLogo.svg" alt="Fehrer Logo" class="site-logo"></div>
+          <span class="site-label">Fehrer</span>
+        </a>
+      </li></ul>
+      </div>
+      <div class="customer-card">
+        <h2 class="customer-header collapsible-trigger">Ground Effects</h2>
+        <ul class="site-list">
+      <li class="site-item first-site">
+        <a href="http://10.34.50.10/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="# Ground Effects, 1990 Concept Dr. Warren, MI - P08">
+          <div class="site-logo-container"><img src="http://10.34.50.10/images/logo.jpg" alt="P08 Logo" class="site-logo"></div>
+          <span class="site-label">P08</span>
+        </a>
+      </li>
+      <li class="site-item extra-site collapsed">
+        <a href="http://10.21.50.10/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="# Ground Effects, 1200 Corvette Dr., Plum Springs (aka Bowling Green), KY - P09">
+          <div class="site-logo-container"><img src="http://10.21.50.10/images/logo.jpg" alt="P09 Logo" class="site-logo"></div>
+          <span class="site-label">P09</span>
+        </a>
+      </li>
+      <li class="site-item extra-site collapsed">
+        <a href="http://10.33.50.10/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="# Ground Effects, 3435 Van Slyke, Flint, MI - P12">
+          <div class="site-logo-container"><img src="http://10.33.50.10/images/logo.jpg" alt="P12 Logo" class="site-logo"></div>
+          <span class="site-label">P12</span>
+        </a>
+      </li>
+      <li class="site-item extra-site collapsed">
+        <a href="http://10.14.50.10/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="# Ground Effects (Fort Wayne), 13204 Aboite Rd, Roanoke, IN - P16">
+          <div class="site-logo-container"><img src="http://10.14.50.10/images/logo.jpg" alt="P16 Logo" class="site-logo"></div>
+          <span class="site-label">P16</span>
+        </a>
+      </li>
+      <li class="site-item extra-site collapsed">
+        <a href="http://10.17.50.10/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="Ground Effects, 320 Shockdrake Ct., Wentzville, MO - P18">
+          <div class="site-logo-container"><img src="http://10.17.50.10/images/logo.jpg" alt="P18 Logo" class="site-logo"></div>
+          <span class="site-label">P18</span>
+        </a>
+      </li>
+      <li class="site-item extra-site collapsed">
+        <a href="http://10.39.0.40/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="# Ground Effects (Louisville), 13600 Northeast Park Drive, Louisville, KY - P19">
+          <div class="site-logo-container"><img src="http://10.39.0.40/images/logo.jpg" alt="P19 Logo" class="site-logo"></div>
+          <span class="site-label">P19</span>
+        </a>
+      </li>
+      <li class="site-item extra-site collapsed">
+        <a href="http://10.22.50.10/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="# Ground Effects, 1655 Tricont Ave., Whitby, ON - P23">
+          <div class="site-logo-container"><img src="http://10.22.50.10/images/logo.jpg" alt="P23 Logo" class="site-logo"></div>
+          <span class="site-label">P23</span>
+        </a>
+      </li>
+      <li class="site-item extra-site collapsed">
+        <a href="http://10.24.50.10/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="Ground Effects, 7566 Metropolitan Pkwy (aka 16 Mile), Sterling Heights, MI - P24">
+          <div class="site-logo-container"><img src="http://10.24.50.10/images/logo.jpg" alt="P24 Logo" class="site-logo"></div>
+          <span class="site-label">P24</span>
+        </a>
+      </li>
+      <li class="site-item extra-site collapsed">
+        <a href="http://10.29.0.40/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="# Ground Effects (Wayne), 39055 Maple Ave, Wayne, MI - P26">
+          <div class="site-logo-container"><img src="http://10.29.0.40/images/logo.jpg" alt="P26 Logo" class="site-logo"></div>
+          <span class="site-label">P26</span>
+        </a>
+      </li>
+      <li class="site-item extra-site collapsed">
+        <a href="http://10.28.50.10/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="# Ground Effects, 4670 North Service Rd E, Windsor - P28">
+          <div class="site-logo-container"><img src="http://10.28.50.10/images/logo.jpg" alt="P28 Logo" class="site-logo"></div>
+          <span class="site-label">P28</span>
+        </a>
+      </li>
+      <li class="site-item extra-site collapsed">
+        <a href="http://10.36.50.10/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="Ground Effects, 6600 Mount Elliot, Hamtramck, MI - P32">
+          <div class="site-logo-container"><img src="http://10.36.50.10/images/logo.jpg" alt="P32 Logo" class="site-logo"></div>
+          <span class="site-label">P32</span>
+        </a>
+      </li>
+      <li class="site-item extra-site collapsed">
+        <a href="http://10.33.50.10/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="# Ground Effects (Dearborn), 13750 Rotunda Drive, Dearborn, MI - P36">
+          <div class="site-logo-container"><img src="http://10.33.50.10/images/logo.jpg" alt="P36 Logo" class="site-logo"></div>
+          <span class="site-label">P36</span>
+        </a>
+      </li>
+      <li class="site-item extra-site collapsed">
+        <a href="http://10.40.50.10/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="# Ground Effects (Saltillo), Av. Principal Parque Industrial Mencorsa #31360, Edificio B1, Parque Industrial Derramadero, Carr. Saltillo – Zacatecas Km. 327, Saltillo, COA">
+          <div class="site-logo-container"><img src="http://10.40.50.10/images/logo.jpg" alt="P39 Logo" class="site-logo"></div>
+          <span class="site-label">P39</span>
+        </a>
+      </li></ul>
+      </div>
+      <div class="customer-card">
+        <h2 class="customer-header collapsible-trigger">SRC</h2>
+        <ul class="site-list">
+      <li class="site-item first-site">
+        <a href="http://172.25.26.109/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="CNH Reman">
+          <div class="site-logo-container"><img src="http://172.25.26.109/images/cnhlogo.png" alt="CNH Reman Logo" class="site-logo"></div>
+          <span class="site-label">CNH Reman</span>
+        </a>
+      </li>
+      <li class="site-item extra-site collapsed">
+        <a href="http://172.25.26.39/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="SRC Automotive">
+          <div class="site-logo-container"><img src="http://172.25.26.39/images/SRClogo.jpg" alt="SRC Automotive Logo" class="site-logo"></div>
+          <span class="site-label">SRC Automotive</span>
+        </a>
+      </li>
+      <li class="site-item extra-site collapsed">
+        <a href="http://172.25.26.70/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="SRC HD">
+          <div class="site-logo-container"><img src="http://172.25.26.70/images/SRCHD.jpg" alt="SRC HD Logo" class="site-logo"></div>
+          <span class="site-label">SRC HD</span>
+        </a>
+      </li></ul>
+      </div>
+      <div class="customer-card">
+        <h2 class="customer-header collapsible-trigger">Textron</h2>
+        <ul class="site-list">
+      <li class="site-item first-site">
+        <a href="http://10.238.142.21/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="EZ-Go">
+          <div class="site-logo-container"><img src="http://10.238.142.21/images/Textronlogo.jpg" alt="EZ-Go Logo" class="site-logo"></div>
+          <span class="site-label">EZ-Go</span>
+        </a>
+      </li>
+      <li class="site-item extra-site collapsed">
+        <a href="http://10.191.4.40/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="Arctic Cat">
+          <div class="site-logo-container"><img src="http://10.191.4.40/images/ArcticCatLogo.jpg" alt="Arctic Cat Logo" class="site-logo"></div>
+          <span class="site-label">Arctic Cat</span>
+        </a>
+      </li></ul>
+      </div>
+      <div class="customer-card">
+        <h2 class="customer-header collapsible-trigger">TS Tech</h2>
+        <ul class="site-list">
+      <li class="site-item first-site">
+        <a href="http://10.8.15.1/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="TSTech - Alabama">
+          <div class="site-logo-container"><img src="http://10.8.15.1/images/TSTECHlogo.png" alt="Alabama Logo" class="site-logo"></div>
+          <span class="site-label">Alabama</span>
+        </a>
+      </li>
+      <li class="site-item extra-site collapsed">
+        <a href="http://10.14.0.17/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="TSTech - Indiana">
+          <div class="site-logo-container"><img src="http://10.14.0.17/images/TSTECHlogo.png" alt="Indiana Logo" class="site-logo"></div>
+          <span class="site-label">Indiana</span>
+        </a>
+      </li>
+      <li class="site-item extra-site collapsed">
+        <a href="http://10.4.0.66/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="TSTech - New Market - Canada">
+          <div class="site-logo-container"><img src="http://10.4.0.66/images/TSTECHlogo.jpg" alt="New Market - Canada Logo" class="site-logo"></div>
+          <span class="site-label">New Market - Canada</span>
+        </a>
+      </li>
+      <li class="site-item extra-site collapsed">
+        <a href="http://10.6.0.45/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="TSTech - Tricon">
+          <div class="site-logo-container"><img src="http://10.6.0.45/images/TSTECHlogo.png" alt="Tricon Logo" class="site-logo"></div>
+          <span class="site-label">Tricon</span>
+        </a>
+      </li>
+      <li class="site-item extra-site collapsed">
+        <a href="http://10.3.32.121/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="TSTech - Trim">
+          <div class="site-logo-container"><img src="http://10.3.32.121/images/TSTECHlogo.jpg" alt="Trim Logo" class="site-logo"></div>
+          <span class="site-label">Trim</span>
+        </a>
+      </li>
+      <li class="site-item extra-site collapsed">
+        <a href="http://10.12.0.54/admin/configs" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="TSTech - Trimont">
+          <div class="site-logo-container"><img src="http://10.12.0.54/images/logo.jpg" alt="Trimont Logo" class="site-logo"></div>
+          <span class="site-label">Trimont</span>
+        </a>
+      </li></ul>
+      </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+    const collapsibleTriggers = document.querySelectorAll('.customer-header.collapsible-trigger');
+
+    collapsibleTriggers.forEach(header => {
+        const siteList = header.nextElementSibling;
+        if (!siteList || !siteList.classList.contains('site-list') || !siteList.querySelector('.extra-site')) {
+            header.classList.remove('collapsible-trigger');
+            return;
+        }
+
+        header.setAttribute('role', 'button');
+        header.setAttribute('tabindex', '0');
+        header.setAttribute('aria-expanded', 'false');
+
+        header.addEventListener('click', function () {
+            this.classList.toggle('active');
+            const expanded = this.classList.contains('active');
+            this.setAttribute('aria-expanded', expanded.toString());
+
+            const extras = siteList.querySelectorAll('.extra-site');
+            extras.forEach(item => item.classList.toggle('collapsed'));
+        });
+
+        header.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                this.click();
+            }
+        });
+    });
+});
+    </script>
+</body>
+</html>

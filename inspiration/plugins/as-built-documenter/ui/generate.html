@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document Generator</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="layout.css" />
+</head>
+<body class="generate-page">
+  <header>
+    <div class="container limited-width inner">
+      <a href="index.html" class="btn-outline btn back-button">Back</a>
+      <div>
+        <h1>Document Generator</h1>
+        <p class="subtitle">Generate your integration documentation</p>
+      </div>
+      <button type="button" class="settings-button" aria-label="Settings">⚙</button>
+    </div>
+  </header>
+
+  <main class="container mt-1-5">
+    <div class="main-content">
+
+      <section class="card tree-panel">
+
+          <div class="card-header">
+            <h2>Project Information</h2>
+            <p class="subtitle">Select a project to generate documentation</p>
+          </div>
+          <div class="grid gap-1">
+            <div>
+              <label for="project-select">Project</label>
+              <select id="project-select" class="input-field"></select>
+            </div>
+            <div>
+              <label for="template-select-generate">Template</label>
+              <select id="template-select-generate" class="input-field"></select>
+            </div>
+            <div id="project-details" class="grid gap-0-5">
+              <p><strong>Name:</strong> <span id="detail-name"></span></p>
+              <p><strong>Description:</strong> <span id="detail-desc"></span></p>
+              <p><strong>Template:</strong> <span id="detail-template"></span></p>
+              <p><strong>Integrator:</strong> <span id="detail-integrator"></span></p>
+            </div>
+            <div class="progress"><div class="progress-bar"></div></div>
+          </div>
+        </section>
+
+      <section class="card output-section output-panel">
+          <h3>Generated Document</h3>
+          <div class="output-actions">
+            <button id="generate-doc-btn" class="btn" type="button">Generate Documentation</button>
+            <span id="status-message"></span>
+            <div class="output-buttons">
+              <button id="copy-btn" disabled>Copy to Clipboard</button>
+              <button id="save-doc-btn" disabled>Save Document</button>
+            </div>
+          </div>
+          <textarea id="output-textarea" readonly placeholder="Generated document will appear here..."></textarea>
+          <pre id="error-summary" class="error-summary"></pre>
+        </section>
+    </div>
+  </main>
+  <button id="back-to-top" class="btn back-to-top" type="button">Back to Top</button>
+  <script src="renderer.js"></script>
+</body>
+</html>

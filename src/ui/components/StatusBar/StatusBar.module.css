@@ -1,0 +1,96 @@
+/* StatusBar CSS Module */
+
+.statusBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 32px;
+  background-color: #f8fafc;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  font-size: 0.75rem;
+  color: #6b7280;
+  z-index: 10;
+}
+
+.statusItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  cursor: default;
+}
+
+.statusItem.clickable {
+  cursor: pointer;
+}
+
+.statusItem.clickable:hover {
+  background-color: #f0f9ff;
+}
+
+.statusIndicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.statusIndicator.active {
+  background-color: #10b981;
+}
+
+.statusIndicator.inactive {
+  background-color: #6b7280;
+}
+
+.statusIndicator.error {
+  background-color: #dc2626;
+}
+
+.leftSection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rightSection {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 0.75rem;
+}
+
+/* Ready state styling */
+.readyStatus {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .statusBar {
+    padding: 0 12px;
+    font-size: 0.7rem;
+  }
+  
+  .leftSection {
+    gap: 8px;
+  }
+  
+  .rightSection {
+    gap: 12px;
+    font-size: 0.7rem;
+  }
+  
+  .statusItem {
+    padding: 3px 6px;
+  }
+}

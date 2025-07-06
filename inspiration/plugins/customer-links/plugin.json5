@@ -1,0 +1,11 @@
+{
+  id: "com.ttcommander.customer-links",
+  name: "Customer Links",
+  version: "0.1.0",
+  description: "Displays a list of customer application links with collapsible sites.",
+  author: "ttCommander",
+  main: "index.js",
+  configurationSchema: "config.schema.json5",
+  engine: { ttCommanderVersion: ">=0.1.0" },
+  ui: { tabName: "Customer Links", entrypoint: "ui/index.html" }
+}

@@ -41,19 +41,32 @@ const electronAPI = {
   mkdir: (dirPath, options) => safeInvoke("fs-mkdir", dirPath, options),
   readdir: (dirPath, options) =>
     safeInvoke("fs-readdir", dirPath, options),
+  stat: (filePath) => safeInvoke("fs-stat", filePath),
 
   // Path operations
   join: (...paths) => safeInvoke("path-join", paths),
 
   // Other utilities
   getCwd: () => safeInvoke("get-cwd"),
+
+  // JSON5 operations
+  json5Parse: (text) => safeInvoke("json5-parse", text),
+  json5Stringify: (value) => safeInvoke("json5-stringify", value),
+  
+  // Zod operations
+  zodAvailable: () => safeInvoke("zod-available"),
+  
+  // Logging operations
+  logMessage: (level, component, message) => safeInvoke("log-message", level, component, message),
+  readLogFile: () => safeInvoke("read-log-file"),
 };
-sanitizeForIpc("electronAPI", electronAPI);
+
+// Don't sanitize the API objects themselves - just expose them directly
 contextBridge.exposeInMainWorld("electronAPI", electronAPI);
 
 // For backward compatibility with your existing code
 const exposedIpc = {
   invoke: (channel, data) => safeInvoke(channel, data),
 };
-sanitizeForIpc("ipcRenderer", exposedIpc);
+
 contextBridge.exposeInMainWorld("ipcRenderer", exposedIpc);

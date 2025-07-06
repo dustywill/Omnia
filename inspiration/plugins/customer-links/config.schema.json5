@@ -1,0 +1,19 @@
+{
+  type: "object",
+  title: "Customer Links Settings",
+  properties: {
+    enabled: {
+      type: "boolean",
+      title: "Enable Plugin",
+      description: "If unchecked, this plugin will be disabled on next startup.",
+      default: true,
+      format: "checkbox",
+    },
+    savePath: {
+      type: "string",
+      title: "HTML Save Path",
+      description: "File path where the standalone customer links page will be written.",
+      default: "c:\\Tutelar\\Spiderworks\\pages\\home\\customers.html",
+    },
+  },
+}

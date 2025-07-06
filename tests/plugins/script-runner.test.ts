@@ -1,6 +1,5 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { jest, describe, it, beforeEach, afterEach, expect } from '@jest/globals';
 import child_process from 'child_process';
 import {
@@ -9,11 +8,8 @@ import {
   runScript,
 } from '../../plugins/script-runner/index.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 describe('script runner plugin', () => {
-  const tmpDir = path.join(__dirname, 'scripts');
+  const tmpDir = path.join(process.cwd(), 'scripts');
 
   beforeEach(async () => {
     await fs.rm(tmpDir, { recursive: true, force: true });

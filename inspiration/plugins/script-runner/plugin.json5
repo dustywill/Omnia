@@ -1,0 +1,19 @@
+{
+  enabled: true,
+  id: "com.ttcommander.script-runner",
+  name: "Script Runner",
+  version: "0.1.0",
+  description: "Discovers, configures, and provides a UI to run local PowerShell scripts.",
+  author: "ttCommander",
+  main: "index.js",
+  configurationSchema: "config.schema.json5",
+  engine: {
+    ttCommanderVersion: ">=0.1.0",
+  },
+
+  // This property tells ttCommander to create a tab for this plugin.
+  ui: {
+    tabName: "Script Runner",
+    entrypoint: "ui/index.html",
+  },
+}

@@ -1,0 +1,15 @@
+.card {
+  background-color: var(--tt-color-surface);
+  border: 1px solid var(--tt-color-border);
+  transition: all 200ms ease-in-out;
+}
+
+.interactive {
+  cursor: pointer;
+}
+
+.interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--tt-shadow-lg);
+  border-color: var(--tt-palette--n70);
+}

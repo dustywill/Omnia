@@ -1,0 +1,18 @@
+{
+  // As-Built Documenter Plugin Manifest
+  id: "as-built-documenter",
+  name: "As-Built Documenter",
+  version: "1.0.0",
+  description: "Generate documentation for as-built projects and configurations",
+  author: "Omnia Team",
+  type: "simple",
+  main: "index.js",
+  engine: {
+    ttCommanderVersion: ">=0.1.0"
+  },
+  permissions: [
+    "filesystem:read",
+    "filesystem:write"
+  ],
+  uiContributions: {}
+}

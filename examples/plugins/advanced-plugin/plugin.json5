@@ -1,0 +1,39 @@
+{
+  id: "example-advanced-plugin",
+  name: "Advanced Example Plugin",
+  version: "1.0.0",
+  description: "An advanced plugin with services, lifecycle hooks, and inter-plugin communication",
+  author: "Omnia Team",
+  type: "advanced",
+  main: "index.tsx",
+  permissions: [
+    "settings:read",
+    "settings:write",
+    "plugins:communicate",
+    "filesystem:read"
+  ],
+  dependencies: [],
+  services: [
+    {
+      name: "example-service",
+      version: "1.0.0",
+      description: "Example service for demonstrating plugin communication",
+      methods: {
+        "getMessage": {
+          description: "Get a customizable message",
+          parameters: {
+            "name": "string"
+          },
+          returnType: "string"
+        },
+        "getStats": {
+          description: "Get plugin statistics",
+          parameters: {},
+          returnType: "object",
+          requiresPermission: "settings:read"
+        }
+      },
+      permissions: ["plugins:communicate"]
+    }
+  ]
+}

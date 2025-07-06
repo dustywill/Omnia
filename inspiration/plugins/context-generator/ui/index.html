@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Context Generator</title>
+
+    <!-- Base ttCommander styles are already included on the page -->
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="controls">
+        <div class="folder-selection">
+          <button id="select-folder-btn">Select Root Folder</button>
+          <p id="selected-folder-path">No folder selected.</p>
+        </div>
+        <div class="filters">
+          <label for="filter-preset-select">Preset:</label>
+          <select id="filter-preset-select">
+            <option value="">Custom...</option>
+            <option value="common">Common Folders</option>
+            <option value="php">PHP Project</option>
+          </select>
+          <label for="filter-name-input">Name:</label>
+          <input id="filter-name-input" type="text" placeholder="Filter name" />
+          <label for="folder-regex-input">Folder Regex:</label>
+          <select id="folder-regex-mode">
+            <option value="include">Include</option>
+            <option value="exclude">Exclude</option>
+          </select>
+          <input id="folder-regex-input" type="text" placeholder="" />
+          <label for="file-regex-input">File Regex:</label>
+          <select id="file-regex-mode">
+            <option value="include">Include</option>
+            <option value="exclude">Exclude</option>
+          </select>
+          <input id="file-regex-input" type="text" placeholder="" />
+          <label for="max-depth-input">Max Depth:</label>
+          <input id="max-depth-input" type="number" min="0" placeholder="" />
+          <button id="apply-filters-btn">Apply Filters</button>
+          <button id="save-filter-btn" disabled>Save Filter</button>
+          <button id="delete-filter-btn" disabled>Delete Filter</button>
+        </div>
+      </div>
+
+      <div class="main-content">
+        <div class="tree-panel">
+          <h3>Files to Include:</h3>
+          <div class="tree-search">
+            <label for="tree-search-input">Search Files:</label>
+            <input id="tree-search-input" type="text" placeholder="Search..." />
+          </div>
+          <div id="file-tree"></div>
+        </div>
+        <div class="output-panel">
+          <h3>Generated Output:</h3>
+          <div class="output-actions">
+            <span id="output-char-count">Length: 0</span>
+            <div class="output-buttons">
+              <button id="generate-btn" disabled>Generate Context</button>
+              <button id="copy-btn">Copy to Clipboard</button>
+            </div>
+          </div>
+          <div id="progress-message"></div>
+          <textarea
+            id="output-textarea"
+            readonly
+            placeholder="Generated context will appear here..."
+          ></textarea>
+        </div>
+      </div>
+    </div>
+    <script src="renderer.js"></script>
+  </body>
+</html>

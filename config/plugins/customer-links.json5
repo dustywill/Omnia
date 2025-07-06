@@ -1,0 +1,13 @@
+{
+  // Customer Links plugin configuration
+  configFilePath: "config/customer-sites.json",
+  outputDirectory: "output/customer-links",
+  title: "Customer Links",
+  showDescription: true,
+  autoReload: false,
+  htmlTemplate: "styled",
+  customCss: "",
+  openAfterGenerate: false,
+  validateUrls: true,
+  maxSites: 100
+}

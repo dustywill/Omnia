@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Client Logging</title>
+</head>
+<body>
+    <h1>Test Client-Side Logging</h1>
+    <p>Check your terminal and log files for output from both main process and client-side console.</p>
+    
+    <button onclick="testLogs()">Generate Test Logs</button>
+    
+    <script>
+        // This would be the client logger in the actual app
+        window.electronAPI = {
+            logMessage: async function(level, component, message) {
+                console.log(`[MockElectronAPI] ${level} from ${component}: ${message}`);
+                return Promise.resolve();
+            }
+        };
+        
+        function testLogs() {
+            console.log("This is an info message from the test page");
+            console.warn("This is a warning message from the test page");
+            console.error("This is an error message from the test page");
+            console.debug("This is a debug message from the test page");
+            
+            // Test error throwing
+            try {
+                throw new Error("Test error for logging");
+            } catch (e) {
+                console.error("Caught test error:", e.message);
+            }
+            
+            // Test promise rejection
+            Promise.reject("Test promise rejection").catch(reason => {
+                console.error("Caught promise rejection:", reason);
+            });
+        }
+        
+        // Generate some initial logs
+        console.log("Client logging test page loaded");
+        console.info("Testing client-side console capture");
+    </script>
+</body>
+</html>

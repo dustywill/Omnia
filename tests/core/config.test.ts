@@ -11,9 +11,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { jest, expect, describe, it, beforeEach, afterEach } from '@jest/globals';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const tempConfigPath = path.join(__dirname, 'app-config.json5');
+// Use static path for test
+const tempConfigPath = path.join(process.cwd(), 'tests', 'temp-config.json5');
 
 beforeEach(async () => {
   await fs.writeFile(tempConfigPath, '{foo:"bar"}', 'utf8');

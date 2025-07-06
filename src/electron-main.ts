@@ -7,7 +7,7 @@ import type {
   IpcMain,
 } from "electron";
 import type { Logger } from "./core/logger.js";
-import { createLogger } from "./core/logger.js";
+import { createLogger, setupConsoleLogging } from "./core/logger.js";
 
 let electron:
   | { BrowserWindow: typeof ElectronBrowserWindow; app: App; ipcMain: IpcMain }
@@ -90,11 +90,32 @@ const setupIpcHandlers = (ipcMain?: IpcMain, logger?: Logger) => {
           return (entries as unknown as Dirent[]).map((d) => ({
             name: d.name,
             isDirectory: d.isDirectory(),
+            isFile: d.isFile(),
           }));
         }
         return entries;
       } catch (error) {
         logger?.error(`Error reading directory ${dirPath}: ${error}`);
+        throw error;
+      }
+    },
+  );
+
+  ipcMain.handle(
+    "fs-stat",
+    async (_event: any, filePath: string) => {
+      try {
+        logger?.info(`Getting stats for: ${filePath}`);
+        const stats = await fs.stat(filePath);
+        return {
+          isFile: stats.isFile(),
+          isDirectory: stats.isDirectory(),
+          size: stats.size,
+          mtime: stats.mtime,
+          ctime: stats.ctime,
+        };
+      } catch (error) {
+        logger?.error(`Error getting stats for ${filePath}: ${error}`);
         throw error;
       }
     },
@@ -108,6 +129,82 @@ const setupIpcHandlers = (ipcMain?: IpcMain, logger?: Logger) => {
   // Other utilities
   ipcMain.handle("get-cwd", async () => {
     return process.cwd();
+  });
+
+  // JSON5 operations via IPC (functions can't be serialized)
+  ipcMain.handle("json5-parse", async (_event: any, text: string) => {
+    try {
+      const json5Module = await import("json5");
+      // Handle both CommonJS and ESM exports
+      const json5 = json5Module.default || json5Module;
+      return json5.parse(text);
+    } catch (error) {
+      logger?.error(`JSON5 parse error: ${error}`);
+      throw error;
+    }
+  });
+
+  ipcMain.handle("json5-stringify", async (_event: any, value: any) => {
+    try {
+      const json5Module = await import("json5");
+      // Handle both CommonJS and ESM exports
+      const json5 = json5Module.default || json5Module;
+      return json5.stringify(value);
+    } catch (error) {
+      logger?.error(`JSON5 stringify error: ${error}`);
+      throw error;
+    }
+  });
+
+  // Zod operations via IPC (return simple schema descriptors)
+  ipcMain.handle("zod-available", async () => {
+    try {
+      await import("zod");
+      return true;
+    } catch (error) {
+      logger?.error(`Zod not available: ${error}`);
+      return false;
+    }
+  });
+
+  // Renderer logging via IPC
+  ipcMain.handle("log-message", async (_event: any, level: string, component: string, message: string) => {
+    try {
+      const logPath = path.join(process.cwd(), "logs", "app.log");
+      const rendererLogger = createLogger(`client-${component}`, logPath);
+      
+      switch (level.toLowerCase()) {
+        case 'info':
+          await rendererLogger.info(message);
+          break;
+        case 'warn':
+        case 'warning':
+          await rendererLogger.warn(message);
+          break;
+        case 'error':
+          await rendererLogger.error(message);
+          break;
+        case 'debug':
+          await rendererLogger.debug(message);
+          break;
+        default:
+          await rendererLogger.info(`[${level.toUpperCase()}] ${message}`);
+      }
+    } catch (error) {
+      logger?.error(`Failed to log renderer message: ${error}`);
+    }
+  });
+
+  // Read log file contents
+  ipcMain.handle("read-log-file", async (_event: any) => {
+    try {
+      const logPath = path.join(process.cwd(), "logs", "app.log");
+      const content = await fs.readFile(logPath, 'utf8');
+      return content;
+    } catch (error) {
+      logger?.warn(`Log file not found or could not be read: ${error}`);
+      return '';
+    }
   });
 
   // Your existing load-sample-data handler
@@ -149,6 +246,7 @@ export const createWindow = async (
   const win = new Win({
     width: 1200,
     height: 800,
+    icon: path.join(process.cwd(), "dist", "assets", "omnia_logo.ico"), // Set window icon
     webPreferences: {
       nodeIntegration: false, // Disable node integration for security
       contextIsolation: true, // Enable context isolation
@@ -157,7 +255,7 @@ export const createWindow = async (
     },
   });
 
-  const indexPath = path.join(process.cwd(), "index.html");
+  const indexPath = path.join(process.cwd(), "dist", "index.html");
   logger?.info(`Loading file: ${indexPath}`);
   await win.loadFile(indexPath);
 
@@ -215,7 +313,13 @@ export const startElectron = (
 };
 
 if (process.env.NODE_ENV !== "test") {
-  const logPath = path.join(process.cwd(), "app.log");
+  const logPath = path.join(process.cwd(), "logs", "app.log");
+  
+  // Set up console logging to capture all console output to file
+  setupConsoleLogging(logPath);
+  
   const logger = createLogger("electron-main", logPath);
+  logger.info("Starting Electron application with console logging enabled");
+  
   startElectron(undefined, logger);
 }

@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Script Runner</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container no-scroll">
+      <div class="main-content">
+        <div class="script-panel">
+        <header class="panel-header">
+          <h3>Available Scripts</h3>
+          <input type="text" id="script-filter-input" placeholder="Filter scripts..." />
+        </header>
+        <div id="script-list-container" class="panel-content">
+          <p class="placeholder-text">Loading script configurations...</p>
+        </div>
+        </div>
+        <div class="output-panel">
+        <header class="panel-header">
+          <h3>Script Output</h3>
+          <div class="output-actions">
+            <button id="clear-output-btn">Clear Output</button>
+            <button id="copy-output-btn">Copy Output</button>
+          </div>
+        </header>
+        <pre id="output-pre" class="panel-content"></pre>
+        </div>
+      </div>
+    </div>
+    <script src="renderer.js"></script>
+  </body>
+</html>

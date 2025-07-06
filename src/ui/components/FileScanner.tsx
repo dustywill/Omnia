@@ -25,7 +25,7 @@ export type FileScannerProps = {
 };
 
 export const FileScanner: React.FC<FileScannerProps> = ({
-  tree,
+  tree = [],
   selectRootFolder,
   presets = [],
   onSavePreset,
@@ -38,6 +38,8 @@ export const FileScanner: React.FC<FileScannerProps> = ({
   const [maxDepth, setMaxDepth] = useState<number | undefined>();
 
   const filterTree = (nodes: FileNode[], depth = 0): FileNode[] => {
+    if (!nodes || !Array.isArray(nodes)) return [];
+    
     const withinDepth =
       maxDepth === undefined ? true : depth <= maxDepth;
     const filteredNodes = nodes

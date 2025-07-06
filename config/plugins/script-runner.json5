@@ -1,0 +1,19 @@
+{
+  "scriptsDirectory": "scripts",
+  "outputDirectory": "output/script-runner",
+  "defaultShell": "powershell",
+  "timeout": 300,
+  "maxConcurrentScripts": 3,
+  "showAdvancedOptions": false,
+  "autoSaveOutput": true,
+  "showExecutionHistory": true,
+  "allowedExtensions": [
+    ".ps1",
+    ".bat",
+    ".cmd"
+  ],
+  "restrictToScriptsDirectory": true,
+  "maxOutputLength": 100000,
+  "preserveOutputFormatting": true,
+  "enableService": true
+}

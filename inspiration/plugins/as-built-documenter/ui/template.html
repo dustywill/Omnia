@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Template Editor</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="layout.css" />
+  </head>
+  <body class="template-page">
+    <header>
+      <div class="container limited-width inner">
+      <a href="index.html" class="btn-outline btn back-button">Back</a>
+      <div>
+        <h1>Template Editor</h1>
+        <p class="subtitle">Customize your documentation templates</p>
+      </div>
+      <button type="button" class="settings-button" aria-label="Settings">⚙</button>
+    </div>
+  </header>
+
+    <main class="container mt-1-5">
+      <div class="main-content page-inner" id="template-container">
+        <div class="tree-panel">
+          <section class="card">
+            <div class="card-header">
+              <h2>Template Selection</h2>
+            </div>
+            <div class="grid gap-1">
+              <select id="template-select-main" class="input-field"></select>
+            </div>
+          </section>
+
+          <section class="card mt-1">
+            <div class="card-header">
+              <h2>Available Variables</h2>
+              <p class="subtitle">Click to insert into template</p>
+            </div>
+              <div class="grid gap-0-5" id="variable-buttons">
+              <button class="btn-outline" data-var="projectName">{{projectName}}</button>
+              <button class="btn-outline" data-var="projectDescription">{{projectDescription}}</button>
+              <button class="btn-outline" data-var="currentDate">{{currentDate}}</button>
+              <button class="btn-outline" data-var="customerName">{{customerName}}</button>
+              <button class="btn-outline" data-var="integratorName">{{integratorName}}</button>
+              <button class="btn-outline" data-var="dataSources">{{dataSources}}</button>
+            </div>
+          </section>
+        </div>
+        <section class="card editor-card">
+          <div class="card-header">
+            <h2>Template Editor</h2>
+          </div>
+          <div class="text-right mb-1">
+            <button id="save-template-btn" class="btn" type="button">Save Template</button>
+          </div>
+          <textarea id="template-textarea" class="input-field" placeholder="Enter your markdown template here..."></textarea>
+        </section>
+        <section class="card sample-card">
+          <div class="card-header">
+            <h2>Sample Data</h2>
+          </div>
+          <div class="grid gap-0-5">
+            <select id="sample-source-select" class="input-field"></select>
+            <button id="load-sample-btn" class="btn" type="button">Load Sample</button>
+          </div>
+          <div class="mt-1">
+            <button id="insert-loop-btn" class="btn" type="button">Insert Loop</button>
+          </div>
+          <table id="sample-data-table" class="mt-1"></table>
+        </section>
+      </div>
+    </main>
+    <button id="back-to-top" class="btn back-to-top" type="button">Back to Top</button>
+    <script src="renderer.js"></script>
+  </body>
+</html>

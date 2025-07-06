@@ -1,0 +1,275 @@
+/* styles.css */
+
+/* General Page Styles */
+/*
+body.customer-links-body,
+#plugin-panel {
+  font-family: "Nunito Sans", sans-serif;
+  background-color: var(--tt-palette--n95);
+  color: var(--tt-palette--n10);
+  margin: 0;
+  padding: 20px;
+  box-sizing: border-box;
+}
+*/
+
+h1 {
+  color: var(--tt-palette--brand-primary);
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+#save-page-btn {
+  margin-bottom: 20px;
+}
+
+.customer-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px; /* Space between cards */
+  justify-content: center;
+  align-items: flex-start; /* Ensures cards don't stretch to match tallest in row */
+}
+
+.customer-card {
+  background-color: var(--tt-palette--white);
+  border: 1px solid var(--tt-palette--n80);
+  border-radius: 8px;
+  box-shadow: 0 2px 5px var(--tt-palette--lolight);
+  padding: 0; /* Padding will be handled by header and site-list */
+  width: 300px; /* Adjust as needed */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* For smooth transitions involving child elements */
+}
+
+.customer-header {
+  font-size: 1.5em;
+  color: var(--tt-palette--n20);
+  margin: 0;
+  padding: 15px 20px;
+  border-bottom: 2px solid var(--tt-palette--brand-accent);
+  position: relative; /* For positioning the arrow, if applicable */
+  /* Default cursor; will be overridden by .collapsible-trigger */
+}
+
+/* Styles for headers that can trigger collapsible content */
+.customer-header.collapsible-trigger {
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.customer-header.collapsible-trigger:hover {
+  background-color: var(--tt-palette--n90);
+}
+
+.customer-header.collapsible-trigger.active {
+  /* When expanded */
+  background-color: var(--tt-palette--b90); /* Example active state color */
+  color: var(--tt-palette--b20);
+}
+
+/* Arrow indicator - only for .collapsible-trigger */
+.customer-header.collapsible-trigger::after {
+  content: "\25B6"; /* Right-pointing triangle '►' */
+  font-size: 0.8em;
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%) rotate(0deg);
+  transition: transform 0.3s ease;
+  color: var(--tt-palette--action);
+}
+
+.customer-header.collapsible-trigger.active::after {
+  transform: translateY(-50%) rotate(90deg); /* Point down when expanded */
+}
+
+.site-list {
+  list-style: none;
+  padding: 0; /* Padding will be applied to the overall list container */
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  /* The gap is between li elements, handled by .site-item margin or direct gap if browser support is assumed for all cases */
+  background-color: var(
+    --tt-palette--n95
+  ); /* Background for the content area under header */
+  padding: 15px 20px; /* Padding for the content area */
+}
+
+.site-item {
+  overflow: hidden; /* Crucial for max-height transition on .extra-site */
+  /* Add a small gap between site items if not using flex gap on ul directly */
+  /* For example: */
+  /* margin-bottom: 10px; */
+}
+/* .site-item:last-child {
+    margin-bottom: 0;
+} */
+
+.site-item.first-site {
+  /* No specific styles needed unless you want to differentiate it beyond always being visible */
+}
+
+.site-item.extra-site {
+  transition:
+    max-height 0.4s ease-out,
+    opacity 0.4s ease-out,
+    margin-top 0.4s ease-out,
+    padding-top 0.4s ease-out,
+    padding-bottom 0.4s ease-out,
+    border-width 0.4s ease-out;
+  /* Apply a top margin to separate from the first site or previous extra sites when expanded */
+  margin-top: 10px;
+}
+.site-item.first-site + .site-item.extra-site {
+  /* If first-site is followed immediately by an extra-site */
+  /* margin-top: 10px; /* Ensures gap even if first-site has no bottom margin */
+}
+
+.site-item.extra-site.collapsed {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0; /* Remove margin when collapsed */
+  margin-bottom: 0; /* Remove margin when collapsed */
+  padding-top: 0;
+  padding-bottom: 0;
+  border-width: 0; /* Remove border when collapsed if .site-item itself has one */
+}
+
+/* Ensure the .site-link within a collapsed item doesn't retain padding/border making the li take space */
+.site-item.extra-site.collapsed .site-link {
+  padding-top: 0;
+  padding-bottom: 0;
+  border-width: 0;
+  /* Hide visual content quickly */
+  visibility: hidden;
+  transition:
+    visibility 0s linear 0.4s,
+    padding 0.4s ease-out,
+    border-width 0.4s ease-out; /* Delay visibility until after collapse */
+}
+/* Restore visibility for non-collapsed site-links */
+.site-item.extra-site:not(.collapsed) .site-link {
+  visibility: visible;
+  transition-delay: 0s; /* Apply visibility transition immediately when expanding */
+}
+
+.site-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 10px; /* Default padding for visible site links */
+  border: 1px solid var(--tt-palette--n80);
+  border-radius: 6px;
+  background-color: var(--tt-palette--white);
+  color: var(--tt-palette--link);
+  text-decoration: none;
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease,
+    padding 0.3s ease,
+    border-width 0.3s ease;
+}
+
+.site-link:hover,
+.site-link:focus {
+  background-color: var(--tt-palette--b90);
+  color: var(--tt-palette--b10);
+  box-shadow: 0 1px 3px var(--tt-palette--hilight);
+  outline: none;
+}
+
+.site-logo-container {
+  width: 100px; /* Max width for logo */
+  height: 80px; /* Max height for logo */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px; /* Space between logo and label */
+  background-color: var(--tt-palette--white); /* Background for the logo area */
+  border-radius: 4px;
+  overflow: hidden; /* Ensure oversized logos are clipped */
+}
+/* Ensure logo container also collapses cleanly */
+.site-item.extra-site.collapsed .site-logo-container {
+  height: 0;
+  margin-bottom: 0;
+}
+
+.site-logo {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.site-logo-placeholder {
+  font-size: 0.9em;
+  color: var(--tt-palette--n50);
+}
+
+/* Ensure placeholder also collapses cleanly */
+.site-item.extra-site.collapsed .site-logo-placeholder {
+  display: none;
+}
+
+.site-label {
+  font-size: 0.9em;
+  font-weight: bold;
+  margin-top: 5px; /* Default margin, might be overridden by collapse */
+}
+/* Ensure label also collapses cleanly */
+.site-item.extra-site.collapsed .site-label {
+  display: none; /* Or visibility: hidden, opacity: 0 if preferred for transitions */
+}
+
+/* Tooltip styles */
+[data-tooltip] {
+  position: relative;
+  cursor: pointer;
+}
+
+[data-tooltip]::before,
+[data-tooltip]::after {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.3s ease,
+    visibility 0.3s ease;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+[data-tooltip]::before {
+  /* Tooltip arrow */
+  content: "";
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent var(--tt-palette--n20) transparent;
+  bottom: 100%;
+  margin-bottom: 0px;
+}
+
+[data-tooltip]::after {
+  /* Tooltip text */
+  content: attr(data-tooltip);
+  background-color: var(--tt-palette--n20);
+  color: var(--tt-palette--n95);
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  white-space: nowrap;
+  bottom: 100%;
+  margin-bottom: 5px;
+}
+
+[data-tooltip]:hover::before,
+[data-tooltip]:hover::after {
+  visibility: visible;
+  opacity: 1;
+}

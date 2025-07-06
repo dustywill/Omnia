@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const TestSimple: React.FC = () => {
+const TestSimple: React.FC = () => {
   return (
     <div style={{ padding: '20px', border: '1px solid #ccc', margin: '10px' }}>
       <h2>🎉 Test Plugin Loaded Successfully!</h2>
@@ -11,3 +11,5 @@ export const TestSimple: React.FC = () => {
     </div>
   );
 };
+
+export default TestSimple;

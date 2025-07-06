@@ -1,0 +1,496 @@
+/* Basic design tokens from Tailwind setup were previously defined here.
+   The project now provides global layout and palette variables.
+   Original rules are retained below for reference. */
+/*
+:root {
+  --background: var(--tt-palette--white);
+  --foreground: var(--tt-palette--n10);
+  --border: var(--tt-palette--n80);
+  --radius: 0.5rem;
+}
+
+body {
+  font-family: 'Nunito Sans', sans-serif;
+  background: var(--background);
+  color: var(--foreground);
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 70rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.container.full-width {
+  max-width: none;
+  width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+*/
+
+header {
+  background: var(--tt-color-surface-light);
+  border-bottom: 1px solid var(--tt-color-border-light);
+}
+.theme-dark header {
+  background: var(--tt-color-surface-dark);
+  border-bottom: 1px solid var(--tt-color-border-dark);
+}
+
+header .inner {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem 0;
+}
+
+/* Back button positioning */
+.back-button {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+}
+
+/* Settings icon positioning */
+.settings-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: var(--tt-palette--n60);
+  cursor: pointer;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+p.subtitle {
+  margin: 0;
+  color: var(--tt-palette--n60);
+}
+
+button,
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--tt-palette--b40);
+  color: var(--tt-palette--white);
+  padding: 0.5rem 1rem;
+  border-radius: var(--tt-border-radius);
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.btn-outline {
+  background: var(--tt-palette--white);
+  color: var(--tt-palette--n30);
+  border: 1px solid var(--tt-color-border-light);
+}
+
+.btn-danger {
+  background: var(--tt-palette--r50);
+  color: var(--tt-palette--white);
+  border: none;
+}
+
+.grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+/* Card layout on the index page */
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+}
+
+.cards .card {
+  flex: 1 1 250px;
+}
+
+.card {
+  background: var(--tt-palette--white);
+  border: 1px solid var(--tt-color-border-light);
+  border-radius: var(--tt-border-radius);
+  padding: 1rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.card:hover {
+  box-shadow: 0 4px 6px var(--tt-palette--lowlight-alpha);
+}
+
+.card-title {
+  font-size: 1rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.card-desc {
+  color: var(--tt-palette--n60);
+  font-size: 0.875rem;
+}
+
+section.recent {
+  background: var(--tt-color-surface-light);
+  border: 1px solid var(--tt-color-border-light);
+  border-radius: var(--tt-border-radius);
+  width: 100%;
+}
+.theme-dark section.recent {
+  background: var(--tt-color-surface-dark);
+  border-color: var(--tt-color-border-dark);
+}
+
+.recent-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--tt-color-border-light);
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.theme-dark .recent-header {
+  border-bottom-color: var(--tt-color-border-dark);
+}
+
+.recent-item {
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--tt-color-border-light);
+}
+.theme-dark .recent-item {
+  border-top-color: var(--tt-color-border-dark);
+}
+
+.recent-item:first-of-type {
+  border-top: none;
+}
+
+/* Highlight project row on hover */
+.recent-item:hover {
+  background-color: var(--tt-palette--n90);
+  box-shadow: 0 2px 4px var(--tt-palette--lowlight-alpha);
+}
+
+.theme-dark .recent-item:hover {
+  background-color: var(--tt-palette--n20);
+}
+
+.status {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 9999px;
+}
+
+.status.completed {
+  background: var(--tt-palette--g95);
+  color: var(--tt-palette--g30);
+}
+
+.status.progress {
+  background: var(--tt-palette--y95);
+  color: var(--tt-palette--o20);
+}
+
+.recent-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Layout utilities for other pages */
+.two-col {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .two-col {
+    grid-template-columns: 1fr 3fr;
+  }
+}
+
+/* Layout similar to the Context Generator interface */
+.main-content {
+  display: flex;
+  flex-grow: 1;
+  height: 100%;
+  gap: 1.5rem;
+  min-height: 0;
+}
+
+.tree-panel,
+.output-panel {
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  min-height: 0;
+}
+
+.theme-light .tree-panel,
+.theme-light .output-panel {
+  background-color: var(--tt-color-surface-light);
+  border: 1px solid var(--tt-color-border-light);
+}
+
+.theme-dark .tree-panel,
+.theme-dark .output-panel {
+  background-color: var(--tt-color-surface-dark);
+  border: 1px solid var(--tt-color-border-dark);
+}
+
+.tree-panel {
+  width: 40%;
+  /* flex-grow: 1; */
+}
+
+.output-panel {
+  width: 60%;
+  flex-grow: 1;
+}
+
+.tree-panel h3,
+.output-panel h3 {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.theme-light .tree-panel h3,
+.theme-light .output-panel h3 {
+  border-bottom: 1px solid var(--tt-color-border-light);
+  color: var(--tt-color-text-primary-light);
+}
+
+.theme-dark .tree-panel h3,
+.theme-dark .output-panel h3 {
+  border-bottom: 1px solid var(--tt-color-border-dark);
+  color: var(--tt-color-text-primary-dark);
+}
+
+.card-header {
+  margin-bottom: 1rem;
+}
+
+textarea {
+  width: 100%;
+  height: 300px;
+  border: 1px solid var(--tt-color-border-light);
+  border-radius: var(--tt-border-radius);
+  padding: 1rem;
+  font-family: monospace;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.progress {
+  width: 100%;
+  background: var(--tt-palette--n90);
+  height: 0.5rem;
+  border-radius: var(--tt-border-radius);
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: var(--tt-palette--b40);
+  width: 0; /* default width for progress indicator */
+}
+
+/* Utility classes extracted from inline styles */
+.mt-1-5 {
+  margin-top: 1.5rem;
+}
+
+.mt-1 {
+  margin-top: 1rem;
+}
+
+.mb-1 {
+  margin-bottom: 1rem;
+}
+
+.gap-1 {
+  gap: 1rem;
+}
+
+.gap-0-5 {
+  gap: 0.5rem;
+}
+
+.span-full {
+  grid-column: 1 / -1;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--tt-color-border-light);
+  border-radius: var(--tt-border-radius);
+  box-sizing: border-box;
+}
+
+.theme-dark .input-field {
+  background-color: var(--tt-palette--n10);
+  border-color: var(--tt-palette--n40);
+  color: var(--tt-palette--n80);
+}
+
+.textarea-80 {
+  height: 80px;
+}
+
+.page-inner {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table th,
+table td {
+  border: 1px solid var(--tt-color-border-light);
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+}
+/* Back to Top button */
+.back-to-top {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  display: none;
+  z-index: 1000;
+}
+
+/* ----- Layout adjustments for the Document Generator page ----- */
+html,
+body.generate-page {
+  height: 100%;
+}
+
+body.generate-page {
+  display: flex;
+  flex-direction: column;
+}
+
+body.generate-page main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+body.generate-page .main-content {
+  flex: 1;
+  min-height: 0;
+}
+
+body.generate-page .main-content > .tree-panel,
+body.generate-page .main-content > .output-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+body.generate-page #output-textarea {
+  height: auto;
+}
+
+html,
+body.template-page {
+  height: 100%;
+}
+
+body.template-page {
+  display: flex;
+  flex-direction: column;
+}
+
+body.template-page main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+body.template-page #template-container {
+  flex: 1;
+  display: grid;
+  gap: 1.5rem;
+  min-height: 0;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 1024px) {
+  body.template-page #template-container {
+    grid-template-columns: max-content 1fr minmax(200px, 25%);
+    align-items: start;
+  }
+}
+
+body.template-page #template-container > .tree-panel,
+body.template-page #template-container > .editor-card,
+body.template-page #template-container > .sample-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+body.template-page #template-textarea {
+  flex: 1;
+  height: auto;
+}
+
+body.template-page #variable-buttons {
+  overflow-y: auto;
+}
+
+body.template-page .tree-panel {
+  width: auto;
+
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.editor-card {
+  min-width: 60%;
+  flex-grow: 1;
+}
+
+body.template-page .sample-card {
+  font-size: 0.875rem;
+}
+
+body.template-page #sample-data-table {
+  flex-grow: 0.5;
+  overflow: auto;
+  overflow-x: auto;
+}

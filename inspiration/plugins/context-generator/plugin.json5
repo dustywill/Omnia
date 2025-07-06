@@ -1,0 +1,16 @@
+{
+  id: "com.ttcommander.context-generator",
+  name: "Context Generator",
+  version: "0.1.0",
+  description: "Scans a directory and bundles the content of selected files for easy copying.",
+  author: "ttCommander",
+  main: "index.js",
+  configurationSchema: "config.schema.json5",
+  engine: {
+    ttCommanderVersion: ">=0.1.0",
+  },
+  ui: {
+    tabName: "Context Generator",
+    entrypoint: "ui/index.html",
+  },
+}
