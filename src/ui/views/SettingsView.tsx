@@ -100,10 +100,33 @@ export function SettingsView({ settingsManager, plugins, pluginManager, navigati
         setDemoSchema(demoSchemaInstance);
         setDemoConfig(defaultDemoConfig);
         
-        // Load app configuration schema
-        const { createAppConfigSchemas } = await import('../../lib/schemas/app-config.js');
-        const appSchemas = await createAppConfigSchemas();
-        setAppConfigSchema(appSchemas.AppConfigSchema);
+        // Load app configuration schema using Zod mock
+        const zodModule = await loadNodeModule('zod');
+        const z = zodModule.z || zodModule.default || zodModule;
+        
+        // Create a proper schema for the app configuration
+        const appConfigSchema = z.object({
+          appSettings: z.object({
+            version: z.string().default('0.1.0').describe('Application Version'),
+            debugMode: z.boolean().default(false).describe('Enable Debug Mode'),
+            userName: z.string().default('User').describe('User Name'),
+            theme: z.enum(['light', 'dark', 'system']).default('system').describe('UI Theme'),
+            pluginsDirectory: z.string().default('plugins').describe('Plugins Directory'),
+            scriptsDirectory: z.string().default('scripts').describe('Scripts Directory'),
+          }).describe('Application Settings'),
+          logging: z.object({
+            level: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal']).default('info').describe('Log Level'),
+            prettyPrint: z.boolean().default(false).describe('Pretty Print Console Logs'),
+            filePath: z.string().default('logs/app.log').describe('Log File Path'),
+          }).describe('Logging Settings'),
+          window: z.object({
+            width: z.number().min(800).default(1200).describe('Window Width'),
+            height: z.number().min(600).default(800).describe('Window Height'),
+          }).optional().describe('Window Settings'),
+          plugins: z.object({}).default({}).describe('Plugin Configurations'),
+        });
+        
+        setAppConfigSchema(appConfigSchema);
         
         // Load app configuration
         const config = await settingsManager.loadAppConfig();
