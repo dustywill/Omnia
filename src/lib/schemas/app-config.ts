@@ -62,37 +62,51 @@ export const createAppConfigSchemas = async () => {
 };
 
 // Simple browser-compatible validation (no Zod dependency)
-const createBrowserCompatibleSchemas = () => {
-  const AppConfigSchema = {
-    parse: (data: any) => {
-      console.log('[AppConfigSchema.parse] Validating config data:', data);
-      
-      // Simple validation - just ensure required structure exists
-      if (!data || typeof data !== 'object') {
-        console.log('[AppConfigSchema.parse] Invalid data, returning defaults');
-        return { ...defaultAppConfig };
-      }
-      
-      // Merge with defaults to ensure all required fields
-      const result = {
-        appSettings: { ...defaultAppConfig.appSettings, ...(data.appSettings || {}) },
-        logging: { ...defaultAppConfig.logging, ...(data.logging || {}) },
-        window: data.window || undefined,
-        plugins: { ...defaultAppConfig.plugins, ...(data.plugins || {}) }
-      };
-      
-      console.log('[AppConfigSchema.parse] Validated config:', result);
-      return result;
-    }
-  };
+const createBrowserCompatibleSchemas = async () => {
+  // Use the node module loader to get Zod mock for the browser
+  const { loadNodeModule } = await import('../../ui/node-module-loader.js');
+  const zodModule = await loadNodeModule('zod') as any;
+  const z = zodModule.z || zodModule.default || zodModule;
+  
+  console.log('[createBrowserCompatibleSchemas] Creating Zod schema using mock');
+  
+  // Create the same schema structure as the Node.js version but using the mock
+  const AppSettingsSchema = z.object({
+    version: z.string().default('0.1.0').describe('Application Version'),
+    debugMode: z.boolean().default(false).describe('Enable Debug Mode'),
+    userName: z.string().default('User').describe('User Name'),
+    theme: z.enum(['light', 'dark', 'system']).default('system').describe('UI Theme'),
+    pluginsDirectory: z.string().default('plugins').describe('Plugins Directory'),
+    scriptsDirectory: z.string().default('scripts').describe('Scripts Directory'),
+  }).describe('Application Settings');
+
+  const LoggingSchema = z.object({
+    level: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal']).default('info').describe('Log Level'),
+    prettyPrint: z.boolean().default(false).describe('Pretty Print Console Logs'),
+    filePath: z.string().default('logs/app.log').describe('Log File Path'),
+  }).describe('Logging Settings');
+
+  const WindowSchema = z.object({
+    width: z.number().min(800).default(1200).describe('Window Width'),
+    height: z.number().min(600).default(800).describe('Window Height'),
+  }).optional().describe('Window Settings');
+
+  const PluginsSchema = z.object({}).default({}).describe('Plugin Configurations');
+
+  const AppConfigSchema = z.object({
+    appSettings: AppSettingsSchema,
+    logging: LoggingSchema,
+    window: WindowSchema,
+    plugins: PluginsSchema,
+  });
 
   return {
     AppConfigSchema,
-    AppSettingsSchema: AppConfigSchema, // Simple fallback
-    LoggingSchema: AppConfigSchema,     // Simple fallback
-    WindowSchema: AppConfigSchema,      // Simple fallback
-    PluginsSchema: AppConfigSchema,     // Simple fallback
-    z: null // Not available in browser
+    AppSettingsSchema,
+    LoggingSchema,
+    WindowSchema,
+    PluginsSchema,
+    z
   };
 };
 
