@@ -34,16 +34,16 @@ const writeEntry = async (
     // Also output to console (but don't double-log if this is already from console redirection)
     if (!message.startsWith('[CONSOLE]')) {
       const consoleFn = 
-        level === 'INFO' ? console.log : 
-        level === 'WARN' ? console.warn : 
-        level === 'ERROR' ? console.error : 
-        console.debug;
+        level === 'INFO' ? originalConsole.log : 
+        level === 'WARN' ? originalConsole.warn : 
+        level === 'ERROR' ? originalConsole.error : 
+        originalConsole.debug;
       consoleFn(`[${plugin}] [${level}] ${message}`);
     }
   } catch (error) {
     // Fallback to console if file logging fails
-    console.error(`Logger failed to write to ${logPath}:`, error);
-    console.log(`[${plugin}] [${level}] ${message}`);
+    originalConsole.error(`Logger failed to write to ${logPath}:`, error);
+    originalConsole.log(`[${plugin}] [${level}] ${message}`);
   }
 };
 

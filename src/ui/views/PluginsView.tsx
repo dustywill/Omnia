@@ -24,7 +24,7 @@ const getPluginIcon = (pluginName: string, pluginType: string) => {
   );
 };
 
-// Plugin Management Card with Dashboard styling and action buttons
+// Plugin Settings Card with Dashboard styling and action buttons
 interface PluginManagementCardProps {
   plugin: PluginInfo;
   onPluginSelect: (pluginId: string) => void;

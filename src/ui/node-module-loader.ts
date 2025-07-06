@@ -2,18 +2,47 @@
 // instead of trying to access Node.js modules directly
 import React from 'react';
 
+// Module cache to prevent repeated loading
+const moduleCache = new Map<string, any>();
+
+// Safe environment detection for browser/renderer context
+const isDevelopment = (): boolean => {
+  try {
+    return typeof process !== 'undefined' && process.env?.NODE_ENV === 'development';
+  } catch {
+    return false;
+  }
+};
+
+// Export cache for debugging purposes
+export const getModuleCache = () => moduleCache;
+export const clearModuleCache = () => moduleCache.clear();
+
 // Mock the Node.js modules for browser environment
 export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
-  console.log(`[loadNodeModule] Attempting to load module: ${name}`);
+  // Check cache first
+  if (moduleCache.has(name)) {
+    if (isDevelopment()) {
+      console.debug(`[loadNodeModule] Using cached module: ${name}`);
+    }
+    return moduleCache.get(name) as T;
+  }
+
+  // Reduced logging verbosity - use debug level for routine operations
+  if (isDevelopment()) {
+    console.debug(`[loadNodeModule] Attempting to load module: ${name}`);
+  }
 
   // Check if we're in an Electron renderer with exposed APIs
   if (typeof window !== "undefined" && (window as any).electronAPI) {
-    console.log(`[loadNodeModule] Using Electron API for ${name}`);
+    if (isDevelopment()) {
+      console.debug(`[loadNodeModule] Using Electron API for ${name}`);
+    }
 
     // Return mock implementations that use IPC
     switch (name) {
       case "fs/promises":
-        return {
+        const fsPromisesModule = {
           readFile: async (filePath: string, options?: any) => {
             return (window as any).electronAPI.readFile(filePath, options);
           },
@@ -39,9 +68,11 @@ export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
             return entries;
           },
         } as T;
+        moduleCache.set(name, fsPromisesModule);
+        return fsPromisesModule;
 
       case "path":
-        return {
+        const pathModule = {
           join: (...paths: string[]) => {
             // Use synchronous path operations for Electron renderer
             // The electronAPI should provide a sync join method
@@ -76,6 +107,8 @@ export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
             return to.replace(from, '').replace(/^[/\\]/, '');
           }
         } as T;
+        moduleCache.set(name, pathModule);
+        return pathModule;
 
       case "fs":
         return {
@@ -89,27 +122,40 @@ export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
         } as T;
 
       case "@uiw/react-codemirror":
-        console.log(`[loadNodeModule] Loading CodeMirror...`);
+        if (isDevelopment()) {
+          console.debug(`[loadNodeModule] Loading CodeMirror...`);
+        }
         // Return a simple textarea as fallback for now
-        return React.forwardRef((props: any, ref) => {
+        const codeMirrorComponent = React.forwardRef((props: any, ref) => {
           return React.createElement('textarea', {
             ...props,
             ref,
             style: { width: '100%', height: '200px', fontFamily: 'monospace' }
           });
         }) as any;
+        moduleCache.set(name, codeMirrorComponent);
+        return codeMirrorComponent;
 
       case "@codemirror/lang-markdown":
-        console.log(`[loadNodeModule] Loading markdown lang (mock)...`);
+        if (isDevelopment()) {
+          console.debug(`[loadNodeModule] Loading markdown lang (mock)...`);
+        }
         // Return empty function as fallback
-        return (() => []) as T;
+        const markdownLang = (() => []) as T;
+        moduleCache.set(name, markdownLang);
+        return markdownLang;
 
       case "json5":
-        console.log(`[loadNodeModule] Loading JSON5 via Electron IPC...`);
+        if (isDevelopment()) {
+          console.debug(`[loadNodeModule] Loading JSON5 via Electron IPC...`);
+        }
+        let json5Module: any;
         try {
           if ((window as any).electronAPI && (window as any).electronAPI.json5Parse) {
-            console.log(`[loadNodeModule] JSON5 loaded successfully via IPC`);
-            return {
+            if (isDevelopment()) {
+              console.debug(`[loadNodeModule] JSON5 loaded successfully via IPC`);
+            }
+            json5Module = {
               parse: (text: string) => (window as any).electronAPI.json5Parse(text),
               stringify: (value: any) => (window as any).electronAPI.json5Stringify(value)
             } as T;
@@ -117,33 +163,39 @@ export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
         } catch (err) {
           console.error(`[loadNodeModule] Failed to load json5 via Electron IPC:`, err);
         }
-        console.warn(`[loadNodeModule] JSON5 not available, using JSON fallback`);
-        // Return a JSON5-compatible parser as fallback
-        return {
-          parse: (text: string) => {
-            console.log(`[loadNodeModule] Parsing JSON5 fallback for text:`, text.substring(0, 200));
-            try {
-              // Enhanced JSON5 fallback - handle more JSON5 features
-              let cleaned = text
-                .replace(/\/\/.*$/gm, '') // Remove single-line comments
-                .replace(/\/\*[\s\S]*?\*\//g, '') // Remove multi-line comments
-                .replace(/,(\s*[}\]])/g, '$1') // Remove trailing commas
-                .replace(/,(\s*\n\s*[}\]])/g, '$1') // Remove trailing commas with newlines
-                .replace(/([{,]\s*)([a-zA-Z_$][a-zA-Z0-9_$]*)\s*:/g, '$1"$2":') // Quote unquoted keys
-                .replace(/([{,]\s*\n\s*)([a-zA-Z_$][a-zA-Z0-9_$]*)\s*:/g, '$1"$2":'); // Quote unquoted keys with newlines
-            
-              console.log(`[loadNodeModule] Cleaned JSON5 text:`, cleaned.substring(0, 200));
-              const result = JSON.parse(cleaned);
-              console.log(`[loadNodeModule] Parsed JSON5 result:`, result);
-              return result;
-            } catch (error) {
-              console.error(`[loadNodeModule] JSON5 fallback parse failed:`, error);
-              console.error(`[loadNodeModule] Original text:`, text);
-              throw error;
-            }
-          },
-          stringify: JSON.stringify
-        } as any;
+        
+        if (!json5Module) {
+          console.warn(`[loadNodeModule] JSON5 not available, using JSON fallback`);
+          // Return a JSON5-compatible parser as fallback
+          json5Module = {
+            parse: (text: string) => {
+              console.log(`[loadNodeModule] Parsing JSON5 fallback for text:`, text.substring(0, 200));
+              try {
+                // Enhanced JSON5 fallback - handle more JSON5 features
+                let cleaned = text
+                  .replace(/\/\/.*$/gm, '') // Remove single-line comments
+                  .replace(/\/\*[\s\S]*?\*\//g, '') // Remove multi-line comments
+                  .replace(/,(\s*[}\]])/g, '$1') // Remove trailing commas
+                  .replace(/,(\s*\n\s*[}\]])/g, '$1') // Remove trailing commas with newlines
+                  .replace(/([{,]\s*)([a-zA-Z_$][a-zA-Z0-9_$]*)\s*:/g, '$1"$2":') // Quote unquoted keys
+                  .replace(/([{,]\s*\n\s*)([a-zA-Z_$][a-zA-Z0-9_$]*)\s*:/g, '$1"$2":'); // Quote unquoted keys with newlines
+              
+                console.log(`[loadNodeModule] Cleaned JSON5 text:`, cleaned.substring(0, 200));
+                const result = JSON.parse(cleaned);
+                console.log(`[loadNodeModule] Parsed JSON5 result:`, result);
+                return result;
+              } catch (error) {
+                console.error(`[loadNodeModule] JSON5 fallback parse failed:`, error);
+                console.error(`[loadNodeModule] Original text:`, text);
+                throw error;
+              }
+            },
+            stringify: JSON.stringify
+          } as any;
+        }
+        
+        moduleCache.set(name, json5Module);
+        return json5Module;
 
       case "url":
         console.log(`[loadNodeModule] Loading URL module via Electron require...`);
@@ -178,12 +230,16 @@ export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
         } as T;
 
       case "zod":
-        console.log(`[loadNodeModule] Loading Zod via Electron IPC...`);
+        if (isDevelopment()) {
+          console.debug(`[loadNodeModule] Loading Zod via Electron IPC...`);
+        }
         try {
           if ((window as any).electronAPI && (window as any).electronAPI.zodAvailable) {
             const available = await (window as any).electronAPI.zodAvailable();
             if (available) {
-              console.log(`[loadNodeModule] Zod available in main process`);
+              if (isDevelopment()) {
+                console.debug(`[loadNodeModule] Zod available in main process`);
+              }
               // Return a comprehensive mock Zod-like object with chainable methods
               const createChainableMock = (type: string) => ({
                 type,
@@ -245,11 +301,13 @@ export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
               };
               
               // Return object that supports both module.z and module.default access patterns
-              return {
+              const zodResult = {
                 z: zodMock,
                 default: zodMock,
                 ...zodMock
               } as T;
+              moduleCache.set(name, zodResult);
+              return zodResult;
             }
           }
         } catch (err) {
@@ -271,41 +329,48 @@ export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
   if (typeof process !== "undefined" && process.versions?.node) {
     // Try CommonJS require first (for Jest/test environments)
     if (typeof require !== "undefined") {
-      console.log(`[loadNodeModule] Using require for ${name}`);
+      if (isDevelopment()) {
+        console.debug(`[loadNodeModule] Using require for ${name}`);
+      }
       try {
-        return require(name) as T;
+        const requiredModule = require(name) as T;
+        moduleCache.set(name, requiredModule);
+        return requiredModule;
       } catch (err) {
         console.warn(`[loadNodeModule] Failed to require ${name}:`, err);
       }
     }
     
     // Fall back to dynamic import for ESM environment
-    console.log(`[loadNodeModule] Using dynamic import for ${name}`);
+    if (isDevelopment()) {
+      console.debug(`[loadNodeModule] Using dynamic import for ${name}`);
+    }
     try {
+      let loadedModule: any;
       // Use dynamic import for ESM environment
       if (name === 'path') {
-        const pathModule = await import('path');
-        return pathModule as T;
+        loadedModule = await import('path');
       } else if (name === 'fs') {
-        const fsModule = await import('fs');
-        return fsModule as T;
+        loadedModule = await import('fs');
       } else if (name === 'fs/promises') {
-        const fsPromises = await import('fs/promises');
-        return fsPromises as T;
+        loadedModule = await import('fs/promises');
       } else if (name === 'zod') {
-        const zodModule = await import('zod');
-        return zodModule as T;
+        loadedModule = await import('zod');
       } else if (name === 'json5') {
         const json5Module = await import('json5');
         // Handle both CommonJS and ESM exports
-        return (json5Module.default || json5Module) as T;
+        loadedModule = json5Module.default || json5Module;
       } else if (name === 'url') {
-        const urlModule = await import('url');
-        return urlModule as T;
+        loadedModule = await import('url');
       } else {
         // Generic dynamic import for other modules
-        const module = await import(name);
-        return module as T;
+        loadedModule = await import(name);
+      }
+      
+      // Cache the loaded module
+      if (loadedModule) {
+        moduleCache.set(name, loadedModule);
+        return loadedModule as T;
       }
     } catch (err) {
       console.warn(`[loadNodeModule] Failed to import ${name}:`, err);

@@ -42,7 +42,7 @@ const initializeDemoSchema = async () => {
       debugMode: z.boolean().default(false).describe('Enable detailed logging and debug features'),
       experimentalFeatures: z.boolean().default(false).describe('Enable experimental features (may be unstable)'),
       customApiEndpoint: z.string().url().optional().describe('Custom API endpoint URL'),
-      tags: z.array(z.string()).default(['production']).describe('Environment tags')
+      tags: z.array(z.string()).default(() => ['production']).describe('Environment tags')
     }).describe('Advanced configuration options')
   });
 
@@ -58,7 +58,7 @@ const initializeDemoSchema = async () => {
   }
 };
 
-type SettingsSection = 'app-config' | 'demo-config' | 'plugin-config' | 'system-info';
+type SettingsSection = 'app-config' | 'demo-config' | 'plugin-config' | 'system-info' | string;
 
 export interface SettingsViewProps {
   settingsManager: SettingsManager;
@@ -103,9 +103,11 @@ export function SettingsView({ settingsManager, plugins, navigationTarget }: Set
         
         // Load app configuration
         const config = await settingsManager.loadAppConfig();
-        console.log('[SettingsView] Loaded app config:', config);
+        // Reduced logging verbosity for routine operations
+        if (typeof process !== 'undefined' && process.env?.NODE_ENV === 'development') {
+          console.debug('[SettingsView] Loaded app config:', config);
+        }
         const configJson = JSON.stringify(config, null, 2);
-        console.log('[SettingsView] Stringified app config:', configJson);
         setAppConfig(configJson);
       } catch (error) {
         console.error('Failed to initialize:', error);
@@ -145,17 +147,19 @@ export function SettingsView({ settingsManager, plugins, navigationTarget }: Set
 
   // Handle navigation target (auto-open plugin configuration)
   useEffect(() => {
-    if (navigationTarget?.pluginId && navigationTarget.pluginId !== autoOpenedPlugin) {
+    if (navigationTarget?.pluginId && 
+        navigationTarget.pluginId !== autoOpenedPlugin && 
+        selectedPluginId !== navigationTarget.pluginId) {
       console.log('[SettingsView] Auto-opening plugin configuration:', navigationTarget.pluginId);
       setSelectedPluginId(navigationTarget.pluginId);
       setActiveSection('plugin-config');
       setAutoOpenedPlugin(navigationTarget.pluginId);
     }
-  }, [navigationTarget, autoOpenedPlugin]);
+  }, [navigationTarget?.pluginId, autoOpenedPlugin, selectedPluginId]);
 
   // Clear auto-opened state when user manually selects a different plugin
   useEffect(() => {
-    if (selectedPluginId !== autoOpenedPlugin && autoOpenedPlugin) {
+    if (selectedPluginId && selectedPluginId !== autoOpenedPlugin && autoOpenedPlugin) {
       setAutoOpenedPlugin(null);
     }
   }, [selectedPluginId, autoOpenedPlugin]);
@@ -226,7 +230,7 @@ export function SettingsView({ settingsManager, plugins, navigationTarget }: Set
         id: 'plugin-config' as SettingsSection,
         label: 'Plugin Settings',
         icon: '🔌',
-        section: 'Plugin Management',
+        section: 'Plugin Settings',
         badge: plugins.length.toString()
       },
       {
@@ -237,25 +241,48 @@ export function SettingsView({ settingsManager, plugins, navigationTarget }: Set
       }
     ];
 
-    const sections = ['Core Settings', 'Plugin Management', 'System'];
+    // Add individual plugins under Plugin Settings section
+    const pluginItems = plugins.map(plugin => ({
+      id: `plugin-${plugin.id}` as SettingsSection,
+      label: plugin.name,
+      icon: '🔧',
+      section: 'Plugin Settings',
+      isPlugin: true,
+      pluginId: plugin.id,
+      pluginStatus: plugin.status
+    }));
+
+    const allItems = [...sidebarItems, ...pluginItems];
+    const sections = ['Core Settings', 'Plugin Settings', 'System'];
 
     return (
       <div className={styles.sidebar}>
         {sections.map(section => (
           <div key={section} className={styles.sidebarSection}>
             <h3 className={styles.sidebarSectionTitle}>{section}</h3>
-            {sidebarItems
+            {allItems
               .filter(item => item.section === section)
               .map(item => (
                 <div
                   key={item.id}
-                  className={`${styles.sidebarItem} ${activeSection === item.id ? styles.active : ''}`}
-                  onClick={() => setActiveSection(item.id)}
+                  className={`${styles.sidebarItem} ${activeSection === item.id ? styles.active : ''} ${(item as any).isPlugin ? styles.pluginItem : ''}`}
+                  onClick={() => {
+                    if ((item as any).isPlugin) {
+                      // Handle plugin-specific item click
+                      setSelectedPluginId((item as any).pluginId);
+                      setActiveSection('plugin-config');
+                    } else {
+                      setActiveSection(item.id);
+                    }
+                  }}
                 >
                   <span className={styles.sidebarItemIcon}>{item.icon}</span>
                   <span className={styles.sidebarItemText}>{item.label}</span>
-                  {item.badge && (
-                    <span className={styles.sidebarItemBadge}>{item.badge}</span>
+                  {(item as any).badge && (
+                    <span className={styles.sidebarItemBadge}>{(item as any).badge}</span>
+                  )}
+                  {(item as any).isPlugin && (
+                    <span className={`${styles.pluginStatus} ${styles[(item as any).pluginStatus] || styles.inactive}`} />
                   )}
                 </div>
               ))}

@@ -24,7 +24,7 @@ export function StatusBar({ activePlugins, totalPlugins, errorPlugins, currentVi
           <span>Ready</span>
         </div>
         <div>
-          Omnia Plugin Management System
+          Omnia Plugin Settings System
         </div>
       </div>
     );
@@ -63,7 +63,7 @@ export function StatusBar({ activePlugins, totalPlugins, errorPlugins, currentVi
       </div>
       
       <div className={styles.rightSection}>
-        {currentView === 'plugins' && 'Plugin Management'}
+        {currentView === 'plugins' && 'Plugin Settings'}
         {currentView === 'settings' && 'System Settings'}
         {currentView === 'logs' && 'Application Logs'}
         {currentView === 'plugin-detail' && selectedPlugin && (

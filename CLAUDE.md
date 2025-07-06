@@ -22,7 +22,8 @@ Omnia is an evolution of the ttCommander application, built as a modern plugin-b
 - `npm run dev` - Start development server with TypeScript ESM loader and CSS support
 - `npm run build` - Full build process (clean, compile TypeScript, copy assets, process CSS modules, fix imports)
 - `npm start` - Run the compiled application
-- `npm run electron` - Build and run in Electron mode
+- `npm run electron` - Clear logs, build, and run in Electron mode (development sessions)
+- `npm run clear-logs` - Clear application log file for fresh development session (development only)
 
 ### Testing
 

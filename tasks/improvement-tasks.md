@@ -1,7 +1,3 @@
-# Logging
-
-The logger seems to have gone haywire and began logging continuous issues. Please take a look at logs\app.log and see if you can determine what may be going on?
-
 # All Screens
 
 - Change the top left div to be this for the image. Get rid of the second Omnia and the "PLugin Management..."
@@ -52,6 +48,78 @@ Uncaught ReferenceError: process is not defined
     at renderMainContent (SettingsView.js:304:105)
     at SettingsView (SettingsView.js:415:76)
 ```
+
+🔧 Remaining Issues to Fix
+
+1. SettingsView Auto-Opening Loop
+
+Priority: HighIssue: SettingsView continuously auto-opens plugin configuration, causing excessive logging and poor UX
+
+Tasks:
+
+- Investigate src/ui/views/SettingsView.tsx for auto-opening logic
+- Look for useEffect hooks or timers that might be triggering repeated navigation
+- Check navigation state management to prevent infinite loops
+- Add guards to prevent auto-opening from triggering multiple times
+- Test navigation flow to ensure one-time auto-opening behavior
+
+2. Excessive JSON5 Module Loading
+
+Priority: MediumIssue: JSON5 module is loaded repeatedly for the same operations, causing performance overhead
+
+Tasks:
+
+- Implement module caching in src/ui/node-module-loader.ts
+- Add singleton pattern for loaded modules to prevent re-loading
+- Cache module instances per session to reduce IPC calls
+- Add debug logging to track module reuse vs. fresh loads
+- Test performance improvement with module caching
+
+3. Zod Schema Loading Error
+
+Priority: MediumIssue: z.array(...).default is not a function error in demo schema initialization
+
+Tasks:
+
+- Fix Zod schema usage in SettingsView demo schema
+- Update schema definitions to use correct Zod syntax
+- Ensure compatibility with current Zod version
+- Add error handling for schema initialization failures
+- Test schema validation with proper Zod patterns
+
+4. Optimize Logging Verbosity
+
+Priority: LowIssue: Too many INFO-level logs for normal operations, cluttering the log output
+
+Tasks:
+
+- Review log levels for routine operations (file reads, module loading)
+- Change routine operations from INFO to DEBUG level
+- Keep ERROR and WARN levels for actual issues
+- Add configuration option to control log verbosity
+- Update LogsView to default to ERROR/WARN only for cleaner display
+
+5. Navigation State Management
+
+Priority: LowIssue: Navigation events might not be properly managed, causing repeated operations
+
+Tasks:
+
+- Review src/core/navigation-service.ts for state management issues
+- Add debouncing for rapid navigation events
+- Implement proper cleanup for navigation listeners
+- Add navigation history management to prevent back/forward loops
+- Test navigation flow stability
+
+📋 Priority Order for Implementation:
+
+1. Fix SettingsView auto-opening loop (High - affects UX and log clarity)
+2. Implement module caching (Medium - performance improvement)
+3. Fix Zod schema error (Medium - eliminates error messages)
+4. Optimize logging verbosity (Low - improves log readability)
+5. Review navigation state management (Low - system stability)
+
+These tasks will complete the logging system optimization and resolve the application behavior issues that are causing excessive log entries.
 
 # Questions
 

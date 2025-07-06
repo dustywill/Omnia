@@ -127,7 +127,7 @@ export function AppNavigation({ currentView, onViewChange }: AppNavigationProps)
                 color: '#6b7280',
                 margin: 0
               }}>
-                Plugin Management System
+                Plugin Settings System
               </p>
             </div>
           </div>

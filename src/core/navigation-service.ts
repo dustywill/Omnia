@@ -22,6 +22,9 @@ export class NavigationService {
   private currentState: NavigationState;
   private history: NavigationState[] = [];
   private maxHistorySize = 50;
+  private debounceTimeout: NodeJS.Timeout | null = null;
+  private isNavigating = false;
+  private eventListeners: Array<{ type: string; listener: EventListener }> = [];
 
   constructor() {
     this.eventBus = createEventBus<NavigationEvents>();
@@ -64,21 +67,73 @@ export class NavigationService {
     pluginId?: string;
     settingsTarget?: NavigationState['settingsTarget'];
     replaceHistory?: boolean;
+    skipDebounce?: boolean;
   }): void {
-    const newState: NavigationState = {
-      currentView: view,
-      selectedPluginId: options?.pluginId,
-      settingsTarget: options?.settingsTarget,
-      urlParams: this.extractUrlParams(),
-    };
-
-    if (!options?.replaceHistory) {
-      this.addToHistory(newState);
+    // Validate navigation state
+    if (!this.isValidView(view)) {
+      this.handleNavigationError(`Invalid view: ${view}`);
+      return;
     }
 
-    this.currentState = newState;
-    this.updateUrl();
-    this.eventBus.publish('navigation:change', newState);
+    // Prevent concurrent navigation calls
+    if (this.isNavigating && !options?.skipDebounce) {
+      if (typeof process !== 'undefined' && process.env?.NODE_ENV === 'development') {
+        console.debug('[NavigationService] Navigation already in progress, ignoring call');
+      }
+      return;
+    }
+
+    // Debounce rapid navigation calls
+    if (!options?.skipDebounce) {
+      if (this.debounceTimeout) {
+        clearTimeout(this.debounceTimeout);
+      }
+      
+      this.debounceTimeout = setTimeout(() => {
+        this.performNavigation(view, options);
+        this.debounceTimeout = null;
+      }, 50); // 50ms debounce
+      return;
+    }
+
+    this.performNavigation(view, options);
+  }
+
+  private performNavigation(view: NavigationState['currentView'], options?: {
+    pluginId?: string;
+    settingsTarget?: NavigationState['settingsTarget'];
+    replaceHistory?: boolean;
+  }): void {
+    this.isNavigating = true;
+
+    try {
+      const newState: NavigationState = {
+        currentView: view,
+        selectedPluginId: options?.pluginId,
+        settingsTarget: options?.settingsTarget,
+        urlParams: this.extractUrlParams(),
+      };
+
+      // Check if this is actually a state change
+      if (this.isStateSame(this.currentState, newState)) {
+        if (typeof process !== 'undefined' && process.env?.NODE_ENV === 'development') {
+          console.debug('[NavigationService] State unchanged, skipping navigation');
+        }
+        return;
+      }
+
+      if (!options?.replaceHistory) {
+        this.addToHistory(newState);
+      }
+
+      this.currentState = newState;
+      this.updateUrl();
+      this.eventBus.publish('navigation:change', newState);
+    } catch (error) {
+      this.handleNavigationError(`Navigation failed: ${error}`, JSON.stringify(options));
+    } finally {
+      this.isNavigating = false;
+    }
   }
 
   // Plugin configuration navigation
@@ -90,7 +145,7 @@ export class NavigationService {
       focusEditor: true,
     };
 
-    this.navigateTo('settings', { settingsTarget });
+    this.navigateTo('settings', { settingsTarget, skipDebounce: true });
     this.eventBus.publish('navigation:configure-plugin', { pluginId, source });
   }
 
@@ -228,7 +283,7 @@ export class NavigationService {
     }
 
     // Handle browser back/forward buttons
-    window.addEventListener('popstate', (event) => {
+    const popstateHandler = (event: PopStateEvent) => {
       if (event.state?.navigationState) {
         this.currentState = event.state.navigationState;
         this.eventBus.publish('navigation:change', this.currentState);
@@ -236,13 +291,29 @@ export class NavigationService {
         // If no state, try to parse from URL
         this.initializeFromUrl();
       }
-    });
+    };
+
+    window.addEventListener('popstate', popstateHandler);
+    this.eventListeners.push({ type: 'popstate', listener: popstateHandler as EventListener });
 
     // Handle initial page load
     this.initializeFromUrl();
   }
 
   // Utility methods
+  private isValidView(view: string): view is NavigationState['currentView'] {
+    const validViews = ['dashboard', 'plugins', 'settings', 'logs', 'plugin-detail'];
+    return validViews.includes(view);
+  }
+
+  private isStateSame(state1: NavigationState, state2: NavigationState): boolean {
+    return (
+      state1.currentView === state2.currentView &&
+      state1.selectedPluginId === state2.selectedPluginId &&
+      JSON.stringify(state1.settingsTarget) === JSON.stringify(state2.settingsTarget)
+    );
+  }
+
   isCurrentView(view: NavigationState['currentView']): boolean {
     return this.currentState.currentView === view;
   }
@@ -267,7 +338,25 @@ export class NavigationService {
 
   // Cleanup
   destroy(): void {
-    // Note: EventBus doesn't have destroy method in current implementation
+    // Clear debounce timeout
+    if (this.debounceTimeout) {
+      clearTimeout(this.debounceTimeout);
+      this.debounceTimeout = null;
+    }
+
+    // Remove all event listeners
+    if (typeof window !== 'undefined') {
+      this.eventListeners.forEach(({ type, listener }) => {
+        window.removeEventListener(type, listener);
+      });
+    }
+    this.eventListeners = [];
+
+    // Clear navigation state
+    this.isNavigating = false;
     this.history = [];
+
+    // Note: EventBus doesn't have destroy method in current implementation
+    // Could add eventBus cleanup here if implemented
   }
 }
