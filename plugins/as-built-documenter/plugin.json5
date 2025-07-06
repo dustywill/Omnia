@@ -6,10 +6,13 @@
   description: "Generate documentation for as-built projects and configurations",
   author: "Omnia Team",
   type: "simple",
-  main: "index.tsx",
+  main: "index.js",
+  engine: {
+    ttCommanderVersion: ">=0.1.0"
+  },
   permissions: [
     "filesystem:read",
     "filesystem:write"
   ],
-  dependencies: []
+  uiContributions: {}
 }

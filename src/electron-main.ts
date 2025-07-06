@@ -7,7 +7,7 @@ import type {
   IpcMain,
 } from "electron";
 import type { Logger } from "./core/logger.js";
-import { createLogger } from "./core/logger.js";
+import { createLogger, setupConsoleLogging } from "./core/logger.js";
 
 let electron:
   | { BrowserWindow: typeof ElectronBrowserWindow; app: App; ipcMain: IpcMain }
@@ -110,28 +110,78 @@ const setupIpcHandlers = (ipcMain?: IpcMain, logger?: Logger) => {
     return process.cwd();
   });
 
-  // Node module access
-  ipcMain.handle("require-zod", async () => {
+  // JSON5 operations via IPC (functions can't be serialized)
+  ipcMain.handle("json5-parse", async (_event: any, text: string) => {
     try {
-      // Use dynamic import since require might not be available in Electron context
-      const zod = await import("zod");
-      logger?.info("Loaded zod module successfully");
-      return zod;
+      const json5Module = await import("json5");
+      // Handle both CommonJS and ESM exports
+      const json5 = json5Module.default || json5Module;
+      return json5.parse(text);
     } catch (error) {
-      logger?.error(`Error loading zod: ${error}`);
+      logger?.error(`JSON5 parse error: ${error}`);
       throw error;
     }
   });
 
-  ipcMain.handle("require-json5", async () => {
+  ipcMain.handle("json5-stringify", async (_event: any, value: any) => {
     try {
-      // Use dynamic import since require might not be available in Electron context
-      const json5 = await import("json5");
-      logger?.info("Loaded json5 module successfully");
-      return json5;
+      const json5Module = await import("json5");
+      // Handle both CommonJS and ESM exports
+      const json5 = json5Module.default || json5Module;
+      return json5.stringify(value);
     } catch (error) {
-      logger?.error(`Error loading json5: ${error}`);
+      logger?.error(`JSON5 stringify error: ${error}`);
       throw error;
+    }
+  });
+
+  // Zod operations via IPC (return simple schema descriptors)
+  ipcMain.handle("zod-available", async () => {
+    try {
+      await import("zod");
+      return true;
+    } catch (error) {
+      logger?.error(`Zod not available: ${error}`);
+      return false;
+    }
+  });
+
+  // Renderer logging via IPC
+  ipcMain.handle("log-message", async (_event: any, level: string, component: string, message: string) => {
+    try {
+      const logPath = path.join(process.cwd(), "logs", "app.log");
+      const rendererLogger = createLogger(`renderer-${component}`, logPath);
+      
+      switch (level.toLowerCase()) {
+        case 'info':
+          await rendererLogger.info(message);
+          break;
+        case 'warn':
+          await rendererLogger.warn(message);
+          break;
+        case 'error':
+          await rendererLogger.error(message);
+          break;
+        case 'debug':
+          await rendererLogger.debug(message);
+          break;
+        default:
+          await rendererLogger.info(`[${level.toUpperCase()}] ${message}`);
+      }
+    } catch (error) {
+      logger?.error(`Failed to log renderer message: ${error}`);
+    }
+  });
+
+  // Read log file contents
+  ipcMain.handle("read-log-file", async (_event: any) => {
+    try {
+      const logPath = path.join(process.cwd(), "logs", "app.log");
+      const content = await fs.readFile(logPath, 'utf8');
+      return content;
+    } catch (error) {
+      logger?.warn(`Log file not found or could not be read: ${error}`);
+      return '';
     }
   });
 
@@ -241,7 +291,13 @@ export const startElectron = (
 };
 
 if (process.env.NODE_ENV !== "test") {
-  const logPath = path.join(process.cwd(), "app.log");
+  const logPath = path.join(process.cwd(), "logs", "app.log");
+  
+  // Set up console logging to capture all console output to file
+  setupConsoleLogging(logPath);
+  
   const logger = createLogger("electron-main", logPath);
+  logger.info("Starting Electron application with console logging enabled");
+  
   startElectron(undefined, logger);
 }

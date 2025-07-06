@@ -100,7 +100,7 @@ export class SettingsManager {
   async loadAppConfig(): Promise<AppConfig> {
     try {
       const content = await this.fs.readFile(this.appConfigPath, 'utf8');
-      const data = this.JSON5.parse(content);
+      const data = await this.JSON5.parse(content);
       return this.AppConfigSchema.parse(data);
     } catch (error: any) {
       if (error.code === 'ENOENT') {
@@ -149,7 +149,7 @@ export class SettingsManager {
   async loadPluginRegistry(): Promise<PluginRegistry> {
     try {
       const content = await this.fs.readFile(this.pluginRegistryPath, 'utf8');
-      const data = this.JSON5.parse(content);
+      const data = await this.JSON5.parse(content);
       
       // Basic validation
       if (!data || typeof data !== 'object' || !data.plugins) {
@@ -207,7 +207,7 @@ export class SettingsManager {
     
     try {
       const content = await this.fs.readFile(configPath, 'utf8');
-      const data = this.JSON5.parse(content);
+      const data = await this.JSON5.parse(content);
       return schema.parse(data);
     } catch (error: any) {
       if (error.code === 'ENOENT' && defaultConfig) {
@@ -304,7 +304,7 @@ export class SettingsManager {
         } else {
           // Generic callback without schema validation
           const content = await this.fs.readFile(configPath, 'utf8');
-          const data = this.JSON5.parse(content);
+          const data = await this.JSON5.parse(content);
           callback(data as T);
         }
       } catch (error) {

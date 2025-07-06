@@ -6,10 +6,13 @@
   description: "Generate context information and documentation for projects",
   author: "Omnia Team",
   type: "simple",
-  main: "index.tsx",
+  main: "index.js",
+  engine: {
+    ttCommanderVersion: ">=0.1.0"
+  },
   permissions: [
     "filesystem:read",
     "filesystem:write"
   ],
-  dependencies: []
+  uiContributions: {}
 }

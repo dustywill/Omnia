@@ -147,7 +147,8 @@ export const initEnhancedRenderer = async (
   const serviceRegistry = new ServiceRegistry(createEventBus(), {
     info: async (message: string) => console.log(message),
     warn: async (message: string) => console.warn(message),
-    error: async (message: string) => console.error(message)
+    error: async (message: string) => console.error(message),
+    debug: async (message: string) => console.debug(message)
   });
   
   console.log('[initEnhancedRenderer] Initializing plugin manager');

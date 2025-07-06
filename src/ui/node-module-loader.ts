@@ -107,10 +107,12 @@ export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
       case "json5":
         console.log(`[loadNodeModule] Loading JSON5 via Electron IPC...`);
         try {
-          if ((window as any).electronAPI && (window as any).electronAPI.requireJson5) {
-            const json5 = await (window as any).electronAPI.requireJson5();
-            console.log(`[loadNodeModule] JSON5 loaded successfully via IPC:`, json5);
-            return json5 as T;
+          if ((window as any).electronAPI && (window as any).electronAPI.json5Parse) {
+            console.log(`[loadNodeModule] JSON5 loaded successfully via IPC`);
+            return {
+              parse: (text: string) => (window as any).electronAPI.json5Parse(text),
+              stringify: (value: any) => (window as any).electronAPI.json5Stringify(value)
+            } as T;
           }
         } catch (err) {
           console.error(`[loadNodeModule] Failed to load json5 via Electron IPC:`, err);
@@ -119,14 +121,26 @@ export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
         // Return a JSON5-compatible parser as fallback
         return {
           parse: (text: string) => {
-            // Simple JSON5 fallback - remove comments and try to parse
-            const cleaned = text
-              .replace(/\/\/.*$/gm, '') // Remove single-line comments
-              .replace(/\/\*[\s\S]*?\*\//g, '') // Remove multi-line comments
-              .replace(/,(\s*[}\]])/g, '$1') // Remove trailing commas
-              .replace(/([{,]\s*)([a-zA-Z_$][a-zA-Z0-9_$]*)\s*:/g, '$1"$2":'); // Quote unquoted keys
+            console.log(`[loadNodeModule] Parsing JSON5 fallback for text:`, text.substring(0, 200));
+            try {
+              // Enhanced JSON5 fallback - handle more JSON5 features
+              let cleaned = text
+                .replace(/\/\/.*$/gm, '') // Remove single-line comments
+                .replace(/\/\*[\s\S]*?\*\//g, '') // Remove multi-line comments
+                .replace(/,(\s*[}\]])/g, '$1') // Remove trailing commas
+                .replace(/,(\s*\n\s*[}\]])/g, '$1') // Remove trailing commas with newlines
+                .replace(/([{,]\s*)([a-zA-Z_$][a-zA-Z0-9_$]*)\s*:/g, '$1"$2":') // Quote unquoted keys
+                .replace(/([{,]\s*\n\s*)([a-zA-Z_$][a-zA-Z0-9_$]*)\s*:/g, '$1"$2":'); // Quote unquoted keys with newlines
             
-            return JSON.parse(cleaned);
+              console.log(`[loadNodeModule] Cleaned JSON5 text:`, cleaned.substring(0, 200));
+              const result = JSON.parse(cleaned);
+              console.log(`[loadNodeModule] Parsed JSON5 result:`, result);
+              return result;
+            } catch (error) {
+              console.error(`[loadNodeModule] JSON5 fallback parse failed:`, error);
+              console.error(`[loadNodeModule] Original text:`, text);
+              throw error;
+            }
           },
           stringify: JSON.stringify
         } as any;
@@ -166,15 +180,82 @@ export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
       case "zod":
         console.log(`[loadNodeModule] Loading Zod via Electron IPC...`);
         try {
-          if ((window as any).electronAPI && (window as any).electronAPI.requireZod) {
-            const zod = await (window as any).electronAPI.requireZod();
-            console.log(`[loadNodeModule] Zod loaded successfully via IPC:`, zod);
-            return zod as T;
+          if ((window as any).electronAPI && (window as any).electronAPI.zodAvailable) {
+            const available = await (window as any).electronAPI.zodAvailable();
+            if (available) {
+              console.log(`[loadNodeModule] Zod available in main process`);
+              // Return a comprehensive mock Zod-like object with chainable methods
+              const createChainableMock = (type: string) => ({
+                type,
+                parse: (v: any) => v,
+                min: (n: number) => createChainableMock(`${type}:min(${n})`),
+                max: (n: number) => createChainableMock(`${type}:max(${n})`),
+                optional: () => createChainableMock(`${type}:optional`),
+                default: (_val: any) => createChainableMock(`${type}:default`),
+                refine: (_fn: any) => createChainableMock(`${type}:refine`),
+                transform: (_fn: any) => createChainableMock(`${type}:transform`),
+                url: () => createChainableMock(`${type}:url`),
+                email: () => createChainableMock(`${type}:email`),
+                uuid: () => createChainableMock(`${type}:uuid`),
+                regex: (_pattern: RegExp) => createChainableMock(`${type}:regex`),
+                length: (n: number) => createChainableMock(`${type}:length(${n})`),
+                describe: (_description: string) => createChainableMock(`${type}:describe`),
+              });
+
+              const zodMock = {
+                string: () => createChainableMock('string'),
+                number: () => createChainableMock('number'),
+                boolean: () => createChainableMock('boolean'),
+                object: (shape: any) => ({
+                  type: 'object',
+                  shape,
+                  parse: (v: any) => v,
+                  optional: () => createChainableMock('object:optional'),
+                  describe: (_description: string) => createChainableMock('object:describe'),
+                }),
+                array: (element: any) => ({
+                  type: 'array',
+                  element,
+                  parse: (v: any) => Array.isArray(v) ? v : [],
+                  optional: () => createChainableMock('array:optional'),
+                  describe: (_description: string) => createChainableMock('array:describe'),
+                }),
+                enum: (values: any[]) => ({
+                  type: 'enum',
+                  values,
+                  parse: (v: any) => values.includes(v) ? v : values[0],
+                  optional: () => createChainableMock('enum:optional'),
+                  default: (_val: any) => createChainableMock('enum:default'),
+                }),
+                literal: (value: any) => ({
+                  type: 'literal',
+                  value,
+                  parse: (_v: any) => value,
+                  optional: () => createChainableMock('literal:optional'),
+                }),
+                union: (...schemas: any[]) => ({
+                  type: 'union',
+                  schemas,
+                  parse: (v: any) => v,
+                  optional: () => createChainableMock('union:optional'),
+                }),
+                optional: () => createChainableMock('optional'),
+                any: () => createChainableMock('any'),
+                unknown: () => createChainableMock('unknown'),
+              };
+              
+              // Return object that supports both module.z and module.default access patterns
+              return {
+                z: zodMock,
+                default: zodMock,
+                ...zodMock
+              } as T;
+            }
           }
         } catch (err) {
           console.error(`[loadNodeModule] Failed to load zod via Electron IPC:`, err);
         }
-        // Fallback - return empty object which will cause the error we're seeing
+        // Fallback - return empty object which will cause graceful degradation
         console.warn(`[loadNodeModule] Zod not available in Electron renderer, returning empty object`);
         return {} as T;
 

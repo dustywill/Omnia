@@ -39,7 +39,18 @@
       "Bash(ls:*)",
       "Bash(timeout 5s npm run electron:*)",
       "Bash(timeout:*)",
-      "Bash(tsc:*)"
+      "Bash(tsc:*)",
+      "Bash(for:*)",
+      "Bash(do)",
+      "Bash(manifest=\"$dir/plugin.json5\")",
+      "Bash(if [ -f \"$manifest\" ])",
+      "Bash(then)",
+      "Bash(echo:*)",
+      "Bash(sed:*)",
+      "Bash(if ! grep -q \"engine:\" \"$manifest\")",
+      "Bash(fi)",
+      "Bash(if ! grep -q \"uiContributions:\" \"$manifest\")",
+      "Bash(done)"
     ],
     "deny": []
   }

@@ -67,7 +67,7 @@ export function DashboardView({
   };
 
   return (
-    <div style={{ height: '100vh', overflowY: 'auto' }}>
+    <div style={{ height: '100%', overflowY: 'auto' }}>
       {/* Header */}
       <header style={headerStyle}>
         <div>

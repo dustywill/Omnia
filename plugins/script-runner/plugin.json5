@@ -5,7 +5,7 @@
   description: "Execute PowerShell scripts with parameters and real-time output. Provides both UI and service capabilities for script execution.",
   author: "Omnia Team",
   type: "hybrid",
-  main: "index.tsx",
+  main: "index.js",
   services: [
     {
       name: "script-execution",
@@ -34,11 +34,14 @@
       }
     }
   ],
+  engine: {
+    ttCommanderVersion: ">=0.1.0"
+  },
   permissions: [
     "filesystem:read",
     "filesystem:write", 
     "system:exec"
   ],
-  dependencies: [],
+  uiContributions: {},
   configSchema: "config-schema.js"
 }

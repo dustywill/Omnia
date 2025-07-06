@@ -113,7 +113,8 @@ export class EnhancedPluginManager {
     this.logger = {
       info: async (message: string) => console.log(message),
       warn: async (message: string) => console.warn(message),
-      error: async (message: string) => console.error(message)
+      error: async (message: string) => console.error(message),
+      debug: async (message: string) => console.debug(message)
     };
   }
 
@@ -707,12 +708,20 @@ export class EnhancedPluginManager {
   private async readManifest(manifestPath: string): Promise<PluginManifest> {
     try {
       const content = await this.fs.readFile(manifestPath, 'utf8');
+      console.log(`[readManifest] Reading manifest from: ${manifestPath}`);
+      console.log(`[readManifest] Content (first 200 chars): ${content.substring(0, 200)}`);
+      
       const { loadNodeModule } = await import('../ui/node-module-loader.js');
       const JSON5 = await loadNodeModule<typeof import('json5')>('json5');
-      const manifest = JSON5.parse(content) as PluginManifest;
+      console.log(`[readManifest] JSON5 module loaded:`, JSON5);
+      
+      const manifest = await JSON5.parse(content) as PluginManifest;
+      console.log(`[readManifest] Parsed manifest:`, manifest);
+      console.log(`[readManifest] Manifest fields - id: ${manifest.id}, name: ${manifest.name}, version: ${manifest.version}, type: ${manifest.type}, main: ${manifest.main}`);
 
       // Validate required fields
       if (!manifest.id || !manifest.name || !manifest.version || !manifest.type || !manifest.main) {
+        console.error(`[readManifest] Validation failed for manifest:`, manifest);
         throw new Error('Manifest missing required fields: id, name, version, type, main');
       }
 

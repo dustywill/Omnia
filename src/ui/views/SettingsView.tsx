@@ -429,31 +429,221 @@ export function SettingsView({ settingsManager, plugins, navigationTarget }: Set
         );
 
       case 'system-info':
+        const environment = typeof window !== 'undefined' && (window as any).electronAPI ? 'Electron' : 'Web';
+        const activePlugins = plugins.filter(p => p.status === 'active');
+        const loadingPlugins = plugins.filter(p => p.status === 'loading');
+        const errorPlugins = plugins.filter(p => p.status === 'error');
+        
         return (
           <div className={styles.contentSection}>
             <div className={styles.contentHeader}>
               <h2 className={styles.contentTitle}>System Information</h2>
               <p className={styles.contentDescription}>
-                View application and environment details.
+                View detailed application and environment information.
               </p>
             </div>
             <div className={styles.contentBody}>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="font-medium text-gray-700">Version:</div>
-                <div className="text-gray-600">0.1.0</div>
+              <div className="space-y-6">
                 
-                <div className="font-medium text-gray-700">Environment:</div>
-                <div className="text-gray-600">
-                  {typeof window !== 'undefined' && (window as any).electronAPI ? 'Electron' : 'Web'}
+                {/* Application Information */}
+                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <span className="mr-2">🏗️</span>
+                    Application Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                        <span className="font-medium text-gray-700">Version</span>
+                        <span className="text-gray-600 font-mono">0.1.0</span>
+                      </div>
+                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                        <span className="font-medium text-gray-700">Environment</span>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          environment === 'Electron' 
+                            ? 'bg-blue-100 text-blue-800' 
+                            : 'bg-green-100 text-green-800'
+                        }`}>
+                          {environment}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                        <span className="font-medium text-gray-700">Build Mode</span>
+                        <span className="text-gray-600">
+                          {typeof process !== 'undefined' && process.env?.NODE_ENV === 'production' ? 'Production' : 'Development'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                        <span className="font-medium text-gray-700">User Agent</span>
+                        <span className="text-gray-600 text-sm truncate max-w-48" title={navigator.userAgent}>
+                          {navigator.userAgent.split(' ')[0]}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                        <span className="font-medium text-gray-700">Platform</span>
+                        <span className="text-gray-600">{navigator.platform}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                        <span className="font-medium text-gray-700">Language</span>
+                        <span className="text-gray-600">{navigator.language}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                
-                <div className="font-medium text-gray-700">Total Plugins:</div>
-                <div className="text-gray-600">{plugins.length}</div>
-                
-                <div className="font-medium text-gray-700">Active Plugins:</div>
-                <div className="text-gray-600">
-                  {plugins.filter(p => p.status === 'active').length}
+
+                {/* Plugin System Status */}
+                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <span className="mr-2">🔌</span>
+                    Plugin System Status
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    <div className="text-center p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="text-2xl font-bold text-green-600">{activePlugins.length}</div>
+                      <div className="text-sm text-green-700">Active</div>
+                    </div>
+                    <div className="text-center p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <div className="text-2xl font-bold text-yellow-600">{loadingPlugins.length}</div>
+                      <div className="text-sm text-yellow-700">Loading</div>
+                    </div>
+                    <div className="text-center p-4 bg-red-50 border border-red-200 rounded-lg">
+                      <div className="text-2xl font-bold text-red-600">{errorPlugins.length}</div>
+                      <div className="text-sm text-red-700">Error</div>
+                    </div>
+                    <div className="text-center p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600">{plugins.length}</div>
+                      <div className="text-sm text-blue-700">Total</div>
+                    </div>
+                  </div>
+                  
+                  {/* Plugin Details */}
+                  {plugins.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-gray-700 mb-2">Plugin Details</h4>
+                      <div className="max-h-48 overflow-y-auto space-y-1">
+                        {plugins.map((plugin) => (
+                          <div key={plugin.id} className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded border">
+                            <div className="flex items-center space-x-3">
+                              <div className={`w-2 h-2 rounded-full ${
+                                plugin.status === 'active' ? 'bg-green-500' : 
+                                plugin.status === 'loading' ? 'bg-yellow-500' : 
+                                plugin.status === 'error' ? 'bg-red-500' : 'bg-gray-400'
+                              }`} />
+                              <span className="font-medium text-sm">{plugin.name}</span>
+                              <span className="text-xs text-gray-500">v{plugin.version}</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                plugin.type === 'simple' ? 'bg-gray-100 text-gray-700' :
+                                plugin.type === 'configured' ? 'bg-blue-100 text-blue-700' :
+                                plugin.type === 'hybrid' ? 'bg-purple-100 text-purple-700' :
+                                'bg-gray-100 text-gray-700'
+                              }`}>
+                                {plugin.type}
+                              </span>
+                              <span className={`px-2 py-1 rounded-full text-xs capitalize ${
+                                plugin.status === 'active' ? 'bg-green-100 text-green-700' :
+                                plugin.status === 'loading' ? 'bg-yellow-100 text-yellow-700' :
+                                plugin.status === 'error' ? 'bg-red-100 text-red-700' :
+                                'bg-gray-100 text-gray-700'
+                              }`}>
+                                {plugin.status}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
+
+                {/* System Performance */}
+                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <span className="mr-2">⚡</span>
+                    Performance Metrics
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                        <span className="font-medium text-gray-700">Memory Usage</span>
+                        <span className="text-gray-600">
+                          {typeof (performance as any).memory !== 'undefined' 
+                            ? `${Math.round((performance as any).memory.usedJSHeapSize / 1024 / 1024)} MB`
+                            : 'Not available'
+                          }
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                        <span className="font-medium text-gray-700">Heap Limit</span>
+                        <span className="text-gray-600">
+                          {typeof (performance as any).memory !== 'undefined'
+                            ? `${Math.round((performance as any).memory.jsHeapSizeLimit / 1024 / 1024)} MB`
+                            : 'Not available'
+                          }
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                        <span className="font-medium text-gray-700">Online Status</span>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          navigator.onLine ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {navigator.onLine ? 'Online' : 'Offline'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                        <span className="font-medium text-gray-700">Hardware Concurrency</span>
+                        <span className="text-gray-600">{navigator.hardwareConcurrency} cores</span>
+                      </div>
+                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                        <span className="font-medium text-gray-700">Connection Type</span>
+                        <span className="text-gray-600">
+                          {(navigator as any).connection?.effectiveType || 'Unknown'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                        <span className="font-medium text-gray-700">Device Memory</span>
+                        <span className="text-gray-600">
+                          {(navigator as any).deviceMemory 
+                            ? `${(navigator as any).deviceMemory} GB`
+                            : 'Not available'
+                          }
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Configuration Paths */}
+                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <span className="mr-2">📁</span>
+                    Directory Structure
+                  </h3>
+                  <div className="space-y-2 font-mono text-sm">
+                    <div className="p-3 bg-gray-50 rounded border">
+                      <div className="font-medium text-gray-700 mb-1">Configuration</div>
+                      <div className="text-gray-600">config/app.json5</div>
+                      <div className="text-gray-600">config/plugins.json5</div>
+                      <div className="text-gray-600">config/plugins/</div>
+                    </div>
+                    <div className="p-3 bg-gray-50 rounded border">
+                      <div className="font-medium text-gray-700 mb-1">Plugins</div>
+                      <div className="text-gray-600">plugins/ (source)</div>
+                      <div className="text-gray-600">dist/plugins/ (compiled)</div>
+                    </div>
+                    <div className="p-3 bg-gray-50 rounded border">
+                      <div className="font-medium text-gray-700 mb-1">Application</div>
+                      <div className="text-gray-600">dist/ (built application)</div>
+                      <div className="text-gray-600">logs/ (application logs)</div>
+                    </div>
+                  </div>
+                </div>
+
               </div>
             </div>
           </div>

@@ -30,96 +30,99 @@ export function LogsView({ plugins }: LogsViewProps) {
   const logsEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Generate demo logs
-  useEffect(() => {
-    const generateDemoLogs = () => {
-      const sources: LogSource[] = ['auth', 'database', 'payment', 'system'];
-      const levels: LogLevel[] = ['ERROR', 'WARNING', 'INFO', 'DEBUG'];
-      const messages = {
-        auth: [
-          'User successfully authenticated',
-          'Failed to authenticate user',
-          'Session expired for user',
-          'Password reset requested',
-          'Invalid token provided'
-        ],
-        database: [
-          'Database connected',
-          'Connection pool limit exceeded',
-          'Query executed successfully',
-          'Database backup completed',
-          'Connection timeout'
-        ],
-        payment: [
-          'Payment request succeeded',
-          'Payment processing failed',
-          'Payment gateway connected',
-          'Refund processed',
-          'Payment validation error'
-        ],
-        system: [
-          'Application started',
-          'Configuration loaded',
-          'System health check passed',
-          'Memory usage warning',
-          'System shutdown initiated'
-        ]
-      };
-
-      const demoLogs: LogEntry[] = [];
-      const now = new Date();
-
-      for (let i = 0; i < 50; i++) {
-        const source = sources[Math.floor(Math.random() * sources.length)];
-        const level = levels[Math.floor(Math.random() * levels.length)];
-        const messageList = messages[source as keyof typeof messages] || ['System message'];
-        const message = messageList[Math.floor(Math.random() * messageList.length)];
+  // Parse log file content into LogEntry objects
+  const parseLogContent = (content: string): LogEntry[] => {
+    if (!content || content.trim() === '') {
+      return [];
+    }
+    
+    const lines = content.split('\n').filter(line => line.trim() !== '');
+    const logs: LogEntry[] = [];
+    
+    lines.forEach((line, index) => {
+      // Parse log format: [2025-07-05T23:44:59.873Z] [electron-main] [INFO] Starting Electron application with console logging enabled
+      const match = line.match(/^\[(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z)\]\s+\[([^\]]+)\]\s+\[(ERROR|WARNING|INFO|DEBUG)\]\s+(.+)$/);
+      
+      if (match) {
+        const [, isoTimestamp, component, level, message] = match;
+        const timestamp = new Date(isoTimestamp);
         
-        demoLogs.unshift({
-          id: `log-${i}`,
-          timestamp: new Date(now.getTime() - (i * 30000) - Math.random() * 30000),
-          level,
+        // Extract plugin ID from component if it follows pattern "renderer-pluginId"
+        const pluginMatch = component.match(/^renderer-(.+)$/);
+        const pluginId = pluginMatch ? pluginMatch[1] : undefined;
+        
+        // Determine source from component name
+        let source: LogSource = 'system';
+        if (component.includes('plugin') || pluginId) {
+          source = 'plugin';
+        } else if (component.includes('auth')) {
+          source = 'auth';
+        } else if (component.includes('database')) {
+          source = 'database';
+        } else if (component.includes('payment')) {
+          source = 'payment';
+        } else if (component.includes('electron')) {
+          source = 'system';
+        } else if (component.includes('CONSOLE')) {
+          source = 'system';
+        } else {
+          source = component;
+        }
+        
+        logs.push({
+          id: `log-${index}-${Date.now()}`,
+          timestamp,
+          level: level as LogLevel,
           source,
           message,
-          pluginId: Math.random() > 0.7 && plugins.length > 0 ? plugins[Math.floor(Math.random() * plugins.length)].id : undefined
+          pluginId
         });
       }
+    });
+    
+    // Sort by timestamp descending (newest first)
+    return logs.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+  };
 
-      setLogs(demoLogs);
+  // Load real logs from file
+  useEffect(() => {
+    const loadLogsFromFile = async () => {
+      try {
+        if (typeof window !== 'undefined' && (window as any).electronAPI?.readLogFile) {
+          const logContent = await (window as any).electronAPI.readLogFile();
+          const parsedLogs = parseLogContent(logContent);
+          setLogs(parsedLogs);
+        } else {
+          // Fallback for non-Electron environment
+          setLogs([]);
+        }
+      } catch (error) {
+        console.error('Failed to load logs:', error);
+        setLogs([]);
+      }
     };
 
-    generateDemoLogs();
-  }, [plugins]);
+    loadLogsFromFile();
+  }, []);
 
-  // Simulate real-time logs
+  // Live refresh logs from file
   useEffect(() => {
     if (!isLive) return;
 
-    const interval = setInterval(() => {
-      const sources: LogSource[] = ['auth', 'database', 'payment', 'system'];
-      const levels: LogLevel[] = ['ERROR', 'WARNING', 'INFO'];
-      const messages = [
-        'New user session created',
-        'Database query completed',
-        'Payment processed successfully',
-        'System check passed',
-        'Configuration updated'
-      ];
-
-      const newLog: LogEntry = {
-        id: `log-${Date.now()}`,
-        timestamp: new Date(),
-        level: levels[Math.floor(Math.random() * levels.length)],
-        source: sources[Math.floor(Math.random() * sources.length)],
-        message: messages[Math.floor(Math.random() * messages.length)],
-        pluginId: Math.random() > 0.8 && plugins.length > 0 ? plugins[Math.floor(Math.random() * plugins.length)].id : undefined
-      };
-
-      setLogs(prev => [newLog, ...prev.slice(0, 999)]); // Keep last 1000 logs
-    }, 3000 + Math.random() * 2000); // Random interval between 3-5 seconds
+    const interval = setInterval(async () => {
+      try {
+        if (typeof window !== 'undefined' && (window as any).electronAPI?.readLogFile) {
+          const logContent = await (window as any).electronAPI.readLogFile();
+          const parsedLogs = parseLogContent(logContent);
+          setLogs(parsedLogs);
+        }
+      } catch (error) {
+        console.error('Failed to refresh logs:', error);
+      }
+    }, 5000); // Refresh every 5 seconds
 
     return () => clearInterval(interval);
-  }, [isLive, plugins]);
+  }, [isLive]);
 
   // Filter logs
   useEffect(() => {
@@ -167,7 +170,9 @@ export function LogsView({ plugins }: LogsViewProps) {
   };
 
   const handleClearLogs = () => {
-    setLogs([]);
+    // Since logs are read from file, we can't clear them directly
+    // This would require clearing the actual log file, which should be done carefully
+    console.warn('Clear logs functionality disabled - logs are read from file');
   };
 
   const handleExportLogs = () => {

@@ -48,16 +48,24 @@ const electronAPI = {
   // Other utilities
   getCwd: () => safeInvoke("get-cwd"),
 
-  // Node modules for renderer
-  requireZod: () => safeInvoke("require-zod"),
-  requireJson5: () => safeInvoke("require-json5"),
+  // JSON5 operations
+  json5Parse: (text) => safeInvoke("json5-parse", text),
+  json5Stringify: (value) => safeInvoke("json5-stringify", value),
+  
+  // Zod operations
+  zodAvailable: () => safeInvoke("zod-available"),
+  
+  // Logging operations
+  logMessage: (level, component, message) => safeInvoke("log-message", level, component, message),
+  readLogFile: () => safeInvoke("read-log-file"),
 };
-sanitizeForIpc("electronAPI", electronAPI);
+
+// Don't sanitize the API objects themselves - just expose them directly
 contextBridge.exposeInMainWorld("electronAPI", electronAPI);
 
 // For backward compatibility with your existing code
 const exposedIpc = {
   invoke: (channel, data) => safeInvoke(channel, data),
 };
-sanitizeForIpc("ipcRenderer", exposedIpc);
+
 contextBridge.exposeInMainWorld("ipcRenderer", exposedIpc);

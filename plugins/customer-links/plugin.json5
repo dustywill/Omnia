@@ -5,11 +5,14 @@
   description: "Manage customer site links and generate HTML output files with configurable templates",
   author: "Omnia Team",
   type: "configured",
-  main: "index.tsx",
+  main: "index.js",
+  engine: {
+    ttCommanderVersion: ">=0.1.0"
+  },
   permissions: [
     "filesystem:read",
     "filesystem:write"
   ],
-  dependencies: [],
+  uiContributions: {},
   configSchema: "config-schema.js"
 }
