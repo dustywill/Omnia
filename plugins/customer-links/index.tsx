@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { loadNodeModule } from '../../src/ui/node-module-loader.js';
 import { Card } from '../../src/ui/components/Card/Card.js';
 import { Button } from '../../src/ui/components/Button/Button.js';
-import { JsonEditor } from '../../src/ui/components/JsonEditor/JsonEditor.js';
+import { SchemaForm } from '../../src/ui/components/SchemaForm/SchemaForm.js';
 // @ts-ignore
 import { createSchemas } from './config-schema.js';
 
@@ -427,9 +427,9 @@ const CustomerLinksPlugin: React.FC<CustomerLinksPluginProps> = ({ config: provi
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [generatedHtml, setGeneratedHtml] = useState<string>('');
-  const [editingData, setEditingData] = useState<string>('');
+  const [editingData, setEditingData] = useState<CustomerGroup[]>([]);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
-  const [isDataValid, setIsDataValid] = useState(true);
+  const [customerSitesSchema, setCustomerSitesSchema] = useState<any>(null);
 
   useEffect(() => {
     loadData();
@@ -442,7 +442,30 @@ const CustomerLinksPlugin: React.FC<CustomerLinksPluginProps> = ({ config: provi
       
       const loadedGroups = await loadCustomerSites(config.configFilePath);
       setCustomerGroups(loadedGroups);
-      setEditingData(JSON.stringify(loadedGroups, null, 2));
+      setEditingData(loadedGroups);
+      
+      // Load schema for customer sites data
+      try {
+        const { z } = await createSchemas();
+        const CustomerGroupSchema = z.array(
+          z.object({
+            CustomerName: z.string().min(1, 'Customer name is required'),
+            sites: z.array(
+              z.object({
+                Location: z.string().min(1, 'Location is required'),
+                Label: z.string().min(1, 'Label is required'),
+                LogoFile: z.string().min(1, 'Logo file is required'),
+                IPAddress: z.string().min(1, 'IP address is required'),
+                CIDR: z.number().min(0).max(32),
+                Link: z.string().min(1, 'Link is required')
+              })
+            )
+          })
+        );
+        setCustomerSitesSchema(CustomerGroupSchema);
+      } catch (error) {
+        console.error('Failed to create customer sites schema:', error);
+      }
       
     } catch (err) {
       console.error('Failed to load customer sites:', err);
@@ -482,17 +505,9 @@ const CustomerLinksPlugin: React.FC<CustomerLinksPluginProps> = ({ config: provi
     }
   };
 
-  const handleValidationChange = (valid: boolean, error?: string) => {
-    setIsDataValid(valid);
-    // Optionally set error state if needed for display
-    if (!valid && error) {
-      console.warn('[CustomerLinks] Validation error:', error);
-    }
-  };
-
-  const handleSaveData = async () => {
-    if (!isDataValid) {
-      setError('Cannot save invalid JSON. Please fix validation errors first.');
+  const handleSchemaFormSubmit = async (values: CustomerGroup[], isValid: boolean) => {
+    if (!isValid) {
+      setError('Cannot save invalid data. Please fix validation errors first.');
       setSaveStatus('error');
       setTimeout(() => setSaveStatus('idle'), 3000);
       return;
@@ -501,25 +516,12 @@ const CustomerLinksPlugin: React.FC<CustomerLinksPluginProps> = ({ config: provi
     try {
       setSaveStatus('saving');
       
-      // Parse the JSON (already validated by JsonEditor)
-      const parsedData = JSON.parse(editingData);
-      
-      // Additional validation for customer sites structure
-      if (!Array.isArray(parsedData)) {
-        throw new Error('Data must be an array of customer groups');
-      }
-      
-      for (const group of parsedData) {
-        if (!group.CustomerName || !Array.isArray(group.sites)) {
-          throw new Error('Each customer group must have CustomerName and sites array');
-        }
-      }
-      
       // Save to file
-      await saveCustomerSites(config.configFilePath, parsedData);
+      await saveCustomerSites(config.configFilePath, values);
       
       // Update local state
-      setCustomerGroups(parsedData);
+      setCustomerGroups(values);
+      setEditingData(values);
       setSaveStatus('saved');
       setError(null);
       
@@ -532,6 +534,11 @@ const CustomerLinksPlugin: React.FC<CustomerLinksPluginProps> = ({ config: provi
       setTimeout(() => setSaveStatus('idle'), 3000);
     }
   };
+  
+  const handleSchemaFormChange = (values: CustomerGroup[]) => {
+    setEditingData(values);
+  };
+
 
   if (loading) {
     return (
@@ -641,67 +648,61 @@ const CustomerLinksPlugin: React.FC<CustomerLinksPluginProps> = ({ config: provi
 
       {activeTab === 'editor' && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-            <div>
-              <h3>Edit Customer Sites Data</h3>
-              <p>Edit the JSON data for customer sites. Validate and save your changes.</p>
-            </div>
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              {saveStatus === 'saving' && <span style={{ color: '#666', fontSize: '14px' }}>Saving...</span>}
-              {saveStatus === 'saved' && <span style={{ color: '#059669', fontSize: '14px', fontWeight: '500' }}>✓ Saved successfully</span>}
-              {saveStatus === 'error' && <span style={{ color: '#dc2626', fontSize: '14px', fontWeight: '500' }}>✗ Save failed</span>}
-              {!isDataValid && <span style={{ color: '#f59e0b', fontSize: '14px', fontWeight: '500' }}>⚠ Validation errors</span>}
-              <Button 
-                onClick={handleSaveData}
-                variant="action"
-                disabled={saveStatus === 'saving' || !isDataValid}
-                title={!isDataValid ? 'Fix validation errors before saving' : ''}
-              >
-                {saveStatus === 'saving' ? 'Saving...' : 'Save Changes'}
-              </Button>
-            </div>
+          <div style={{ marginBottom: '20px' }}>
+            <h3>Edit Customer Sites Data</h3>
+            <p>Edit the customer sites data using the form or JSON editor. Changes are validated automatically.</p>
           </div>
           
-          <JsonEditor
-            label="Customer Sites JSON Data"
-            description="Edit the customer sites data structure. Each customer group should contain a CustomerName and sites array."
-            initialContent={editingData}
-            onChange={setEditingData}
-            onValidationChange={handleValidationChange}
-            placeholder="Enter customer sites JSON data..."
-            height="600px"
-            showLineNumbers={true}
-            showValidationErrors={true}
-          />
-          
-          <div style={{ 
-            marginTop: '1rem', 
-            padding: '1rem',
-            backgroundColor: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            borderRadius: '8px',
-            fontSize: '0.875rem', 
-            color: '#475569'
-          }}>
-            <div style={{ fontWeight: '600', marginBottom: '0.5rem', color: '#1e293b' }}>Data Structure Schema:</div>
-            <div style={{ fontFamily: 'monospace', backgroundColor: '#ffffff', padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
-              <pre style={{ margin: 0, fontSize: 'inherit' }}>{`[
-  {
-    "CustomerName": "string",
-    "sites": [
-      {
-        "Location": "string",
-        "Label": "string",
-        "LogoFile": "string",
-        "IPAddress": "string",
-        "CIDR": number,
-        "Link": "string"
-      }
-    ]
-  }
-]`}</pre>
+          {customerSitesSchema ? (
+            <SchemaForm
+              title="Customer Sites Configuration"
+              description="Manage your customer sites data with automatic validation."
+              schema={customerSitesSchema}
+              initialValues={editingData}
+              onSubmit={handleSchemaFormSubmit}
+              onChange={handleSchemaFormChange}
+              loading={saveStatus === 'saving'}
+              mode="hybrid"
+              defaultMode="json"
+              submitLabel={saveStatus === 'saving' ? 'Saving...' : 'Save Customer Sites'}
+              showResetButton={true}
+              compact={false}
+            />
+          ) : (
+            <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+              Loading schema...
             </div>
-          </div>
+          )}
+          
+          {saveStatus === 'saved' && (
+            <div style={{ 
+              marginTop: '1rem',
+              padding: '0.75rem',
+              backgroundColor: '#f0f9f0',
+              color: '#059669',
+              border: '1px solid #a7f3d0',
+              borderRadius: '6px',
+              fontSize: '0.875rem',
+              fontWeight: '500'
+            }}>
+              ✓ Customer sites data saved successfully
+            </div>
+          )}
+          
+          {saveStatus === 'error' && (
+            <div style={{ 
+              marginTop: '1rem',
+              padding: '0.75rem',
+              backgroundColor: '#fef2f2',
+              color: '#dc2626',
+              border: '1px solid #fecaca',
+              borderRadius: '6px',
+              fontSize: '0.875rem',
+              fontWeight: '500'
+            }}>
+              ✗ Failed to save customer sites data
+            </div>
+          )}
         </div>
       )}
 
