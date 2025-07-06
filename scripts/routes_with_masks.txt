@@ -1,0 +1,69 @@
+# Routes to add:
+# **********************Tutelar**********************
+172.25.25.0/24
+172.25.26.0/24
+172.25.30.0/24
+
+# **********************Magna**********************
+# AIM
+10.68.88.196/32
+
+# **********************Ground Effects**********************
+# Ground Effects, 320 Shockdrake Ct., Wentzville, MO - P18
+10.17.50.10/32
+# Ground Effects, 1200 Corvette Dr., Plum Springs (aka Bowling Green), KY - P09
+10.21.50.10/32
+# Ground Effects, 7566 Metropolitan Pkwy (aka 16 Mile), Sterling Heights, MI - P24
+10.24.50.10/32
+# Ground Effects, 1990 Concept Dr. Warren, MI - P08
+10.34.50.10/32
+# Ground Effects, 4670 North Service Rd E, Windsor - P28
+10.28.50.10/32
+# Ground Effects, 6600 Mount Elliot, Hamtramck, MI - P32
+10.36.50.10/32
+# Ground Effects, 1655 Tricont Ave., Whitby, ON - P23
+10.22.50.10/32
+# Ground Effects, 3435 Van Slyke, Flint, MI - P12
+10.33.50.10/32
+# Ground Effects (Fort Wayne), 13204 Aboite Rd, Roanoke, IN - P16
+10.14.50.10/32
+# Ground Effects (Wayne), 39055 Maple Ave, Wayne, MI - P26
+10.29.0.40/32
+# Ground Effects (Louisville), 13600 Northeast Park Drive, Louisville, KY - P19
+10.39.0.40/32
+# Ground Effects (Dearborn), 13750 Rotunda Drive, Dearborn, MI - P36
+10.33.50.10/32
+# Ground Effects Test Server
+10.1.0.39/32
+# Ground Effects (Saltillo), Av. Principal Parque Industrial Mencorsa #31360, Edificio B1, Parque Industrial Derramadero, Carr. Saltillo – Zacatecas Km. 327, Saltillo, COA - 
+# P39
+10.40.50.10/32
+
+# **********************Textron**********************
+
+# EZ-Go
+10.238.142.21/32
+10.238.142.22/32
+
+# ArctiCat
+10.191.4.40/32
+
+# **********************TSTech**********************
+
+# Alabama
+10.8.15.1/32
+
+# Indiana
+10.14.0.17/32
+
+# New Market - Canada
+10.4.0.66/32
+
+# Tricon
+10.6.0.45/32
+
+# Trim
+10.3.32.121/32
+
+# Trimont
+10.12.0.54/32

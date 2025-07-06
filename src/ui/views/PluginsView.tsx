@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from '../components/Button/Button.js';
 import { Input } from '../components/Input/Input.js';
+import { ToggleSwitch } from '../components/ToggleSwitch/ToggleSwitch.js';
 import { type PluginInfo } from '../main-app-renderer.js';
 import styles from './PluginsView.module.css';
 
@@ -97,45 +98,50 @@ function PluginManagementCard({
       )}
       
       {/* Action buttons */}
-      <div className={`${styles.pluginActions} mt-auto pt-4 border-t border-gray-200 flex gap-2 flex-wrap`}>
-        <Button
-          variant={status === 'active' ? 'secondary' : 'primary'}
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            onPluginToggle(id);
-          }}
-          disabled={status === 'loading'}
-          className="flex-1 min-w-20"
-        >
-          {status === 'active' ? 'Deactivate' : 'Activate'}
-        </Button>
+      <div className={`${styles.pluginActions} mt-auto pt-4 border-t border-gray-200 flex gap-3 flex-wrap items-center`}>
+        {/* Toggle Switch for Active/Inactive */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-600 font-medium">
+            {status === 'active' ? 'Active' : 'Inactive'}
+          </span>
+          <ToggleSwitch
+            checked={status === 'active'}
+            onChange={() => {
+              onPluginToggle(id);
+            }}
+            disabled={status === 'loading' || status === 'error'}
+            size="sm"
+            aria-label={`Toggle ${name} plugin ${status === 'active' ? 'off' : 'on'}`}
+          />
+        </div>
         
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            onPluginConfigure(id);
-          }}
-          disabled={status === 'loading' || status === 'error'}
-          className="flex-1 min-w-20"
-        >
-          Configure
-        </Button>
-        
-        <Button
-          variant="danger"
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            onPluginRemove(id);
-          }}
-          disabled={status === 'loading'}
-          className="min-w-18"
-        >
-          Remove
-        </Button>
+        <div className="flex gap-2 flex-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onPluginConfigure(id);
+            }}
+            disabled={status === 'loading' || status === 'error'}
+            className="flex-1 min-w-20"
+          >
+            Configure
+          </Button>
+          
+          <Button
+            variant="danger"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onPluginRemove(id);
+            }}
+            disabled={status === 'loading'}
+            className="min-w-18"
+          >
+            Remove
+          </Button>
+        </div>
       </div>
       
       {/* Click instruction for active plugins */}
@@ -187,9 +193,10 @@ export function PluginsView({
       </header>
 
       <div className="px-8 pb-8 max-w-7xl mx-auto">
-        {/* Filters */}
-        <div className={styles.filterSection}>
-          <div className="flex-1 min-w-80">
+        {/* Search and Filters */}
+        <div className={styles.controlsRow}>
+          {/* Search on the left */}
+          <div className={styles.searchSection}>
             <Input
               type="search"
               placeholder="Search plugins..."
@@ -198,7 +205,8 @@ export function PluginsView({
             />
           </div>
           
-          <div className={styles.filterRow}>
+          {/* Filter buttons in the middle */}
+          <div className={styles.filterButtons}>
             <Button
               variant={filterStatus === 'all' ? 'action' : 'ghost'}
               size="sm"
@@ -228,6 +236,9 @@ export function PluginsView({
               Issues ({plugins.filter(p => p.status === 'error').length})
             </Button>
           </div>
+          
+          {/* Spacer to push filter buttons to center */}
+          <div className={styles.spacer}></div>
         </div>
 
         {/* Plugin Grid */}

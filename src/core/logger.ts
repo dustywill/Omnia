@@ -56,6 +56,14 @@ export const createLogger = (plugin: string, logPath: string): Logger => {
   };
 };
 
+// Store original console methods globally to prevent logging loops
+const originalConsole = {
+  log: console.log.bind(console),
+  warn: console.warn.bind(console),
+  error: console.error.bind(console),
+  debug: console.debug.bind(console)
+};
+
 // Console redirection for Electron main process
 export const setupConsoleLogging = (logPath: string): void => {
   const logger = createLogger('CONSOLE', logPath);

@@ -1,6 +1,5 @@
 import React from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { AppHeader } from './components/AppHeader/AppHeader.js';
 import { AppNavigation } from './components/AppNavigation/AppNavigation.js';
 import { StatusBar } from './components/StatusBar/StatusBar.js';
 import { DashboardView } from './views/DashboardView.js';
@@ -14,6 +13,8 @@ import { SettingsManager } from '../core/settings-manager.js';
 import { NavigationService } from '../core/navigation-service.js';
 import { createEventBus } from '../core/event-bus.js';
 import { loadNodeModule } from './node-module-loader.js';
+// Client logger is imported to initialize console capture
+import './client-logger.js';
 
 export type MainAppRendererOptions = {
   container: HTMLElement;
@@ -115,7 +116,8 @@ const MainApp: React.FC<{
   const appBodyStyle: React.CSSProperties = {
     display: 'flex',
     flex: 1,
-    overflow: 'hidden'
+    overflow: 'hidden',
+    marginBottom: '33px' // Account for StatusBar height (32px) + border (1px)
   };
 
   const contentStyle: React.CSSProperties = {
@@ -125,7 +127,6 @@ const MainApp: React.FC<{
 
   return (
     <div style={mainStyle}>
-      <AppHeader />
       <div style={appBodyStyle}>
         <AppNavigation 
           currentView={currentView === 'plugin-detail' ? 'plugins' : currentView} 
@@ -137,12 +138,8 @@ const MainApp: React.FC<{
           <DashboardView 
             plugins={pluginInfos}
             onPluginSelect={handlePluginSelect}
-            onPluginToggle={(pluginId) => {
-              // TODO: Implement plugin toggle
-              console.log('Toggle plugin:', pluginId);
-            }}
-            onPluginConfigure={(pluginId) => handlePluginConfigure(pluginId, 'dashboard')}
             onViewChange={handleViewChange}
+            onStatusClick={handleStatusClick}
           />
         )}
         
@@ -210,6 +207,9 @@ const MainApp: React.FC<{
 export const initMainAppRenderer = async (
   opts: MainAppRendererOptions,
 ): Promise<Root> => {
+  // Initialize client-side logging first - this will start capturing all console logs
+  console.log('[initMainAppRenderer] Initializing client-side console logging');
+  
   console.log('[initMainAppRenderer] Starting main application renderer initialization');
   
   const path = await loadNodeModule<typeof import('path')>('path');

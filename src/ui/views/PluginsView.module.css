@@ -164,12 +164,39 @@
 /* Plugin Grid Layout */
 .pluginGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
   margin-top: 24px;
 }
 
-/* Filter Section */
+/* Controls Row Layout */
+.controlsRow {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.searchSection {
+  flex: 0 0 300px;
+  min-width: 200px;
+}
+
+.filterButtons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  flex: 1;
+}
+
+.spacer {
+  flex: 0 0 300px;
+  min-width: 200px;
+}
+
+/* Legacy filter styles (keeping for backward compatibility) */
 .filterSection {
   display: flex;
   flex-direction: column;

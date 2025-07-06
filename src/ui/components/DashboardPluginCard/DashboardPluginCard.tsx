@@ -50,15 +50,7 @@ export function DashboardPluginCard({
   onPluginSelect,
   className = '' 
 }: DashboardPluginCardProps) {
-  const { id, name, description, version, author, status } = plugin;
-  
-  
-  const statusText = {
-    active: 'Active',
-    inactive: 'Inactive',
-    error: 'Error',
-    loading: 'Loading...',
-  };
+  const { id, name, description, version, author } = plugin;
 
   const cardStyle: React.CSSProperties = {
     backgroundColor: '#ffffff',
@@ -75,17 +67,13 @@ export function DashboardPluginCard({
   };
 
   const handleClick = () => {
-    if (status === 'active') {
-      onPluginSelect(id);
-    }
+    onPluginSelect(id);
   };
 
   const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (status === 'active') {
-      e.currentTarget.style.transform = 'translateY(-2px)';
-      e.currentTarget.style.boxShadow = '0 10px 25px 0 rgba(0, 0, 0, 0.1), 0 4px 6px 0 rgba(0, 0, 0, 0.05)';
-      e.currentTarget.style.borderColor = '#d1d5db';
-    }
+    e.currentTarget.style.transform = 'translateY(-2px)';
+    e.currentTarget.style.boxShadow = '0 10px 25px 0 rgba(0, 0, 0, 0.1), 0 4px 6px 0 rgba(0, 0, 0, 0.05)';
+    e.currentTarget.style.borderColor = '#d1d5db';
   };
 
   const handleMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -102,19 +90,6 @@ export function DashboardPluginCard({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Loading indicator */}
-      {status === 'loading' && (
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '3px',
-          background: 'linear-gradient(90deg, #3b82f6, #1e40af)',
-          borderRadius: '12px 12px 0 0',
-          animation: 'pulse 2s infinite'
-        }} />
-      )}
       
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', marginBottom: '16px' }}>
@@ -149,77 +124,25 @@ export function DashboardPluginCard({
           </p>
         </div>
 
-        {/* Status indicator LED */}
-        <div 
-          title={statusText[status]}
-          style={{
-            width: '14px',
-            height: '14px',
-            borderRadius: '50%',
-            backgroundColor: status === 'active' ? '#059669' : status === 'error' ? '#ef4444' : '#6b7280',
-            flexShrink: 0,
-            boxShadow: status === 'active' 
-              ? '0 0 6px rgba(5, 150, 105, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.3)' 
-              : status === 'error' 
-                ? '0 0 6px rgba(239, 68, 68, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.3)'
-                : '0 0 2px rgba(107, 114, 128, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.3)',
-            background: status === 'active' 
-              ? 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.6), #059669)' 
-              : status === 'error' 
-                ? 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.6), #ef4444)'
-                : 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.4), #6b7280)',
-            cursor: 'help'
-          }} 
-        />
       </div>
       
       
       
-      {/* Error message */}
-      {status === 'error' && (
-        <div style={{
-          backgroundColor: '#fef2f2',
-          border: '1px solid #fecaca',
-          borderRadius: '6px',
-          padding: '8px 12px',
-          marginBottom: '12px'
-        }}>
-          <span style={{ color: '#dc2626', fontSize: '0.875rem', fontWeight: '500' }}>
-            ⚠ Plugin failed to load
-          </span>
-        </div>
-      )}
-      
       {/* Bottom section with click instruction */}
       <div style={{ marginTop: 'auto', paddingTop: '12px' }}>
-        {status === 'active' ? (
-          <div style={{
-            textAlign: 'center',
-            padding: '8px',
-            backgroundColor: '#f0f9ff',
-            border: '1px solid #bae6fd',
-            borderRadius: '6px',
-            color: '#0369a1',
-            fontSize: '0.875rem',
-            fontWeight: '500',
-            marginBottom: '12px'
-          }}>
-            Click to open tool
-          </div>
-        ) : (
-          <div style={{
-            textAlign: 'center',
-            padding: '8px',
-            backgroundColor: '#f9fafb',
-            border: '1px solid #e5e7eb',
-            borderRadius: '6px',
-            color: '#6b7280',
-            fontSize: '0.875rem',
-            marginBottom: '12px'
-          }}>
-            {status === 'inactive' ? 'Plugin is inactive' : 'Plugin has errors'}
-          </div>
-        )}
+        <div style={{
+          textAlign: 'center',
+          padding: '8px',
+          backgroundColor: '#f0f9ff',
+          border: '1px solid #bae6fd',
+          borderRadius: '6px',
+          color: '#0369a1',
+          fontSize: '0.875rem',
+          fontWeight: '500',
+          marginBottom: '12px'
+        }}>
+          Click to open tool
+        </div>
 
         {/* Plugin metadata - spread across full width with specific alignment */}
         <div style={{ 

@@ -92,7 +92,7 @@ export class ScriptExecutionService {
     
     try {
       // Validate script path
-      if (!this.validateScriptPath(scriptPath)) {
+      if (!(await this.validateScriptPath(scriptPath))) {
         throw new Error('Invalid script path or not allowed');
       }
 
@@ -165,30 +165,42 @@ export class ScriptExecutionService {
     }
   }
 
+  // Helper function to access Electron API
+  private getElectronAPI(): any {
+    if (typeof window !== 'undefined' && (window as any).electronAPI) {
+      return (window as any).electronAPI;
+    }
+    return null;
+  }
+
   async getAvailableScripts(): Promise<Script[]> {
     try {
-      const fs = await loadNodeModule<typeof import('fs/promises')>('fs/promises');
+      const electronAPI = this.getElectronAPI();
+      
+      if (!electronAPI) {
+        console.warn('[ScriptRunner] Electron API not available, using fallback scripts');
+        return this.getFallbackScripts();
+      }
+      
       const path = await loadNodeModule<typeof import('path')>('path');
       
       // Try to create scripts directory if it doesn't exist
       try {
-        await fs.mkdir(this.config.scriptsDirectory, { recursive: true });
+        await electronAPI.mkdir(this.config.scriptsDirectory, { recursive: true });
       } catch (mkdirError) {
         // Directory might already exist, continue
       }
       
-      const files = await fs.readdir(this.config.scriptsDirectory, { withFileTypes: true });
+      const files = await electronAPI.readdir(this.config.scriptsDirectory, { withFileTypes: true });
       const scripts: Script[] = [];
       
       for (const file of files) {
         try {
-          // Check if file has isFile method, fallback to stat if not
-          const isFile = typeof file.isFile === 'function' 
-            ? file.isFile() 
-            : (await fs.stat(path.join(this.config.scriptsDirectory, file.name))).isFile();
+          // Use the isFile property from the enhanced readdir response
+          const isFile = file.isFile;
             
           if (isFile && this.config.allowedExtensions.some((ext: string) => file.name.endsWith(ext))) {
-            const scriptPath = path.join(this.config.scriptsDirectory, file.name);
+            const scriptPath = await electronAPI.join(this.config.scriptsDirectory, file.name);
             const id = path.basename(file.name, path.extname(file.name));
             
             scripts.push({
@@ -218,12 +230,17 @@ export class ScriptExecutionService {
     }
   }
 
-  validateScriptPath(scriptPath: string): boolean {
+  async validateScriptPath(scriptPath: string): Promise<boolean> {
     if (this.config.restrictToScriptsDirectory) {
-      const path = require('path');
-      const normalizedPath = path.normalize(scriptPath);
-      const scriptsDir = path.normalize(this.config.scriptsDirectory);
-      return normalizedPath.startsWith(scriptsDir);
+      try {
+        const path = await loadNodeModule<typeof import('path')>('path');
+        const normalizedPath = path.normalize(scriptPath);
+        const scriptsDir = path.normalize(this.config.scriptsDirectory);
+        return normalizedPath.startsWith(scriptsDir);
+      } catch (error) {
+        console.warn('[ScriptRunner] Failed to validate script path, allowing:', error);
+        return this.config.allowedExtensions.some((ext: string) => scriptPath.endsWith(ext));
+      }
     }
     
     return this.config.allowedExtensions.some((ext: string) => scriptPath.endsWith(ext));
@@ -237,14 +254,20 @@ export class ScriptExecutionService {
 
   private async saveExecutionResult(scriptPath: string, result: ExecutionResult): Promise<void> {
     try {
-      const fs = await loadNodeModule<typeof import('fs/promises')>('fs/promises');
+      const electronAPI = this.getElectronAPI();
+      
+      if (!electronAPI) {
+        console.warn('[ScriptRunner] Electron API not available, skipping save execution result');
+        return;
+      }
+      
       const path = await loadNodeModule<typeof import('path')>('path');
       
-      await fs.mkdir(this.config.outputDirectory, { recursive: true });
+      await electronAPI.mkdir(this.config.outputDirectory, { recursive: true });
       
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       const scriptName = path.basename(scriptPath, path.extname(scriptPath));
-      const outputFile = path.join(this.config.outputDirectory, `${scriptName}_${timestamp}.log`);
+      const outputFile = await electronAPI.join(this.config.outputDirectory, `${scriptName}_${timestamp}.log`);
       
       const logContent = [
         `Script: ${scriptPath}`,
@@ -257,7 +280,7 @@ export class ScriptExecutionService {
         result.error ? `\n--- ERROR ---\n${result.error}` : ''
       ].join('\n');
       
-      await fs.writeFile(outputFile, logContent);
+      await electronAPI.writeFile(outputFile, logContent);
     } catch (error) {
       console.error('Failed to save execution result:', error);
     }

@@ -5,15 +5,15 @@ import { type PluginInfo } from '../main-app-renderer.js';
 export interface DashboardViewProps {
   plugins: PluginInfo[];
   onPluginSelect: (pluginId: string) => void;
-  onPluginToggle: (pluginId: string) => void;
-  onPluginConfigure: (pluginId: string) => void;
   onViewChange?: (view: 'dashboard' | 'plugins' | 'settings') => void;
+  onStatusClick?: (filter: 'active' | 'inactive' | 'error') => void;
 }
 
 export function DashboardView({ 
   plugins, 
   onPluginSelect,
-  onViewChange
+  onViewChange,
+  onStatusClick
 }: DashboardViewProps) {
   const activePlugins = plugins.filter(p => p.status === 'active');
   const inactivePlugins = plugins.filter(p => p.status === 'inactive');
@@ -21,8 +21,8 @@ export function DashboardView({
 
   const headerStyle: React.CSSProperties = {
     padding: '1rem 2rem',
-    backgroundColor: '#ffffff',
-    borderBottom: '1px solid #e5e7eb',
+    backgroundColor: '#3b82f6',
+    borderBottom: '1px solid #2563eb',
     marginBottom: '1.5rem',
     display: 'flex',
     justifyContent: 'space-between',
@@ -71,10 +71,10 @@ export function DashboardView({
       {/* Header */}
       <header style={headerStyle}>
         <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1f2937', marginBottom: '0.25rem' }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#ffffff', marginBottom: '0.25rem' }}>
             Dashboard
           </h1>
-          <p style={{ color: '#6b7280', fontSize: '0.9rem' }}>
+          <p style={{ color: '#e5e7eb', fontSize: '0.9rem' }}>
             Overview of your plugin ecosystem
           </p>
         </div>
@@ -83,7 +83,7 @@ export function DashboardView({
         <div style={miniStatsGridStyle}>
           <div 
             style={miniStatCardStyle}
-            onClick={() => onViewChange?.('plugins')}
+            onClick={() => onStatusClick?.('active')}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = '#f0f9ff';
               e.currentTarget.style.borderColor = '#bae6fd';
@@ -104,7 +104,7 @@ export function DashboardView({
           
           <div 
             style={miniStatCardStyle}
-            onClick={() => onViewChange?.('plugins')}
+            onClick={() => onStatusClick?.('inactive')}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = '#f9fafb';
               e.currentTarget.style.borderColor = '#d1d5db';
@@ -125,7 +125,7 @@ export function DashboardView({
           
           <div 
             style={miniStatCardStyle}
-            onClick={() => onViewChange?.('plugins')}
+            onClick={() => onStatusClick?.('error')}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = '#fef2f2';
               e.currentTarget.style.borderColor = '#fecaca';
@@ -185,37 +185,6 @@ export function DashboardView({
           </section>
         )}
 
-        {/* Available Plugins Section */}
-        {inactivePlugins.length > 0 && (
-          <section>
-            <h2 style={sectionHeaderStyle}>Available Plugins</h2>
-            <div style={pluginGridStyle}>
-              {inactivePlugins.map((plugin) => (
-                <DashboardPluginCard
-                  key={plugin.id}
-                  plugin={plugin}
-                  onPluginSelect={onPluginSelect}
-                />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Error Plugins Section */}
-        {errorPlugins.length > 0 && (
-          <section>
-            <h2 style={{ ...sectionHeaderStyle, color: '#dc2626' }}>Plugins with Issues</h2>
-            <div style={pluginGridStyle}>
-              {errorPlugins.map((plugin) => (
-                <DashboardPluginCard
-                  key={plugin.id}
-                  plugin={plugin}
-                  onPluginSelect={onPluginSelect}
-                />
-              ))}
-            </div>
-          </section>
-        )}
 
         {/* Empty State */}
         {plugins.length === 0 && (

@@ -22,7 +22,7 @@ export interface LogsViewProps {
 export function LogsView({ plugins }: LogsViewProps) {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [filteredLogs, setFilteredLogs] = useState<LogEntry[]>([]);
-  const [selectedLevels, setSelectedLevels] = useState<Set<LogLevel>>(new Set(['ERROR', 'WARNING', 'INFO']));
+  const [selectedLevels, setSelectedLevels] = useState<Set<LogLevel>>(new Set(['ERROR', 'WARNING', 'INFO', 'DEBUG']));
   const [selectedPlugin, setSelectedPlugin] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [isLive, setIsLive] = useState(true);
@@ -41,14 +41,25 @@ export function LogsView({ plugins }: LogsViewProps) {
     
     lines.forEach((line, index) => {
       // Parse log format: [2025-07-05T23:44:59.873Z] [electron-main] [INFO] Starting Electron application with console logging enabled
-      const match = line.match(/^\[(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z)\]\s+\[([^\]]+)\]\s+\[(ERROR|WARNING|INFO|DEBUG)\]\s+(.+)$/);
+      // Also handle: [2025-07-06T03:38:37.554Z] [client-renderer] [INFO] [CONSOLE] [start] Loading path module...
+      // Also handle: [2025-07-06T03:45:10.438Z] [client-renderer] [ERROR] [CONSOLE] Failed to load Zod for demo schema
+      const match = line.match(/^\[(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z)\]\s+\[([^\]]+)\]\s+\[(ERROR|WARN|WARNING|INFO|DEBUG)\]\s+(.+)$/);
       
       if (match) {
-        const [, isoTimestamp, component, level, message] = match;
+        const [, isoTimestamp, component, level, rawMessage] = match;
         const timestamp = new Date(isoTimestamp);
         
-        // Extract plugin ID from component if it follows pattern "renderer-pluginId"
-        const pluginMatch = component.match(/^renderer-(.+)$/);
+        // Normalize WARN to WARNING for consistency
+        const normalizedLevel = level === 'WARN' ? 'WARNING' : level;
+        
+        // Clean up the message - remove nested [CONSOLE] tags for cleaner display
+        let message = rawMessage;
+        if (message.startsWith('[CONSOLE] ')) {
+          message = message.substring(10); // Remove "[CONSOLE] " prefix
+        }
+        
+        // Extract plugin ID from component if it follows pattern "renderer-pluginId" or "client-pluginId"
+        const pluginMatch = component.match(/^(?:renderer|client)-(.+)$/);
         const pluginId = pluginMatch ? pluginMatch[1] : undefined;
         
         // Determine source from component name
@@ -63,6 +74,8 @@ export function LogsView({ plugins }: LogsViewProps) {
           source = 'payment';
         } else if (component.includes('electron')) {
           source = 'system';
+        } else if (component.includes('client')) {
+          source = 'system'; // Client-side logs are system logs
         } else if (component.includes('CONSOLE')) {
           source = 'system';
         } else {
@@ -72,11 +85,14 @@ export function LogsView({ plugins }: LogsViewProps) {
         logs.push({
           id: `log-${index}-${Date.now()}`,
           timestamp,
-          level: level as LogLevel,
+          level: normalizedLevel as LogLevel,
           source,
           message,
           pluginId
         });
+      } else {
+        // Log unparseable lines for debugging
+        console.debug('Failed to parse log line:', line);
       }
     });
     
@@ -279,6 +295,20 @@ export function LogsView({ plugins }: LogsViewProps) {
                 />
                 <span className={`${styles.levelIndicator} ${styles.info}`}></span>
                 <span>Info</span>
+              </div>
+              
+              <div 
+                className={`${styles.filterItem} ${selectedLevels.has('DEBUG') ? styles.active : ''}`}
+                onClick={() => handleLevelToggle('DEBUG')}
+              >
+                <input 
+                  type="checkbox" 
+                  checked={selectedLevels.has('DEBUG')}
+                  onChange={() => handleLevelToggle('DEBUG')}
+                  className={styles.checkbox}
+                />
+                <span className={`${styles.levelIndicator} ${styles.debug}`}></span>
+                <span>Debug</span>
               </div>
             </div>
           </div>

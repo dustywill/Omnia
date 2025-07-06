@@ -41,6 +41,7 @@ const electronAPI = {
   mkdir: (dirPath, options) => safeInvoke("fs-mkdir", dirPath, options),
   readdir: (dirPath, options) =>
     safeInvoke("fs-readdir", dirPath, options),
+  stat: (filePath) => safeInvoke("fs-stat", filePath),
 
   // Path operations
   join: (...paths) => safeInvoke("path-join", paths),

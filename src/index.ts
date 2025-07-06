@@ -7,6 +7,14 @@ export type StartOptions = {
 
 export const start = async (opts?: StartOptions): Promise<void> => {
   try {
+  // Initialize client-side logging early if we're in a browser/Electron renderer environment
+  if (typeof window !== "undefined" && typeof document !== "undefined") {
+    console.log('[start] Initializing client-side console logging...');
+    // Import and initialize the client logger - it automatically sets up console capture
+    await import("./ui/client-logger.js");
+    console.log('[start] Client-side console logging initialized');
+  }
+  
   console.log('[start] Loading path module...');
   const path = await loadNodeModule<typeof import("path")>("path");
   console.log('[start] Modules loaded successfully');

@@ -1573,6 +1573,350 @@ export default function MyPlugin() {
 }
 ```
 
+## Logging Best Practices
+
+### Console Logging Integration
+
+Omnia automatically captures all console output from plugins through the unified logging system. Your console.log, console.warn, console.error, and console.debug calls are automatically sent to the main log file and displayed in the Logs page.
+
+```typescript
+export default function MyPlugin() {
+  // These logs automatically appear in the Logs page
+  console.log('[MyPlugin] Component initialized');
+  console.warn('[MyPlugin] Configuration incomplete');
+  console.error('[MyPlugin] Failed to load data');
+  console.debug('[MyPlugin] Debug details:', { data, state });
+  
+  return <div>My Plugin Content</div>;
+}
+```
+
+### Structured Logging
+
+Use structured, consistent log messages for better debugging:
+
+```typescript
+// ✅ Good - Structured with context
+console.log(`[${pluginId}] Plugin initialized with config:`, config);
+console.error(`[${pluginId}] API call failed:`, { endpoint, error: error.message });
+
+// ❌ Bad - Vague or inconsistent
+console.log('done');
+console.log('error happened');
+```
+
+### Log Levels and Usage
+
+**ERROR**: Critical failures that prevent plugin operation
+```typescript
+try {
+  await loadCriticalData();
+} catch (error) {
+  console.error(`[${pluginId}] Critical failure loading data:`, error.message);
+}
+```
+
+**WARN**: Issues that don't break functionality but should be addressed
+```typescript
+if (!config.apiKey) {
+  console.warn(`[${pluginId}] No API key configured, using default behavior`);
+}
+```
+
+**INFO**: Normal operational messages
+```typescript
+console.log(`[${pluginId}] Processing ${items.length} items`);
+console.log(`[${pluginId}] Data refresh completed successfully`);
+```
+
+**DEBUG**: Detailed debugging information
+```typescript
+if (process.env.NODE_ENV === 'development') {
+  console.debug(`[${pluginId}] Function called with:`, { args, state });
+}
+```
+
+### Component-Specific Logging
+
+Create focused loggers for different parts of your plugin:
+
+```typescript
+import { createClientLogger } from '../../src/ui/client-logger.js';
+
+// Create a plugin-specific logger
+const logger = createClientLogger('my-plugin');
+
+export default function MyPlugin() {
+  // Use the focused logger
+  logger.log('info', 'Plugin component rendered');
+  
+  const handleAction = async () => {
+    try {
+      logger.log('info', 'Starting action');
+      await performAction();
+      logger.log('info', 'Action completed successfully');
+    } catch (error) {
+      logger.log('error', `Action failed: ${error.message}`);
+    }
+  };
+}
+```
+
+## IPC File System Operations
+
+### Why Use IPC for File Operations
+
+Plugins run in the renderer process and cannot directly access Node.js file system APIs. Instead, use the IPC (Inter-Process Communication) system to safely perform file operations through the main process.
+
+```typescript
+// ❌ INCORRECT - Direct Node.js access (will fail)
+import fs from 'fs/promises';
+const content = await fs.readFile(filePath); // Error: fs not available
+
+// ✅ CORRECT - Using IPC
+const content = await window.electronAPI.readFile(filePath, 'utf8');
+```
+
+### Available IPC File Operations
+
+#### Reading Files
+```typescript
+try {
+  // Read text file
+  const content = await window.electronAPI.readFile(filePath, 'utf8');
+  console.log(`[${pluginId}] File read successfully:`, filePath);
+  
+  // Read binary file
+  const buffer = await window.electronAPI.readFile(filePath);
+  console.log(`[${pluginId}] Binary file read:`, buffer.length, 'bytes');
+} catch (error) {
+  console.error(`[${pluginId}] Failed to read file:`, error.message);
+}
+```
+
+#### Writing Files
+```typescript
+try {
+  await window.electronAPI.writeFile(filePath, content);
+  console.log(`[${pluginId}] File written successfully:`, filePath);
+} catch (error) {
+  console.error(`[${pluginId}] Failed to write file:`, error.message);
+}
+```
+
+#### Directory Operations
+```typescript
+// Create directory
+try {
+  await window.electronAPI.mkdir(dirPath, { recursive: true });
+  console.log(`[${pluginId}] Directory created:`, dirPath);
+} catch (error) {
+  console.error(`[${pluginId}] Failed to create directory:`, error.message);
+}
+
+// List directory contents
+try {
+  const entries = await window.electronAPI.readdir(dirPath, { withFileTypes: true });
+  const files = entries.filter(entry => entry.isFile);
+  const dirs = entries.filter(entry => entry.isDirectory);
+  console.log(`[${pluginId}] Found ${files.length} files, ${dirs.length} directories`);
+} catch (error) {
+  console.error(`[${pluginId}] Failed to read directory:`, error.message);
+}
+```
+
+#### File/Directory Information
+```typescript
+try {
+  const stats = await window.electronAPI.stat(filePath);
+  console.log(`[${pluginId}] File stats:`, {
+    isFile: stats.isFile,
+    isDirectory: stats.isDirectory,
+    size: stats.size,
+    modified: stats.mtime
+  });
+} catch (error) {
+  console.error(`[${pluginId}] Failed to get file stats:`, error.message);
+}
+```
+
+#### Path Operations
+```typescript
+// Join paths safely
+const fullPath = await window.electronAPI.join('base', 'subdir', 'file.txt');
+console.log(`[${pluginId}] Constructed path:`, fullPath);
+
+// Get current working directory
+const cwd = await window.electronAPI.getCwd();
+console.log(`[${pluginId}] Working directory:`, cwd);
+```
+
+### ScriptRunner Plugin Example
+
+The ScriptRunner plugin demonstrates proper IPC usage for file operations:
+
+```typescript
+// From plugins/script-runner/index.tsx
+const checkFileExists = async (filePath: string): Promise<boolean> => {
+  try {
+    await window.electronAPI.stat(filePath);
+    console.log(`[script-runner] File exists: ${filePath}`);
+    return true;
+  } catch (error) {
+    console.log(`[script-runner] File not found: ${filePath}`);
+    return false;
+  }
+};
+
+const loadScriptContent = async (scriptPath: string): Promise<string> => {
+  try {
+    const content = await window.electronAPI.readFile(scriptPath, 'utf8');
+    console.log(`[script-runner] Script loaded: ${scriptPath}`);
+    return content;
+  } catch (error) {
+    console.error(`[script-runner] Failed to load script: ${error.message}`);
+    throw error;
+  }
+};
+
+const saveScriptOutput = async (outputPath: string, output: string) => {
+  try {
+    // Ensure output directory exists
+    const outputDir = await window.electronAPI.join(outputPath, '..');
+    await window.electronAPI.mkdir(outputDir, { recursive: true });
+    
+    // Write output file
+    await window.electronAPI.writeFile(outputPath, output);
+    console.log(`[script-runner] Output saved: ${outputPath}`);
+  } catch (error) {
+    console.error(`[script-runner] Failed to save output: ${error.message}`);
+    throw error;
+  }
+};
+```
+
+### Error Handling for IPC Operations
+
+Always implement proper error handling for IPC operations:
+
+```typescript
+const performFileOperation = async () => {
+  try {
+    // Check if file exists first
+    const exists = await checkFileExists(filePath);
+    if (!exists) {
+      console.warn(`[${pluginId}] File does not exist: ${filePath}`);
+      return;
+    }
+    
+    // Perform the operation
+    const content = await window.electronAPI.readFile(filePath, 'utf8');
+    console.log(`[${pluginId}] File operation completed successfully`);
+    
+    return content;
+  } catch (error) {
+    // Log the error with context
+    console.error(`[${pluginId}] File operation failed:`, {
+      operation: 'readFile',
+      filePath,
+      error: error.message
+    });
+    
+    // Re-throw for caller to handle
+    throw new Error(`Failed to read file: ${error.message}`);
+  }
+};
+
+const checkFileExists = async (filePath: string): Promise<boolean> => {
+  try {
+    await window.electronAPI.stat(filePath);
+    return true;
+  } catch (error) {
+    // Don't log as error - file not existing is often normal
+    return false;
+  }
+};
+```
+
+### JSON5 Configuration Loading
+
+For loading JSON5 configuration files:
+
+```typescript
+const loadPluginConfig = async (configPath: string) => {
+  try {
+    const configContent = await window.electronAPI.readFile(configPath, 'utf8');
+    const config = await window.electronAPI.json5Parse(configContent);
+    console.log(`[${pluginId}] Configuration loaded:`, configPath);
+    return config;
+  } catch (error) {
+    console.error(`[${pluginId}] Failed to load config:`, error.message);
+    // Return default configuration
+    return getDefaultConfig();
+  }
+};
+
+const savePluginConfig = async (configPath: string, config: any) => {
+  try {
+    const configContent = await window.electronAPI.json5Stringify(config);
+    await window.electronAPI.writeFile(configPath, configContent);
+    console.log(`[${pluginId}] Configuration saved:`, configPath);
+  } catch (error) {
+    console.error(`[${pluginId}] Failed to save config:`, error.message);
+    throw error;
+  }
+};
+```
+
+### Performance Considerations
+
+#### Batch Operations
+```typescript
+// ✅ Good - Process files in batches
+const processFiles = async (filePaths: string[]) => {
+  console.log(`[${pluginId}] Processing ${filePaths.length} files`);
+  
+  for (let i = 0; i < filePaths.length; i += 10) {
+    const batch = filePaths.slice(i, i + 10);
+    await Promise.all(batch.map(processFile));
+    console.log(`[${pluginId}] Processed batch ${Math.floor(i/10) + 1}`);
+  }
+};
+
+// ❌ Bad - All files at once (may overwhelm IPC)
+const processAllFiles = async (filePaths: string[]) => {
+  await Promise.all(filePaths.map(processFile)); // Too many concurrent IPC calls
+};
+```
+
+#### Caching File Information
+```typescript
+class FileCache {
+  private cache = new Map<string, { stats: any, timestamp: number }>();
+  private readonly cacheTTL = 30000; // 30 seconds
+  
+  async getFileStats(filePath: string) {
+    const cached = this.cache.get(filePath);
+    const now = Date.now();
+    
+    if (cached && (now - cached.timestamp) < this.cacheTTL) {
+      console.debug(`[${pluginId}] Using cached stats for: ${filePath}`);
+      return cached.stats;
+    }
+    
+    try {
+      const stats = await window.electronAPI.stat(filePath);
+      this.cache.set(filePath, { stats, timestamp: now });
+      console.debug(`[${pluginId}] Cached stats for: ${filePath}`);
+      return stats;
+    } catch (error) {
+      console.error(`[${pluginId}] Failed to get stats: ${error.message}`);
+      throw error;
+    }
+  }
+}
+```
+
 ## Plugin Examples
 
 Check the existing plugins for examples:

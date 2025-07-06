@@ -90,11 +90,32 @@ const setupIpcHandlers = (ipcMain?: IpcMain, logger?: Logger) => {
           return (entries as unknown as Dirent[]).map((d) => ({
             name: d.name,
             isDirectory: d.isDirectory(),
+            isFile: d.isFile(),
           }));
         }
         return entries;
       } catch (error) {
         logger?.error(`Error reading directory ${dirPath}: ${error}`);
+        throw error;
+      }
+    },
+  );
+
+  ipcMain.handle(
+    "fs-stat",
+    async (_event: any, filePath: string) => {
+      try {
+        logger?.info(`Getting stats for: ${filePath}`);
+        const stats = await fs.stat(filePath);
+        return {
+          isFile: stats.isFile(),
+          isDirectory: stats.isDirectory(),
+          size: stats.size,
+          mtime: stats.mtime,
+          ctime: stats.ctime,
+        };
+      } catch (error) {
+        logger?.error(`Error getting stats for ${filePath}: ${error}`);
         throw error;
       }
     },
@@ -150,13 +171,14 @@ const setupIpcHandlers = (ipcMain?: IpcMain, logger?: Logger) => {
   ipcMain.handle("log-message", async (_event: any, level: string, component: string, message: string) => {
     try {
       const logPath = path.join(process.cwd(), "logs", "app.log");
-      const rendererLogger = createLogger(`renderer-${component}`, logPath);
+      const rendererLogger = createLogger(`client-${component}`, logPath);
       
       switch (level.toLowerCase()) {
         case 'info':
           await rendererLogger.info(message);
           break;
         case 'warn':
+        case 'warning':
           await rendererLogger.warn(message);
           break;
         case 'error':

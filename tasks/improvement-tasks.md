@@ -1,9 +1,21 @@
+# Logging
+
+The logger seems to have gone haywire and began logging continuous issues. Please take a look at logs\app.log and see if you can determine what may be going on?
+
+# All Screens
+
+- Change the top left div to be this for the image. Get rid of the second Omnia and the "PLugin Management..."
+
+```HTML
+<div style="padding: 5px; border-bottom: 1px solid rgb(229, 231, 235); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px;"><div style="width: 100%; display: flex; align-items: center; justify-content: center;"><img alt="Omnia Logo" src="./assets/omnia_logo.svg" style="width: 100%;"></div></div>
+```
+
+- Let's use the blue background for the Dashboard head section's background
+  - Make sure the text is in a contrasting enough color to be seen.
+
 # screenshot\Omnia - Dashboard 070525 1846.jpg
 
-- The two Omni logos and headers in the top right corner seems redundant. I htinkn we can remove the entire top one.
-- Let's use the blue background for he Dashboard head section's background
-  - Make sure the text is in a contrasting enough color to be seen.
-- The Active, Inactive, Errors, and Total squares shjould navigate to the Plugins page AND Enable the Active, Inactive or Issues (Errors) filter
+- The Active, Inactive, Errors, and Total squares should navigate to the Plugins page AND Enable the Active, Inactive or Issues (Errors) filter
 - Remove the indicator for active on the cards, only active Plugins should show on the Dashboard.
 - When the window is not able to display all of the contents vertically, the scroll bar bottom down button is hidden by the status bar.
 

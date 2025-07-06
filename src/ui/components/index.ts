@@ -8,6 +8,9 @@ export type { InputProps } from './Input/Input.js';
 export { Badge } from './Badge/Badge.js';
 export type { BadgeProps } from './Badge/Badge.js';
 
+export { ToggleSwitch } from './ToggleSwitch/ToggleSwitch.js';
+export type { ToggleSwitchProps } from './ToggleSwitch/ToggleSwitch.js';
+
 // Layout Components
 export { Card } from './Card/Card.js';
 export type { CardProps } from './Card/Card.js';
