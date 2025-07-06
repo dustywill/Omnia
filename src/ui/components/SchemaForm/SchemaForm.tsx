@@ -151,10 +151,25 @@ export function SchemaForm({
   };
 
   const handleFieldChange = (fieldKey: string, value: any) => {
-    setValues(prev => ({
-      ...prev,
-      [fieldKey]: value
-    }));
+    setValues(prev => {
+      // Handle nested field keys like "appSettings.theme"
+      if (fieldKey.includes('.')) {
+        const [parentKey, childKey] = fieldKey.split('.');
+        return {
+          ...prev,
+          [parentKey]: {
+            ...prev[parentKey],
+            [childKey]: value
+          }
+        };
+      } else {
+        // Handle simple field keys
+        return {
+          ...prev,
+          [fieldKey]: value
+        };
+      }
+    });
 
     // Clear field error when user starts typing
     if (errors[fieldKey]) {
@@ -223,7 +238,18 @@ export function SchemaForm({
 
   const renderField = (field: SchemaFormField) => {
     const { key, label, type, description, required, options, placeholder, min, max } = field;
-    const value = values[key] ?? field.defaultValue ?? '';
+    
+    // Handle nested field keys like "appSettings.theme"
+    const getValue = (fieldKey: string) => {
+      if (fieldKey.includes('.')) {
+        const [parentKey, childKey] = fieldKey.split('.');
+        return values[parentKey]?.[childKey] ?? field.defaultValue ?? '';
+      } else {
+        return values[fieldKey] ?? field.defaultValue ?? '';
+      }
+    };
+    
+    const value = getValue(key);
     const error = errors[key];
 
     switch (type) {

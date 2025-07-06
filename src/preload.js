@@ -55,6 +55,8 @@ const electronAPI = {
   
   // Zod operations
   zodAvailable: () => safeInvoke("zod-available"),
+  zodValidate: (data, schemaDescriptor) => safeInvoke("zod-validate", data, schemaDescriptor),
+  zodParse: (data, schemaDescriptor) => safeInvoke("zod-parse", data, schemaDescriptor),
   
   // Logging operations
   logMessage: (level, component, message) => safeInvoke("log-message", level, component, message),

@@ -22,6 +22,7 @@ export interface PluginSettingsProps {
   pluginManager: EnhancedPluginManager;
   onSettingsChange?: (pluginId: string, settings: any) => void;
   className?: string;
+  targetPluginId?: string; // If specified, show only this plugin's settings
 }
 
 interface PluginConfig {
@@ -34,7 +35,8 @@ export function PluginSettings({
   settingsManager, 
   pluginManager, 
   onSettingsChange, 
-  className = '' 
+  className = '',
+  targetPluginId
 }: PluginSettingsProps) {
   const [plugins, setPlugins] = useState<LoadedPlugin[]>([]);
   const [selectedPlugin, setSelectedPlugin] = useState<LoadedPlugin | null>(null);
@@ -47,6 +49,16 @@ export function PluginSettings({
   useEffect(() => {
     loadPlugins();
   }, [pluginManager]);
+  
+  // Auto-select target plugin if specified
+  useEffect(() => {
+    if (targetPluginId && plugins.length > 0) {
+      const targetPlugin = plugins.find(p => p.manifest.id === targetPluginId);
+      if (targetPlugin) {
+        setSelectedPlugin(targetPlugin);
+      }
+    }
+  }, [targetPluginId, plugins]);
 
   const loadPlugins = () => {
     try {
@@ -201,6 +213,65 @@ export function PluginSettings({
     );
   }
 
+  // For plugin-only mode (when targetPluginId is specified), render only the settings
+  if (targetPluginId && selectedPlugin) {
+    return (
+      <div className={`${styles.pluginSettings} ${className}`}>
+        {/* Plugin Settings Form for single plugin */}
+        {pluginConfig && (
+          <Card>
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-xl font-semibold text-theme-primary">
+                  Plugin Configuration
+                </h2>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-theme-secondary">
+                    {pluginConfig.enabled ? 'Enabled' : 'Disabled'}
+                  </span>
+                  <Button
+                    onClick={handleEnableToggle}
+                    variant={pluginConfig.enabled ? 'danger' : 'success'}
+                    size="sm"
+                    disabled={saving}
+                  >
+                    {pluginConfig.enabled ? 'Disable' : 'Enable'}
+                  </Button>
+                </div>
+              </div>
+              
+              {selectedPlugin.manifest.type === 'simple' && (
+                <p className="text-theme-secondary">
+                  This is a simple plugin with no configurable settings.
+                </p>
+              )}
+            </div>
+
+            {pluginConfig.schema && selectedPlugin.manifest.type !== 'simple' && (
+              <SchemaForm
+                title=""
+                schema={pluginConfig.schema}
+                initialValues={pluginConfig.settings}
+                onSubmit={handleConfigSave}
+                loading={saving}
+                submitLabel="Save Plugin Settings"
+                showResetButton={true}
+                realTimeValidation={true}
+              />
+            )}
+
+            {error && (
+              <div className="mt-4 p-4 bg-red-95 border border-red-80 rounded-lg">
+                <p className="text-danger text-sm">{error}</p>
+              </div>
+            )}
+          </Card>
+        )}
+      </div>
+    );
+  }
+
+  // Full mode with plugin list
   return (
     <div className={`${styles.pluginSettings} ${className}`}>
       {/* Header */}

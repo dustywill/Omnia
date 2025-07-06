@@ -67,9 +67,18 @@ export interface SettingsViewProps {
     pluginId: string;
     focusEditor?: boolean;
   } | null;
+  viewMode?: 'full' | 'plugin-only'; // New prop to control view mode
+  targetPluginId?: string | null; // Specific plugin to show in plugin-only mode
 }
 
-export function SettingsView({ settingsManager, plugins, pluginManager, navigationTarget }: SettingsViewProps) {
+export function SettingsView({ 
+  settingsManager, 
+  plugins, 
+  pluginManager, 
+  navigationTarget, 
+  viewMode = 'full',
+  targetPluginId 
+}: SettingsViewProps) {
   // Navigation state
   const [activeSection, setActiveSection] = useState<SettingsSection>('app-config');
   
@@ -100,33 +109,10 @@ export function SettingsView({ settingsManager, plugins, pluginManager, navigati
         setDemoSchema(demoSchemaInstance);
         setDemoConfig(defaultDemoConfig);
         
-        // Load app configuration schema using Zod mock
-        const zodModule = await loadNodeModule('zod');
-        const z = zodModule.z || zodModule.default || zodModule;
-        
-        // Create a proper schema for the app configuration
-        const appConfigSchema = z.object({
-          appSettings: z.object({
-            version: z.string().default('0.1.0').describe('Application Version'),
-            debugMode: z.boolean().default(false).describe('Enable Debug Mode'),
-            userName: z.string().default('User').describe('User Name'),
-            theme: z.enum(['light', 'dark', 'system']).default('system').describe('UI Theme'),
-            pluginsDirectory: z.string().default('plugins').describe('Plugins Directory'),
-            scriptsDirectory: z.string().default('scripts').describe('Scripts Directory'),
-          }).describe('Application Settings'),
-          logging: z.object({
-            level: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal']).default('info').describe('Log Level'),
-            prettyPrint: z.boolean().default(false).describe('Pretty Print Console Logs'),
-            filePath: z.string().default('logs/app.log').describe('Log File Path'),
-          }).describe('Logging Settings'),
-          window: z.object({
-            width: z.number().min(800).default(1200).describe('Window Width'),
-            height: z.number().min(600).default(800).describe('Window Height'),
-          }).optional().describe('Window Settings'),
-          plugins: z.object({}).default({}).describe('Plugin Configurations'),
-        });
-        
-        setAppConfigSchema(appConfigSchema);
+        // Load app configuration schema using the existing schema factory
+        const { createAppConfigSchemas } = await import('../../lib/schemas/app-config.js');
+        const { AppConfigSchema } = await createAppConfigSchemas();
+        setAppConfigSchema(AppConfigSchema);
         
         // Load app configuration
         const config = await settingsManager.loadAppConfig();
@@ -596,6 +582,38 @@ export function SettingsView({ settingsManager, plugins, pluginManager, navigati
     }
   };
 
+  // For plugin-only mode, render directly without sidebar
+  if (viewMode === 'plugin-only' && targetPluginId && pluginManager) {
+    const targetPlugin = plugins.find(p => p.id === targetPluginId);
+    
+    return (
+      <div className={styles.settingsView}>
+        {/* Header */}
+        <header className={styles.header}>
+          <h1 className={styles.title}>
+            {targetPlugin ? `${targetPlugin.name} Settings` : 'Plugin Settings'}
+          </h1>
+          <p className={styles.subtitle}>
+            {targetPlugin ? targetPlugin.description || 'Configure plugin settings' : 'Plugin configuration'}
+          </p>
+        </header>
+
+        {/* Direct plugin settings content */}
+        <main className={styles.pluginOnlyContent}>
+          <PluginSettings
+            settingsManager={settingsManager}
+            pluginManager={pluginManager}
+            targetPluginId={targetPluginId}
+            onSettingsChange={(pluginId, settings) => {
+              console.log('Plugin settings changed:', pluginId, settings);
+            }}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  // Full mode with sidebar (original behavior)
   return (
     <div className={styles.settingsView}>
       {/* Header */}

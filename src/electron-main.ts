@@ -13,6 +13,127 @@ let electron:
   | { BrowserWindow: typeof ElectronBrowserWindow; app: App; ipcMain: IpcMain }
   | undefined;
 
+// Helper function to build Zod schemas from descriptors
+export const buildZodSchemaFromDescriptor = (z: any, descriptor: any): any => {
+  if (!descriptor || typeof descriptor !== 'object') {
+    throw new Error('Invalid schema descriptor');
+  }
+
+  switch (descriptor.type) {
+    case 'string':
+      let stringSchema = z.string();
+      if (descriptor.min !== undefined) stringSchema = stringSchema.min(descriptor.min);
+      if (descriptor.max !== undefined) stringSchema = stringSchema.max(descriptor.max);
+      if (descriptor.length !== undefined) stringSchema = stringSchema.length(descriptor.length);
+      if (descriptor.regex !== undefined) stringSchema = stringSchema.regex(new RegExp(descriptor.regex));
+      if (descriptor.email) stringSchema = stringSchema.email();
+      if (descriptor.url) stringSchema = stringSchema.url();
+      if (descriptor.uuid) stringSchema = stringSchema.uuid();
+      if (descriptor.default !== undefined) stringSchema = stringSchema.default(descriptor.default);
+      if (descriptor.optional) stringSchema = stringSchema.optional();
+      return stringSchema;
+
+    case 'number':
+      let numberSchema = z.number();
+      if (descriptor.min !== undefined) numberSchema = numberSchema.min(descriptor.min);
+      if (descriptor.max !== undefined) numberSchema = numberSchema.max(descriptor.max);
+      if (descriptor.int) numberSchema = numberSchema.int();
+      if (descriptor.positive) numberSchema = numberSchema.positive();
+      if (descriptor.negative) numberSchema = numberSchema.negative();
+      if (descriptor.default !== undefined) numberSchema = numberSchema.default(descriptor.default);
+      if (descriptor.optional) numberSchema = numberSchema.optional();
+      return numberSchema;
+
+    case 'boolean':
+      let booleanSchema = z.boolean();
+      if (descriptor.default !== undefined) booleanSchema = booleanSchema.default(descriptor.default);
+      if (descriptor.optional) booleanSchema = booleanSchema.optional();
+      return booleanSchema;
+
+    case 'object':
+      if (!descriptor.shape) {
+        throw new Error('Object schema requires shape');
+      }
+      const shape: any = {};
+      for (const [key, value] of Object.entries(descriptor.shape)) {
+        shape[key] = buildZodSchemaFromDescriptor(z, value);
+      }
+      let objectSchema = z.object(shape);
+      if (descriptor.strict) objectSchema = objectSchema.strict();
+      if (descriptor.passthrough) objectSchema = objectSchema.passthrough();
+      if (descriptor.default !== undefined) objectSchema = objectSchema.default(descriptor.default);
+      if (descriptor.optional) objectSchema = objectSchema.optional();
+      return objectSchema;
+
+    case 'array':
+      if (!descriptor.element) {
+        throw new Error('Array schema requires element');
+      }
+      const elementSchema = buildZodSchemaFromDescriptor(z, descriptor.element);
+      let arraySchema = z.array(elementSchema);
+      if (descriptor.min !== undefined) arraySchema = arraySchema.min(descriptor.min);
+      if (descriptor.max !== undefined) arraySchema = arraySchema.max(descriptor.max);
+      if (descriptor.length !== undefined) arraySchema = arraySchema.length(descriptor.length);
+      if (descriptor.nonempty) arraySchema = arraySchema.nonempty();
+      if (descriptor.default !== undefined) arraySchema = arraySchema.default(descriptor.default);
+      if (descriptor.optional) arraySchema = arraySchema.optional();
+      return arraySchema;
+
+    case 'enum':
+      if (!descriptor.values || !Array.isArray(descriptor.values)) {
+        throw new Error('Enum schema requires values array');
+      }
+      let enumSchema = z.enum(descriptor.values);
+      if (descriptor.default !== undefined) enumSchema = enumSchema.default(descriptor.default);
+      if (descriptor.optional) enumSchema = enumSchema.optional();
+      return enumSchema;
+
+    case 'literal':
+      if (descriptor.value === undefined) {
+        throw new Error('Literal schema requires value');
+      }
+      let literalSchema = z.literal(descriptor.value);
+      if (descriptor.optional) literalSchema = literalSchema.optional();
+      return literalSchema;
+
+    case 'union':
+      if (!descriptor.schemas || !Array.isArray(descriptor.schemas)) {
+        throw new Error('Union schema requires schemas array');
+      }
+      const unionSchemas = descriptor.schemas.map((schema: any) => buildZodSchemaFromDescriptor(z, schema));
+      // z.union requires at least 2 schemas, handle the case where we have less
+      if (unionSchemas.length < 2) {
+        throw new Error('Union schema requires at least 2 schemas');
+      }
+      let unionSchema = z.union([unionSchemas[0], unionSchemas[1], ...unionSchemas.slice(2)]);
+      if (descriptor.optional) unionSchema = unionSchema.optional();
+      return unionSchema;
+
+    case 'record':
+      if (!descriptor.value) {
+        throw new Error('Record schema requires value');
+      }
+      const valueSchema = buildZodSchemaFromDescriptor(z, descriptor.value);
+      let recordSchema = z.record(valueSchema);
+      if (descriptor.default !== undefined) recordSchema = recordSchema.default(descriptor.default);
+      if (descriptor.optional) recordSchema = recordSchema.optional();
+      return recordSchema;
+
+    case 'any':
+      let anySchema = z.any();
+      if (descriptor.optional) anySchema = anySchema.optional();
+      return anySchema;
+
+    case 'unknown':
+      let unknownSchema = z.unknown();
+      if (descriptor.optional) unknownSchema = unknownSchema.optional();
+      return unknownSchema;
+
+    default:
+      throw new Error(`Unknown schema type: ${descriptor.type}`);
+  }
+};
+
 const getElectron = async () => {
   if (!electron) {
     try {
@@ -156,7 +277,7 @@ const setupIpcHandlers = (ipcMain?: IpcMain, logger?: Logger) => {
     }
   });
 
-  // Zod operations via IPC (return simple schema descriptors)
+  // Zod operations via IPC - provide real Zod validation
   ipcMain.handle("zod-available", async () => {
     try {
       await import("zod");
@@ -164,6 +285,66 @@ const setupIpcHandlers = (ipcMain?: IpcMain, logger?: Logger) => {
     } catch (error) {
       logger?.error(`Zod not available: ${error}`);
       return false;
+    }
+  });
+
+  // Zod schema validation via IPC
+  ipcMain.handle("zod-validate", async (_event: any, data: any, schemaDescriptor: any) => {
+    try {
+      const { z } = await import("zod");
+      
+      // Build the schema from the descriptor
+      const schema = buildZodSchemaFromDescriptor(z, schemaDescriptor);
+      
+      // Validate the data
+      const result = schema.safeParse(data);
+      
+      if (result.success) {
+        return {
+          success: true,
+          data: result.data,
+          error: null
+        };
+      } else {
+        return {
+          success: false,
+          data: null,
+          error: result.error.issues
+        };
+      }
+    } catch (error) {
+      logger?.error(`Zod validation error: ${error}`);
+      return {
+        success: false,
+        data: null,
+        error: [{ message: `Validation failed: ${error}` }]
+      };
+    }
+  });
+
+  // Zod schema parsing via IPC
+  ipcMain.handle("zod-parse", async (_event: any, data: any, schemaDescriptor: any) => {
+    try {
+      const { z } = await import("zod");
+      
+      // Build the schema from the descriptor
+      const schema = buildZodSchemaFromDescriptor(z, schemaDescriptor);
+      
+      // Parse the data (throws on validation failure)
+      const result = schema.parse(data);
+      
+      return {
+        success: true,
+        data: result,
+        error: null
+      };
+    } catch (error) {
+      logger?.error(`Zod parse error: ${error}`);
+      return {
+        success: false,
+        data: null,
+        error: error instanceof Error ? error.message : String(error)
+      };
     }
   });
 

@@ -32,10 +32,32 @@ export function introspectSchema(schema: any): SchemaIntrospectionResult {
     
     Object.entries(shape).forEach(([key, fieldSchema]: [string, any]) => {
       const field = analyzeField(key, fieldSchema);
-      fields.push(field);
       
-      if (field.defaultValue !== undefined) {
-        defaultValues[key] = field.defaultValue;
+      // If the field is an object type, recursively flatten it
+      if (field.type === 'object' && field.schema) {
+        const nestedResult = introspectSchema(field.schema);
+        
+        // Add flattened fields with prefixed keys
+        nestedResult.fields.forEach(nestedField => {
+          const flattenedField = {
+            ...nestedField,
+            key: `${key}.${nestedField.key}`,
+            label: `${field.label} - ${nestedField.label}`
+          };
+          fields.push(flattenedField);
+        });
+        
+        // Handle nested default values
+        if (Object.keys(nestedResult.defaultValues).length > 0) {
+          defaultValues[key] = nestedResult.defaultValues;
+        }
+      } else {
+        // Add non-object fields directly
+        fields.push(field);
+        
+        if (field.defaultValue !== undefined) {
+          defaultValues[key] = field.defaultValue;
+        }
       }
     });
   }
