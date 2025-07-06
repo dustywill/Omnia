@@ -29,44 +29,44 @@ Tests should be written following TDD as mandated in `AGENTS.md` – write a fai
 
 ## 4. Component Coverage Matrix
 
-Below is a high level checklist of behaviours to verify for each component. Use it to create individual test files under `tests/ui/components/`.
+Below is a high level checklist of behaviors to verify for each component. Use it to create individual test files under `tests/ui/components/`.
 
 ### Primitive Components
 
-| Component      | Key Tests |
-| -------------- | --------- |
-| **Button**     | Renders text/children; calls `onClick`; applies variants & sizes; disabled state prevents clicks; hover/focus classes added |
-| **Input**      | Renders label and helper text; accepts typing; error state styling; icon rendering; generates unique `id`; focus management |
-| **Badge**      | Displays children; variant colours; size options |
-| **ToggleSwitch** | Toggles checked state on click; calls `onChange`; keyboard activation; disabled state |
+| Component        | Key Tests                                                                                                                   |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **Button**       | Renders text/children; calls `onClick`; applies variants & sizes; disabled state prevents clicks; hover/focus classes added |
+| **Input**        | Renders label and helper text; accepts typing; error state styling; icon rendering; generates unique `id`; focus management |
+| **Badge**        | Displays children; variant colours; size options                                                                            |
+| **ToggleSwitch** | Toggles checked state on click; calls `onChange`; keyboard activation; disabled state                                       |
 
 ### Layout Components
 
-| Component | Key Tests |
-| --------- | --------- |
-| **Card**  | Renders children; `onClick` invoked when interactive; elevation & hover classes applied when `elevated`/`interactive`; respects custom className |
-| **Grid**  | Creates correct column count; gap sizes; responsive className passthrough |
-| **Sidebar & SidebarItem** | Collapse/expand behaviour; item click callbacks; active item highlighting; icon rendering |
+| Component                 | Key Tests                                                                                                                                        |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Card**                  | Renders children; `onClick` invoked when interactive; elevation & hover classes applied when `elevated`/`interactive`; respects custom className |
+| **Grid**                  | Creates correct column count; gap sizes; responsive className passthrough                                                                        |
+| **Sidebar & SidebarItem** | Collapse/expand behaviour; item click callbacks; active item highlighting; icon rendering                                                        |
 
 ### Navigation Components
 
-| Component | Key Tests |
-| --------- | --------- |
+| Component         | Key Tests                                                                                                                        |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | **AppNavigation** | Buttons render with labels and icons; highlights current view; invokes `onViewChange` on click or key press; accessibility roles |
-| **AppHeader** | Displays title and optional actions; ensures semantic `<header>` element |
+| **AppHeader**     | Displays title and optional actions; ensures semantic `<header>` element                                                         |
 
 ### Complex Components
 
-| Component | Key Tests |
-| --------- | --------- |
-| **PluginCard** | Shows plugin info; status-based styling; toggle/configure/remove buttons fire callbacks; loading/error states |
-| **DashboardPluginCard** | Entire card clickable when plugin active; hover animation; displays plugin metadata |
-| **StatusBar** | Displays plugin counts and view label; hides counts on Dashboard; colour indicators for active/error plugins |
-| **SettingsForm** | Generates fields from schema; validates input; calls `onSubmit` with values; change tracking via `onChange` |
-| **SchemaForm** | Handles nested and array fields; validation errors shown; submit handler invoked |
-| **AppSettings** | Renders settings sections; saves updates; displays success feedback |
-| **PluginSettings** | Loads plugin schema; enable/disable actions; configuration validation |
-| **SettingsPage** | Tab navigation between App, Plugin and System settings; preserves active tab; integrates other settings components |
+| Component               | Key Tests                                                                                                          |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **PluginCard**          | Shows plugin info; status-based styling; toggle/configure/remove buttons fire callbacks; loading/error states      |
+| **DashboardPluginCard** | Entire card clickable when plugin active; hover animation; displays plugin metadata                                |
+| **StatusBar**           | Displays plugin counts and view label; hides counts on Dashboard; colour indicators for active/error plugins       |
+| **SettingsForm**        | Generates fields from schema; validates input; calls `onSubmit` with values; change tracking via `onChange`        |
+| **SchemaForm**          | Handles nested and array fields; validation errors shown; submit handler invoked                                   |
+| **AppSettings**         | Renders settings sections; saves updates; displays success feedback                                                |
+| **PluginSettings**      | Loads plugin schema; enable/disable actions; configuration validation                                              |
+| **SettingsPage**        | Tab navigation between App, Plugin and System settings; preserves active tab; integrates other settings components |
 
 ### Other Components
 
