@@ -122,7 +122,7 @@ const MainApp: React.FC<{
 
   const contentStyle: React.CSSProperties = {
     flex: 1,
-    overflow: 'hidden'
+    overflowY: 'auto'
   };
 
   return (
