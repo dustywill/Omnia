@@ -49,15 +49,17 @@ export const defaultAppConfig: AppConfig = {
 // Browser-compatible schema factory
 // Uses runtime validation instead of Zod in browser environments
 export const createAppConfigSchemas = async () => {
-  // Check if we're in a browser environment
-  const isBrowser = typeof window !== 'undefined';
+  // Check if we're in a Node.js environment (main process or tests)
+  const isNodeJS = typeof process !== 'undefined' && process.versions?.node !== undefined;
+  // Check if we're in Electron renderer (window exists and electronAPI is available)
+  const isElectronRenderer = typeof window !== 'undefined' && typeof (window as any).electronAPI !== 'undefined';
   
-  if (isBrowser) {
-    console.log('[createAppConfigSchemas] Browser environment detected, using simple validation');
-    return createBrowserCompatibleSchemas();
-  } else {
-    console.log('[createAppConfigSchemas] Node.js environment detected, loading Zod');
+  if (isNodeJS && !isElectronRenderer) {
+    console.log('[createAppConfigSchemas] Node.js environment detected, loading real Zod');
     return createZodSchemas();
+  } else {
+    console.log('[createAppConfigSchemas] Browser/Electron renderer environment detected, using proxy validation');
+    return createBrowserCompatibleSchemas();
   }
 };
 

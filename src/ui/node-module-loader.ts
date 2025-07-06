@@ -14,6 +14,16 @@ const isDevelopment = (): boolean => {
   }
 };
 
+// Enhanced environment detection
+const isElectronRenderer = (): boolean => {
+  return typeof window !== 'undefined' && typeof (window as any).electronAPI !== 'undefined';
+};
+
+const isNodeJS = (): boolean => {
+  return typeof process !== 'undefined' && process.versions?.node !== undefined;
+};
+
+
 // Export cache for debugging purposes
 export const getModuleCache = () => moduleCache;
 export const clearModuleCache = () => moduleCache.clear();
@@ -34,7 +44,7 @@ export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
   }
 
   // Check if we're in an Electron renderer with exposed APIs
-  if (typeof window !== "undefined" && (window as any).electronAPI) {
+  if (isElectronRenderer()) {
     if (isDevelopment()) {
       console.debug(`[loadNodeModule] Using Electron API for ${name}`);
     }
@@ -238,75 +248,96 @@ export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
             const available = await (window as any).electronAPI.zodAvailable();
             if (available) {
               if (isDevelopment()) {
-                console.debug(`[loadNodeModule] Zod available in main process`);
+                console.debug(`[loadNodeModule] Zod available in main process, creating IPC proxy`);
               }
-              // Return a comprehensive mock Zod-like object with chainable methods
-              const createChainableMock = (type: string) => ({
-                type,
-                parse: (v: any) => v,
-                min: (n: number) => createChainableMock(`${type}:min(${n})`),
-                max: (n: number) => createChainableMock(`${type}:max(${n})`),
-                optional: () => createChainableMock(`${type}:optional`),
-                default: (_val: any) => createChainableMock(`${type}:default`),
-                refine: (_fn: any) => createChainableMock(`${type}:refine`),
-                transform: (_fn: any) => createChainableMock(`${type}:transform`),
-                url: () => createChainableMock(`${type}:url`),
-                email: () => createChainableMock(`${type}:email`),
-                uuid: () => createChainableMock(`${type}:uuid`),
-                regex: (_pattern: RegExp) => createChainableMock(`${type}:regex`),
-                length: (n: number) => createChainableMock(`${type}:length(${n})`),
-                describe: (_description: string) => createChainableMock(`${type}:describe`),
-              });
+              
+              // Create a proxy that converts Zod calls to schema descriptors and uses IPC
+              const createIPCZodProxy = (type: string, options: any = {}) => {
+                const descriptor = { type, ...options };
+                
+                return {
+                  type,
+                  descriptor,
+                  // Validation methods that use IPC
+                  parse: async (data: any) => {
+                    const result = await (window as any).electronAPI.zodParse(data, descriptor);
+                    if (result.success) {
+                      return result.data;
+                    } else {
+                      throw new Error(result.error);
+                    }
+                  },
+                  safeParse: async (data: any) => {
+                    return await (window as any).electronAPI.zodValidate(data, descriptor);
+                  },
+                  // Chaining methods that return new proxy objects
+                  min: (n: number) => createIPCZodProxy(type, { ...options, min: n }),
+                  max: (n: number) => createIPCZodProxy(type, { ...options, max: n }),
+                  length: (n: number) => createIPCZodProxy(type, { ...options, length: n }),
+                  optional: () => createIPCZodProxy(type, { ...options, optional: true }),
+                  default: (val: any) => createIPCZodProxy(type, { ...options, default: val }),
+                  describe: (description: string) => createIPCZodProxy(type, { ...options, description }),
+                  email: () => createIPCZodProxy(type, { ...options, email: true }),
+                  url: () => createIPCZodProxy(type, { ...options, url: true }),
+                  uuid: () => createIPCZodProxy(type, { ...options, uuid: true }),
+                  regex: (pattern: RegExp) => createIPCZodProxy(type, { ...options, regex: pattern.source }),
+                  int: () => createIPCZodProxy(type, { ...options, int: true }),
+                  positive: () => createIPCZodProxy(type, { ...options, positive: true }),
+                  negative: () => createIPCZodProxy(type, { ...options, negative: true }),
+                  nonempty: () => createIPCZodProxy(type, { ...options, nonempty: true }),
+                  strict: () => createIPCZodProxy(type, { ...options, strict: true }),
+                  passthrough: () => createIPCZodProxy(type, { ...options, passthrough: true }),
+                };
+              };
 
-              const zodMock = {
-                string: () => createChainableMock('string'),
-                number: () => createChainableMock('number'),
-                boolean: () => createChainableMock('boolean'),
-                object: (shape: any) => ({
-                  type: 'object',
-                  shape,
-                  parse: (v: any) => v,
-                  optional: () => createChainableMock('object:optional'),
-                  default: (_val: any) => createChainableMock('object:default'),
-                  describe: (_description: string) => createChainableMock('object:describe'),
-                }),
-                array: (element: any) => ({
-                  type: 'array',
-                  element,
-                  parse: (v: any) => Array.isArray(v) ? v : [],
-                  optional: () => createChainableMock('array:optional'),
-                  default: (_val: any) => createChainableMock('array:default'),
-                  describe: (_description: string) => createChainableMock('array:describe'),
-                }),
-                enum: (values: any[]) => ({
-                  type: 'enum',
-                  values,
-                  parse: (v: any) => values.includes(v) ? v : values[0],
-                  optional: () => createChainableMock('enum:optional'),
-                  default: (_val: any) => createChainableMock('enum:default'),
-                }),
-                literal: (value: any) => ({
-                  type: 'literal',
-                  value,
-                  parse: (_v: any) => value,
-                  optional: () => createChainableMock('literal:optional'),
-                }),
-                union: (...schemas: any[]) => ({
-                  type: 'union',
-                  schemas,
-                  parse: (v: any) => v,
-                  optional: () => createChainableMock('union:optional'),
-                }),
-                optional: () => createChainableMock('optional'),
-                any: () => createChainableMock('any'),
-                unknown: () => createChainableMock('unknown'),
+              const zodIPCProxy = {
+                string: () => createIPCZodProxy('string'),
+                number: () => createIPCZodProxy('number'),
+                boolean: () => createIPCZodProxy('boolean'),
+                object: (shape: any) => {
+                  // Convert shape to descriptors
+                  const shapeDescriptors: any = {};
+                  for (const [key, value] of Object.entries(shape)) {
+                    if (value && typeof value === 'object' && (value as any).descriptor) {
+                      shapeDescriptors[key] = (value as any).descriptor;
+                    } else {
+                      // Fallback for non-proxy objects
+                      shapeDescriptors[key] = { type: 'any' };
+                    }
+                  }
+                  return createIPCZodProxy('object', { shape: shapeDescriptors });
+                },
+                array: (element: any) => {
+                  const elementDescriptor = element && typeof element === 'object' && element.descriptor 
+                    ? element.descriptor 
+                    : { type: 'any' };
+                  return createIPCZodProxy('array', { element: elementDescriptor });
+                },
+                enum: (values: any[]) => createIPCZodProxy('enum', { values }),
+                literal: (value: any) => createIPCZodProxy('literal', { value }),
+                union: (...schemas: any[]) => {
+                  const schemaDescriptors = schemas.map(schema => 
+                    schema && typeof schema === 'object' && schema.descriptor 
+                      ? schema.descriptor 
+                      : { type: 'any' }
+                  );
+                  return createIPCZodProxy('union', { schemas: schemaDescriptors });
+                },
+                record: (value: any) => {
+                  const valueDescriptor = value && typeof value === 'object' && value.descriptor 
+                    ? value.descriptor 
+                    : { type: 'any' };
+                  return createIPCZodProxy('record', { value: valueDescriptor });
+                },
+                any: () => createIPCZodProxy('any'),
+                unknown: () => createIPCZodProxy('unknown'),
               };
               
               // Return object that supports both module.z and module.default access patterns
               const zodResult = {
-                z: zodMock,
-                default: zodMock,
-                ...zodMock
+                z: zodIPCProxy,
+                default: zodIPCProxy,
+                ...zodIPCProxy
               } as T;
               moduleCache.set(name, zodResult);
               return zodResult;
@@ -328,7 +359,7 @@ export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
   }
 
   // Fallback for Node.js environment (main process or tests)
-  if (typeof process !== "undefined" && process.versions?.node) {
+  if (isNodeJS()) {
     // Try CommonJS require first (for Jest/test environments)
     if (typeof require !== "undefined") {
       if (isDevelopment()) {
