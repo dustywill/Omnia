@@ -8,6 +8,12 @@ const config = {
       tsconfig: {
         module: 'esnext'
       }
+    }],
+    '^.+\\.js$': ['ts-jest', {
+      useESM: true,
+      tsconfig: {
+        module: 'esnext'
+      }
     }]
   },
   moduleNameMapper: {
