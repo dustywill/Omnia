@@ -16,7 +16,9 @@ export const createEventBus = <Events extends Record<string, unknown>>(): EventB
   return {
     subscribe(event, handler) {
       const list = handlers[event] ?? [];
-      handlers[event] = [...list, handler];
+      if (!list.includes(handler)) {
+        handlers[event] = [...list, handler];
+      }
     },
     unsubscribe(event, handler) {
       const list = handlers[event];

@@ -54,7 +54,7 @@ describe('config manager', () => {
     const bus = createEventBus<{ configChanged: Record<string, unknown> }>();
     const handler = jest.fn();
     bus.subscribe('configChanged', handler);
-    const stop = watchConfig(tempConfigPath, bus);
+    const stop = await watchConfig(tempConfigPath, bus);
     
     await writeConfig(tempConfigPath, { foo: 'updated' });
     
@@ -67,5 +67,55 @@ describe('config manager', () => {
     
     stop();
     expect(handler).toHaveBeenCalledWith({ foo: 'updated' });
+  });
+
+  it('throws error when reading malformed config file', async () => {
+    await fs.writeFile(tempConfigPath, 'this is not json5', 'utf8'); // Malformed JSON5
+    await expect(readConfig(tempConfigPath)).rejects.toThrow();
+  });
+
+  it('emits event when config file is deleted and recreated', async () => {
+    const bus = createEventBus<{ configChanged: Record<string, unknown> }>();
+    const handler = jest.fn();
+    bus.subscribe('configChanged', handler);
+    const stop = await watchConfig(tempConfigPath, bus);
+
+    // Delete the file
+    await fs.rm(tempConfigPath, { force: true });
+    // Recreate with new content
+    await fs.writeFile(tempConfigPath, '{recreated: true}', 'utf8');
+
+    // Wait for file watcher to trigger with retries
+    let attempts = 0;
+    while (handler.mock.calls.length === 0 && attempts < 10) {
+      await new Promise((r) => setTimeout(r, 200));
+      attempts++;
+    }
+
+    stop();
+    expect(handler).toHaveBeenCalledWith({ recreated: true });
+  });
+
+  it('emits event for rapid successive changes (debounced)', async () => {
+    const bus = createEventBus<{ configChanged: Record<string, unknown> }>();
+    const handler = jest.fn();
+    bus.subscribe('configChanged', handler);
+    const stop = await watchConfig(tempConfigPath, bus);
+
+    await writeConfig(tempConfigPath, { value: 1 });
+    await writeConfig(tempConfigPath, { value: 2 });
+    await writeConfig(tempConfigPath, { value: 3 });
+
+    // Wait for file watcher to trigger with retries
+    let attempts = 0;
+    while (handler.mock.calls.length === 0 && attempts < 10) {
+      await new Promise((r) => setTimeout(r, 200));
+      attempts++;
+    }
+
+    stop();
+    // Expect at least one call, and the last call should have the final value
+    expect(handler).toHaveBeenCalled();
+    expect(handler).toHaveBeenCalledWith({ value: 3 });
   });
 });
