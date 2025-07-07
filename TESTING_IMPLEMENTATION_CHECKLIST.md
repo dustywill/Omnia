@@ -58,11 +58,11 @@ This section covers the setup of the AI-driven Playwright testing framework.
 This section covers tasks from `docs/testing/UI_COMPONENT_TEST_PLAN.md`.
 
 ### 2.1: Review and Audit Existing Tests
-- [ ] **Audit Primitive Components:**
-  - [ ] Review tests for `Button` in `tests/ui/components/`. (Missing: No `Button.test.tsx` found)
-  - [ ] Review tests for `Input`. (Missing: No `Input.test.tsx` found)
-  - [ ] Review tests for `Badge`. (Missing: No `Badge.test.tsx` found)
-  - [ ] Review tests for `ToggleSwitch`. (Missing: No `ToggleSwitch.test.tsx` found)
+[X] **Audit Primitive Components:**
+- [X] Review tests for `Button` in `tests/ui/components/`. (Completed)
+  - [X] Review tests for `Input`. (Completed)
+  - [X] Review tests for `Badge`. (Completed)
+  - [X] Review tests for `ToggleSwitch`. (Completed)
 - [ ] **Audit Layout Components:**
   - [ ] Review tests for `Card`. (Missing: No `Card.test.tsx` found)
   - [ ] Review tests for `Grid`. (Missing: No `Grid.test.tsx` found)
@@ -88,48 +88,48 @@ This section covers tasks from `docs/testing/UI_COMPONENT_TEST_PLAN.md`.
   - [ ] If applicable, update the component to make the test pass.
   - [ ] Refactor the tests for clarity and ensure all conditions from the component matrix are met.
 
-- [ ] **Implement `Button` Tests (`tests/ui/components/Button.test.tsx`):**
-  - [ ] Renders text/children.
-  - [ ] Calls `onClick` when clicked.
-  - [ ] Applies variants & sizes.
-  - [ ] Disabled state prevents clicks.
-  - [ ] Hover/focus classes are added.
+- [X] **Implement `Button` Tests (`tests/ui/components/Button.test.tsx`):**
+  - [X] Renders text/children.
+  - [X] Calls `onClick` when clicked.
+  - [X] Applies variants & sizes.
+  - [X] Disabled state prevents clicks.
+  - [X] Hover/focus classes are added.
 
-- [ ] **Implement `Input` Tests (`tests/ui/components/Input.test.tsx`):**
-  - [ ] Renders label and helper text.
-  - [ ] Accepts typing.
-  - [ ] Error state styling.
-  - [ ] Icon rendering.
-  - [ ] Generates unique `id`.
-  - [ ] Focus management.
+- [X] **Implement `Input` Tests (`tests/ui/components/Input.test.tsx`):**
+  - [X] Renders label and helper text.
+  - [X] Accepts typing.
+  - [X] Error state styling.
+  - [X] Icon rendering.
+  - [X] Generates unique `id`.
+  - [X] Focus management.
 
-- [ ] **Implement `Badge` Tests (`tests/ui/components/Badge.test.tsx`):**
-  - [ ] Displays children.
-  - [ ] Variant colours.
-  - [ ] Size options.
+- [X] **Implement `Badge` Tests (`tests/ui/components/Badge.test.tsx`):**
+  - [X] Displays children.
+  - [X] Variant colours.
+  - [X] Size options.
 
-- [ ] **Implement `ToggleSwitch` Tests (`tests/ui/components/ToggleSwitch.test.tsx`):**
-  - [ ] Toggles checked state on click.
-  - [ ] Calls `onChange`.
-  - [ ] Keyboard activation.
-  - [ ] Disabled state.
+- [X] **Implement `ToggleSwitch` Tests (`tests/ui/components/ToggleSwitch.test.tsx`):**
+  - [X] Toggles checked state on click.
+  - [X] Calls `onChange`.
+  - [X] Keyboard activation.
+  - [X] Disabled state.
 
 - [ ] **Implement `Card` Tests (`tests/ui/components/Card.test.tsx`):**
-  - [ ] Renders children.
-  - [ ] `onClick` invoked when interactive.
-  - [ ] Elevation & hover classes applied when `elevated`/`interactive`.
-  - [ ] Respects custom className.
+  - [X] Renders children.
+  - [X] `onClick` invoked when interactive.
+  - [X] Elevation & hover classes applied when `elevated`/`interactive`.
+  - [X] Respects custom className.
 
-- [ ] **Implement `Grid` Tests (`tests/ui/components/Grid.test.tsx`):**
-  - [ ] Creates correct column count.
-  - [ ] Gap sizes.
-  - [ ] Responsive className passthrough.
+- [X] **Implement `Grid` Tests (`tests/ui/components/Grid.test.tsx`):**
+  - [X] Creates correct column count.
+  - [X] Gap sizes.
+  - [X] Responsive className passthrough.
 
 - [ ] **Implement `Sidebar` & `SidebarItem` Tests (`tests/ui/components/Sidebar.test.tsx`, `SidebarItem.test.tsx`):**
   - [ ] Collapse/expand behaviour.
-  - [ ] Item click callbacks.
-  - [ ] Active item highlighting.
-  - [ ] Icon rendering.
+  - [X] Item click callbacks.
+  - [X] Active item highlighting.
+  - [X] Icon rendering.
 
 - [ ] **Enhance `CardGrid` Tests (`tests/ui/components/CardGrid.test.tsx`):**
   - [ ] Verify `Card` specific behaviors (e.g., `onClick` for interactive cards, elevation/hover classes).

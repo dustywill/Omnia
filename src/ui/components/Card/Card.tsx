@@ -7,6 +7,7 @@ export interface CardProps {
   elevated?: boolean;
   interactive?: boolean;
   padding?: 'none' | 'sm' | 'md' | 'lg';
+  onClick?: () => void;
 }
 
 export function Card({ 
@@ -14,7 +15,8 @@ export function Card({
   className = '', 
   elevated = false, 
   interactive = false,
-  padding = 'md'
+  padding = 'md',
+  onClick
 }: CardProps) {
   const paddingClasses = {
     none: '',
@@ -27,8 +29,13 @@ export function Card({
   const elevatedClasses = elevated ? 'shadow-lg' : '';
   const interactiveClasses = interactive ? styles.interactive : '';
   
+  const clickHandler = interactive ? onClick : undefined;
+
   return (
-    <div className={`${baseClasses} ${elevatedClasses} ${interactiveClasses} ${styles.card} ${className}`}>
+    <div
+      className={`${baseClasses} ${elevatedClasses} ${interactiveClasses} ${styles.card} ${className}`}
+      onClick={clickHandler}
+    >
       {children}
     </div>
   );
