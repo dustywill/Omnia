@@ -1,4 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
+import { jest } from '@jest/globals';
 import { Button } from '../../../src/ui/components/Button/Button.js';
 
 describe('Button', () => {
