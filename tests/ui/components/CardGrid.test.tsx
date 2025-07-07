@@ -2,17 +2,18 @@ import { render, screen } from '@testing-library/react';
 import { CardGrid } from '../../../src/ui/components/CardGrid.js';
 
 describe('CardGrid', () => {
-  it('renders items as cards with Nunito Sans font and palette colors', () => {
+  it('renders items into a grid of cards', () => {
     const items = [
       { title: 'Card 1', content: <p>One</p> },
-      { title: 'Card 2', content: <p>Two</p> },
+      { title: 'Card 2', content: <p>Two</p> }
     ];
-    render(<CardGrid items={items} />);
+    const { container } = render(<CardGrid items={items} />);
+    const grid = container.firstElementChild as HTMLElement;
+    expect(grid.getAttribute('role')).toBe('grid');
+    expect(grid.style.display).toBe('grid');
     const cards = screen.getAllByRole('article');
     expect(cards).toHaveLength(2);
-    expect(cards[0]).toHaveClass('card');
-    expect(screen.getByRole('grid')).toHaveClass('card-grid');
-    expect(screen.getByText('Card 1')).toBeInTheDocument();
-    expect(screen.getByText('Card 2')).toBeInTheDocument();
+    expect(cards[0].querySelector('header')?.textContent).toBe('Card 1');
+    expect(cards[1].querySelector('header')?.textContent).toBe('Card 2');
   });
 });

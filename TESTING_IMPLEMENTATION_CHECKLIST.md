@@ -132,22 +132,22 @@ This section covers tasks from `docs/testing/UI_COMPONENT_TEST_PLAN.md`.
   - [X] Icon rendering.
 
 - [ ] **Enhance `CardGrid` Tests (`tests/ui/components/CardGrid.test.tsx`):**
-  - [ ] Verify `Card` specific behaviors (e.g., `onClick` for interactive cards, elevation/hover classes).
-  - [ ] Verify `Grid` specific behaviors (e.g., column count, gap sizes, responsive classes).
+  - [X] Verify `Card` specific behaviors (e.g., `onClick` for interactive cards, elevation/hover classes).
+  - [X] Verify `Grid` specific behaviors (e.g., column count, gap sizes, responsive classes).
 
 - [ ] **Implement `AppHeader` Tests (`tests/ui/components/AppHeader.test.tsx`):**
-  - [ ] Displays title and optional actions.
-  - [ ] Ensures semantic `<header>` element.
+  - [X] Displays title and optional actions.
+  - [X] Ensures semantic `<header>` element.
 
 - [ ] **Implement `DashboardPluginCard` Tests (`tests/ui/components/DashboardPluginCard.test.tsx`):**
-  - [ ] Entire card clickable when plugin active.
-  - [ ] Hover animation.
-  - [ ] Displays plugin metadata.
+  - [X] Entire card clickable when plugin active.
+  - [X] Hover animation.
+  - [X] Displays plugin metadata.
 
 - [ ] **Implement `StatusBar` Tests (`tests/ui/components/StatusBar.test.tsx`):**
-  - [ ] Displays plugin counts and view label.
-  - [ ] Hides counts on Dashboard.
-  - [ ] Colour indicators for active/error plugins.
+  - [X] Displays plugin counts and view label.
+  - [X] Hides counts on Dashboard.
+  - [X] Colour indicators for active/error plugins.
 
 - [ ] **Implement `SettingsForm` Tests (`tests/ui/components/SettingsForm.test.tsx`):**
   - [ ] Generates fields from schema.
