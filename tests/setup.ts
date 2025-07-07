@@ -35,11 +35,14 @@ global.Range.prototype.getBoundingClientRect = function() {
 if (!global.navigator.clipboard) {
   Object.defineProperty(global.navigator, 'clipboard', {
     value: {
-      writeText: function() { return Promise.resolve(); },
+      writeText: () => Promise.resolve(),
+      readText: () => Promise.resolve(''),
     },
     configurable: true,
     writable: true,
   });
+} else if (typeof global.navigator.clipboard.readText !== 'function') {
+  global.navigator.clipboard.readText = () => Promise.resolve('');
 }
 
 // Utility for path resolution in tests
