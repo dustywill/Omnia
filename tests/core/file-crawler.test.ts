@@ -23,4 +23,27 @@ describe('getFileTree', () => {
     const names = result.map((n) => n.name).sort();
     expect(names).toEqual(['b.txt', 'sub']);
   });
+
+  it('correctly represents hierarchical structures', async () => {
+    const result = await getFileTree(tmpDir);
+    const subDir = result.find((node) => node.name === 'sub');
+    expect(subDir).toBeDefined();
+    expect(subDir?.children).toBeDefined();
+    expect(subDir?.children?.length).toBe(1);
+    expect(subDir?.children?.[0].name).toBe('a.txt');
+  });
+
+  it('returns an empty array for an empty directory', async () => {
+    const emptyDir = path.join(process.cwd(), 'empty-tree');
+    await fs.mkdir(emptyDir, { recursive: true });
+    const result = await getFileTree(emptyDir);
+    expect(result).toEqual([]);
+    await fs.rm(emptyDir, { recursive: true, force: true });
+  });
+
+  it('returns an empty array for a non-existent directory', async () => {
+    const nonExistentDir = path.join(process.cwd(), 'non-existent-tree');
+    const result = await getFileTree(nonExistentDir);
+    expect(result).toEqual([]);
+  });
 });

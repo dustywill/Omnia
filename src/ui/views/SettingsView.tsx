@@ -15,7 +15,7 @@ const initializeDemoSchema = async () => {
   
   try {
     const zodModule = await loadNodeModule<typeof import('zod')>('zod');
-    const z = zodModule.z || zodModule.default || zodModule;
+    const z = (zodModule as typeof import('zod')).z || (zodModule as any).default || zodModule;
   
   DemoConfigSchema = z.object({
     displaySettings: z.object({
