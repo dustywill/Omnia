@@ -97,7 +97,7 @@ describe('config manager', () => {
   });
 
   it('emits event for rapid successive changes (debounced)', async () => {
-    const bus = createEventBus<{ configChanged: Record<string, unknown> }>();
+    const bus = createEventBus<{ configChanged: Record<string, unknown} >();
     const handler = jest.fn();
     bus.subscribe('configChanged', handler);
     const stop = await watchConfig(tempConfigPath, bus);
@@ -117,5 +117,98 @@ describe('config manager', () => {
     // Expect at least one call, and the last call should have the final value
     expect(handler).toHaveBeenCalled();
     expect(handler).toHaveBeenCalledWith({ value: 3 });
+  });
+
+  it('throws error when readConfig encounters permission issues', async () => {
+    const mockError = new Error('Permission denied') as NodeJS.ErrnoException;
+    mockError.code = 'EACCES';
+    jest.spyOn(fs, 'readFile').mockRejectedValueOnce(mockError);
+
+    await expect(readConfig(tempConfigPath)).rejects.toThrow('Permission denied');
+  });
+
+  it('throws error when writeConfig encounters permission issues', async () => {
+    const mockError = new Error('Permission denied') as NodeJS.ErrnoException;
+    mockError.code = 'EACCES';
+    jest.spyOn(fs, 'writeFile').mockRejectedValueOnce(mockError);
+
+    await expect(writeConfig(tempConfigPath, { foo: 'bar' })).rejects.toThrow('Permission denied');
+  });
+
+  it('throws unexpected error when loadConfig encounters readConfig error', async () => {
+    const mockError = new Error('Unexpected error');
+    jest.spyOn(fs, 'readFile').mockRejectedValueOnce(mockError);
+
+    await expect(loadConfig(tempConfigPath, { foo: 'default' })).rejects.toThrow('Unexpected error');
+  });
+
+  it('handles watchConfig becoming unreadable during watching', async () => {
+    const bus = createEventBus<{ configChanged: Record<string, unknown} >();
+    const handler = jest.fn();
+    bus.subscribe('configChanged', handler);
+
+    const stop = await watchConfig(tempConfigPath, bus);
+
+    // Simulate file becoming unreadable
+    const mockError = new Error('Permission denied') as NodeJS.ErrnoException;
+    mockError.code = 'EACCES';
+    jest.spyOn(fs, 'readFile').mockRejectedValueOnce(mockError);
+
+    // Trigger a change (this will cause watchConfig to try and read the file)
+    await fs.writeFile(tempConfigPath, '{foo:"new"}', 'utf8');
+
+    // Give some time for the watcher to react
+    await new Promise((r) => setTimeout(r, 500));
+
+    stop();
+    // Expect no handler call as the read should have failed silently
+    expect(handler).not.toHaveBeenCalled();
+  });
+});
+
+  it('throws error when readConfig encounters permission issues', async () => {
+    const mockError = new Error('Permission denied') as NodeJS.ErrnoException;
+    mockError.code = 'EACCES';
+    jest.spyOn(fs, 'readFile').mockRejectedValueOnce(mockError);
+
+    await expect(readConfig(tempConfigPath)).rejects.toThrow('Permission denied');
+  });
+
+  it('throws error when writeConfig encounters permission issues', async () => {
+    const mockError = new Error('Permission denied') as NodeJS.ErrnoException;
+    mockError.code = 'EACCES';
+    jest.spyOn(fs, 'writeFile').mockRejectedValueOnce(mockError);
+
+    await expect(writeConfig(tempConfigPath, { foo: 'bar' })).rejects.toThrow('Permission denied');
+  });
+
+  it('throws unexpected error when loadConfig encounters readConfig error', async () => {
+    const mockError = new Error('Unexpected error');
+    jest.spyOn(fs, 'readFile').mockRejectedValueOnce(mockError);
+
+    await expect(loadConfig(tempConfigPath, { foo: 'default' })).rejects.toThrow('Unexpected error');
+  });
+
+  it('handles watchConfig becoming unreadable during watching', async () => {
+    const bus = createEventBus<{ configChanged: Record<string, unknown} >();
+    const handler = jest.fn();
+    bus.subscribe('configChanged', handler);
+
+    const stop = await watchConfig(tempConfigPath, bus);
+
+    // Simulate file becoming unreadable
+    const mockError = new Error('Permission denied') as NodeJS.ErrnoException;
+    mockError.code = 'EACCES';
+    jest.spyOn(fs, 'readFile').mockRejectedValueOnce(mockError);
+
+    // Trigger a change (this will cause watchConfig to try and read the file)
+    await fs.writeFile(tempConfigPath, '{foo:"new"}', 'utf8');
+
+    // Give some time for the watcher to react
+    await new Promise((r) => setTimeout(r, 500));
+
+    stop();
+    // Expect no handler call as the read should have failed silently
+    expect(handler).not.toHaveBeenCalled();
   });
 });
