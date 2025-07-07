@@ -22,7 +22,7 @@ export type MainAppRendererOptions = {
   configPath?: string;
 };
 
-export type AppView = 'dashboard' | 'plugins' | 'settings' | 'logs' | 'plugin-detail';
+export type AppView = 'dashboard' | 'plugins' | 'settings' | 'logs' | 'plugin-detail' | string; // Allow plugin-specific views
 
 export type PluginInfo = {
   id: string;
@@ -47,6 +47,7 @@ const MainApp: React.FC<{
   navigationService: NavigationService;
 }> = ({ pluginInfos, pluginManager, serviceRegistry, settingsManager, navigationService }) => {
   const [currentView, setCurrentView] = React.useState<AppView>('dashboard');
+  const [currentPluginSettingsId, setCurrentPluginSettingsId] = React.useState<string | null>(null);
   const [selectedPluginId, setSelectedPluginId] = React.useState<string | null>(null);
   const [settingsTarget, setSettingsTarget] = React.useState<{
     pluginId: string;
@@ -70,12 +71,26 @@ const MainApp: React.FC<{
     navigationService.setupBrowserNavigation();
   }, [navigationService]);
 
-  const handleViewChange = (view: 'dashboard' | 'plugins' | 'settings' | 'logs') => {
+  const handleViewChange = (view: 'dashboard' | 'plugins' | 'settings' | 'logs' | string) => {
+    // Check if this is a plugin settings view
+    if (view.startsWith('plugin-')) {
+      const pluginId = view.replace('plugin-', '');
+      setCurrentView(view);
+      setCurrentPluginSettingsId(pluginId);
+      // Set settings target for the specific plugin
+      setSettingsTarget({ pluginId });
+      return;
+    }
+    
+    // Reset plugin settings when navigating away
+    setCurrentPluginSettingsId(null);
+    setSettingsTarget(null);
+    
     // Reset filter when navigating to plugins view normally
     if (view === 'plugins') {
       setPluginFilter('all');
     }
-    navigationService.navigateTo(view);
+    navigationService.navigateTo(view as 'dashboard' | 'plugins' | 'settings' | 'logs');
   };
 
   const handlePluginSelect = (pluginId: string) => {
@@ -131,6 +146,7 @@ const MainApp: React.FC<{
         <AppNavigation 
           currentView={currentView === 'plugin-detail' ? 'plugins' : currentView} 
           onViewChange={handleViewChange}
+          plugins={pluginInfos.map(p => ({ id: p.id, name: p.name, enabled: p.enabled }))}
         />
         
         <main style={contentStyle}>
@@ -160,12 +176,14 @@ const MainApp: React.FC<{
           />
         )}
         
-        {currentView === 'settings' && (
+        {(currentView === 'settings' || currentView.startsWith('plugin-')) && (
           <SettingsView 
             settingsManager={settingsManager}
             plugins={pluginInfos}
             pluginManager={pluginManager}
             navigationTarget={settingsTarget}
+            viewMode={currentView.startsWith('plugin-') ? 'plugin-only' : 'full'}
+            targetPluginId={currentPluginSettingsId}
           />
         )}
         

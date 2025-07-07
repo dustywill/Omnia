@@ -2,9 +2,16 @@ import React from 'react';
 import { Sidebar } from '../Sidebar/Sidebar.js';
 import styles from './AppNavigation.module.css';
 
+export interface PluginInfo {
+  id: string;
+  name: string;
+  enabled: boolean;
+}
+
 export interface AppNavigationProps {
-  currentView: 'dashboard' | 'plugins' | 'settings' | 'logs';
-  onViewChange: (view: 'dashboard' | 'plugins' | 'settings' | 'logs') => void;
+  currentView: string; // Allow any string for plugin views
+  onViewChange: (view: string) => void;
+  plugins?: PluginInfo[]; // Add plugins prop for individual navigation
 }
 
 // Colorful navigation icons (Unus-inspired design)
@@ -295,6 +302,77 @@ export function AppNavigation({ currentView, onViewChange }: AppNavigationProps)
                 Logs
               </div>
             </div>
+            
+            {/* Plugin Settings Section */}
+            {plugins.length > 0 && (
+              <>
+                {/* Divider */}
+                <div style={{
+                  height: '1px',
+                  backgroundColor: '#e5e7eb',
+                  margin: '12px 0'
+                }} />
+                
+                {/* Plugin Settings Title */}
+                <div style={{
+                  fontSize: '0.75rem',
+                  fontWeight: '600',
+                  color: '#9ca3af',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  textAlign: 'center',
+                  marginBottom: '12px'
+                }}>
+                  Plugin Settings
+                </div>
+                
+                {/* Individual Plugin Navigation Items */}
+                {plugins.filter((plugin: PluginInfo) => plugin.enabled).map((plugin: PluginInfo) => (
+                  <div 
+                    key={plugin.id}
+                    style={{ 
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      textAlign: 'center',
+                      gap: '8px',
+                      cursor: 'pointer',
+                      padding: '8px',
+                      borderRadius: '8px',
+                      transition: 'background-color 0.2s ease',
+                      backgroundColor: currentView === `plugin-${plugin.id}` ? 'rgba(37, 99, 235, 0.1)' : 'transparent'
+                    }}
+                    onClick={() => onViewChange(`plugin-${plugin.id}`)}
+                    onMouseEnter={(e) => {
+                      if (currentView !== `plugin-${plugin.id}`) {
+                        e.currentTarget.style.backgroundColor = 'rgba(107, 114, 128, 0.05)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (currentView !== `plugin-${plugin.id}`) {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                      <PluginSettingsIcon pluginName={plugin.name} />
+                    </div>
+                    <div 
+                      style={{ 
+                        color: currentView === `plugin-${plugin.id}` ? '#2563eb' : '#6b7280',
+                        fontSize: '0.75rem',
+                        fontWeight: currentView === `plugin-${plugin.id}` ? '600' : '400',
+                        lineHeight: '1.2',
+                        maxWidth: '80px',
+                        wordWrap: 'break-word'
+                      }}
+                    >
+                      {plugin.name}
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
           </div>
           
           {/* Footer with Version */}

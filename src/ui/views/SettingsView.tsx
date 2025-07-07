@@ -67,9 +67,18 @@ export interface SettingsViewProps {
     pluginId: string;
     focusEditor?: boolean;
   } | null;
+  viewMode?: 'full' | 'plugin-only'; // New prop to control view mode
+  targetPluginId?: string | null; // Specific plugin to show in plugin-only mode
 }
 
-export function SettingsView({ settingsManager, plugins, pluginManager, navigationTarget }: SettingsViewProps) {
+export function SettingsView({ 
+  settingsManager, 
+  plugins, 
+  pluginManager, 
+  navigationTarget, 
+  viewMode = 'full',
+  targetPluginId 
+}: SettingsViewProps) {
   // Navigation state
   const [activeSection, setActiveSection] = useState<SettingsSection>('app-config');
   
@@ -596,6 +605,38 @@ export function SettingsView({ settingsManager, plugins, pluginManager, navigati
     }
   };
 
+  // For plugin-only mode, render directly without sidebar
+  if (viewMode === 'plugin-only' && targetPluginId && pluginManager) {
+    const targetPlugin = plugins.find(p => p.id === targetPluginId);
+    
+    return (
+      <div className={styles.settingsView}>
+        {/* Header */}
+        <header className={styles.header}>
+          <h1 className={styles.title}>
+            {targetPlugin ? `${targetPlugin.name} Settings` : 'Plugin Settings'}
+          </h1>
+          <p className={styles.subtitle}>
+            {targetPlugin ? targetPlugin.description || 'Configure plugin settings' : 'Plugin configuration'}
+          </p>
+        </header>
+
+        {/* Direct plugin settings content */}
+        <main className={styles.pluginOnlyContent}>
+          <PluginSettings
+            settingsManager={settingsManager}
+            pluginManager={pluginManager}
+            targetPluginId={targetPluginId}
+            onSettingsChange={(pluginId, settings) => {
+              console.log('Plugin settings changed:', pluginId, settings);
+            }}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  // Full mode with sidebar (original behavior)
   return (
     <div className={styles.settingsView}>
       {/* Header */}
