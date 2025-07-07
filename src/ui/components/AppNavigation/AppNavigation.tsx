@@ -103,7 +103,41 @@ const OmniaIcon = () => (
   </div>
 );
 
-export function AppNavigation({ currentView, onViewChange }: AppNavigationProps) {
+// Plugin settings icon component for individual plugins
+const PluginSettingsIcon = ({ pluginName }: { pluginName: string }) => {
+  // Generate a color based on plugin name for visual distinction
+  const colors = [
+    'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', // red
+    'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', // orange
+    'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)', // yellow
+    'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)', // green
+    'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)', // cyan
+    'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', // blue
+    'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)', // purple
+    'linear-gradient(135deg, #ec4899 0%, #db2777 100%)', // pink
+  ];
+  
+  const colorIndex = pluginName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
+  
+  return (
+    <div style={{
+      width: '24px',
+      height: '24px',
+      borderRadius: '6px',
+      background: colors[colorIndex],
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: 'white',
+      fontSize: '12px',
+      fontWeight: 'bold'
+    }}>
+      {pluginName.charAt(0).toUpperCase()}
+    </div>
+  );
+};
+
+export function AppNavigation({ currentView, onViewChange, plugins = [] }: AppNavigationProps) {
   return (
     <div className={styles.navigationWrapper}>
       <Sidebar width="md" className={styles.navigation}>
@@ -304,7 +338,7 @@ export function AppNavigation({ currentView, onViewChange }: AppNavigationProps)
             </div>
             
             {/* Plugin Settings Section */}
-            {plugins.length > 0 && (
+            {plugins && plugins.length > 0 && (
               <>
                 {/* Divider */}
                 <div style={{
