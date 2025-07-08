@@ -8,6 +8,7 @@ async function copyAssets() {
   await fs.mkdir('dist/assets', { recursive: true });
   await fs.mkdir('dist/ui', { recursive: true });
   await fs.mkdir('dist/ui/components', { recursive: true });
+  await fs.mkdir('dist/ui/components/ui', { recursive: true });
   
   // Copy basic files
   await fs.copyFile('src/preload.js', 'dist/preload.js');
@@ -21,6 +22,17 @@ async function copyAssets() {
     'AppHeader', 'AppNavigation', 'AppSettings', 'Card', 'PluginCard',
     'PluginSettings', 'SchemaForm', 'SettingsForm', 'SettingsPage', 'Sidebar', 'JsonEditor', 'StatusBar', 'ToggleSwitch', 'NotificationSystem'
   ];
+  
+  // Copy Shadcn UI components (no CSS modules, just ensure directory structure)
+  try {
+    const shadcnSrcDir = 'src/ui/components/ui';
+    const shadcnDestDir = 'dist/ui/components/ui';
+    
+    await fs.mkdir(shadcnDestDir, { recursive: true });
+    console.log(`Created Shadcn UI directory: ${shadcnDestDir}`);
+  } catch (err) {
+    console.warn(`Could not create Shadcn UI directory:`, err.message);
+  }
   
   for (const dir of componentDirs) {
     const srcDir = `src/ui/components/${dir}`;

@@ -9,13 +9,56 @@
 
 /* Base styles with design system variables */
 @layer base {
+  /* Shadcn UI Theme Variables - Mapped to Omnia Design System */
+  :root {
+    /* Shadcn background/foreground mapping */
+    --background: var(--tt-color-background);
+    --foreground: var(--tt-color-text-primary);
+    
+    /* Shadcn card mapping */
+    --card: var(--tt-color-surface);
+    --card-foreground: var(--tt-color-text-primary);
+    
+    /* Shadcn popover mapping */
+    --popover: var(--tt-color-surface);
+    --popover-foreground: var(--tt-color-text-primary);
+    
+    /* Shadcn primary mapping */
+    --primary: var(--tt-color-primary);
+    --primary-foreground: #ffffff;
+    
+    /* Shadcn secondary mapping */
+    --secondary: var(--tt-palette--n80);
+    --secondary-foreground: var(--tt-palette--n20);
+    
+    /* Shadcn muted mapping */
+    --muted: var(--tt-palette--n90);
+    --muted-foreground: var(--tt-color-text-secondary);
+    
+    /* Shadcn accent mapping */
+    --accent: var(--tt-color-action);
+    --accent-foreground: #ffffff;
+    
+    /* Shadcn destructive mapping */
+    --destructive: var(--tt-color-danger);
+    --destructive-foreground: #ffffff;
+    
+    /* Shadcn border/input mapping */
+    --border: var(--tt-color-border);
+    --input: var(--tt-color-surface);
+    --ring: var(--tt-color-action);
+    
+    /* Shadcn radius mapping */
+    --radius: 0.5rem;
+  }
+  
   html {
     font-family: var(--tt-font-family-sans);
   }
   
   body {
-    background-color: var(--tt-color-background);
-    color: var(--tt-color-text-primary);
+    background-color: var(--background);
+    color: var(--foreground);
     font-size: var(--tt-font-size-base);
     line-height: 1.5;
   }

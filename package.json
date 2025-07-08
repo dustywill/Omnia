@@ -43,9 +43,15 @@
   },
   "dependencies": {
     "@playwright/test": "^1.53.1",
+    "@radix-ui/react-slot": "^1.2.3",
     "axios": "^1.10.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "handlebars": "^4.7.8",
     "jsdom": "^26.1.0",
+    "lucide-react": "^0.525.0",
+    "shadcn-ui": "^0.9.5",
+    "tailwind-merge": "^3.3.1",
     "ts-node": "^10.9.2"
   }
 }

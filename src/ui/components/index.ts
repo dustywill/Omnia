@@ -1,4 +1,5 @@
-// Primitive Components
+// LEGACY: Original Omnia Components (Default exports for backward compatibility)
+// These remain as the default exports to ensure existing plugins continue to work
 export { Button } from './Button/Button.js';
 export type { ButtonProps } from './Button/Button.js';
 
@@ -7,6 +8,20 @@ export type { InputProps } from './Input/Input.js';
 
 export { Badge } from './Badge/Badge.js';
 export type { BadgeProps } from './Badge/Badge.js';
+
+// NEW: Shadcn UI Components (Use these for new development)
+export { Button as ShadcnButton } from './ui/button.js';
+export type { ButtonProps as ShadcnButtonProps } from './ui/button.js';
+
+export { Input as ShadcnInput } from './ui/input.js'; 
+export type { InputProps as ShadcnInputProps } from './ui/input.js';
+
+export { Badge as ShadcnBadge } from './ui/badge.js';
+export type { BadgeProps as ShadcnBadgeProps } from './ui/badge.js';
+
+// Shadcn Demo Component for Testing
+export { ShadcnDemo } from './ui/demo.js';
+export type { ShadcnDemoProps } from './ui/demo.js';
 
 export { ToggleSwitch } from './ToggleSwitch/ToggleSwitch.js';
 export type { ToggleSwitchProps } from './ToggleSwitch/ToggleSwitch.js';
