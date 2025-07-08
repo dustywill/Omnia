@@ -5,7 +5,7 @@
  * plugin settings, and system configuration.
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { AppSettings } from '../AppSettings/AppSettings.js';
 import { PluginSettings } from '../PluginSettings/PluginSettings.js';
 import { Card } from '../Card/Card.js';

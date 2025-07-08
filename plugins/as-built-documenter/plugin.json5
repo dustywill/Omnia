@@ -12,7 +12,8 @@
   },
   permissions: [
     "filesystem:read",
-    "filesystem:write"
+    "filesystem:write",
+    "network:http"
   ],
   uiContributions: {}
 }

@@ -1,4 +1,4 @@
-import React from 'react';
+// React import not needed with automatic JSX transform
 import { Badge } from '../Badge/Badge.js';
 import { Button } from '../Button/Button.js';
 import styles from './PluginCard.module.css';

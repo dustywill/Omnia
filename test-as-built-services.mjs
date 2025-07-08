@@ -1,0 +1,234 @@
+/**
+ * Test script for As-Built Documenter services
+ * 
+ * This script tests the core functionality of the HTTP client,
+ * template engine, and document generation services.
+ */
+
+import { createHttpClient, createTemplateEngine, createDocumentGenerator } from './dist/core/services/index.js';
+
+console.log('🧪 Testing As-Built Documenter Services...\n');
+
+// Test 1: HTTP Client Service
+console.log('1️⃣ Testing HTTP Client Service');
+try {
+  const httpClient = createHttpClient({
+    timeout: 5000,
+    retries: 2,
+    retryDelay: 1000,
+  });
+
+  console.log('✅ HTTP Client created successfully');
+  console.log('📡 Testing with httpbin.org endpoint...');
+
+  const testEndpoint = {
+    url: 'https://httpbin.org/json',
+    method: 'GET'
+  };
+
+  const result = await httpClient.fetchData(testEndpoint);
+  
+  if (result.success) {
+    console.log('✅ HTTP request successful');
+    console.log('📊 Response data:', JSON.stringify(result.data, null, 2));
+    console.log(`⏱️ Request took ${result.duration}ms`);
+  } else {
+    console.log('❌ HTTP request failed:', result.error);
+  }
+} catch (error) {
+  console.log('❌ HTTP Client test failed:', error.message);
+}
+
+console.log('\n' + '='.repeat(50) + '\n');
+
+// Test 2: Template Engine Service
+console.log('2️⃣ Testing Template Engine Service');
+try {
+  const templateEngine = createTemplateEngine();
+  console.log('✅ Template Engine created successfully');
+
+  // Test template compilation
+  const testTemplate = `# {{project.name}} Documentation
+
+Generated on: {{formatDate system.generatedAt 'long'}}
+
+## Project Details
+- **Name**: {{project.name}}
+- **Author**: {{project.author}}
+- **Version**: {{project.version}}
+
+## Data Sources
+{{#each data}}
+### {{@key}}
+{{#if this.success}}
+- **Status**: ✅ Success
+- **Data**: {{json this.data true}}
+{{else}}
+- **Status**: ❌ Failed
+- **Error**: {{this.error}}
+{{/if}}
+{{/each}}
+
+## System Information
+- **Generated At**: {{system.generatedAt}}
+- **Template**: {{system.templateName}}
+`;
+
+  const templateContext = {
+    project: {
+      name: 'Test Project',
+      author: 'Test Author',
+      version: '1.0.0',
+      date: new Date().toLocaleDateString(),
+    },
+    data: {
+      'test-endpoint': {
+        success: true,
+        data: { message: 'Hello World', count: 42 }
+      },
+      'failed-endpoint': {
+        success: false,
+        error: 'Connection timeout'
+      }
+    },
+    system: {
+      generatedAt: new Date().toISOString(),
+      generatorVersion: '1.0.0',
+      templateName: 'test-template',
+    }
+  };
+
+  const compilationResult = templateEngine.generateDocument(testTemplate, templateContext);
+  
+  if (compilationResult.success) {
+    console.log('✅ Template compilation successful');
+    console.log('📝 Variables used:', compilationResult.usedVariables.join(', '));
+    if (compilationResult.missingVariables.length > 0) {
+      console.log('⚠️ Missing variables:', compilationResult.missingVariables.join(', '));
+    }
+    console.log('\n📄 Generated Document:');
+    console.log('-'.repeat(40));
+    console.log(compilationResult.output);
+    console.log('-'.repeat(40));
+  } else {
+    console.log('❌ Template compilation failed:', compilationResult.error);
+  }
+} catch (error) {
+  console.log('❌ Template Engine test failed:', error.message);
+}
+
+console.log('\n' + '='.repeat(50) + '\n');
+
+// Test 3: Document Generation Service (Integration Test)
+console.log('3️⃣ Testing Document Generation Service (Integration)');
+try {
+  const httpClient = createHttpClient({
+    timeout: 5000,
+    retries: 1,
+    retryDelay: 1000,
+  });
+  
+  const templateEngine = createTemplateEngine();
+  const documentGenerator = createDocumentGenerator(httpClient, templateEngine);
+  
+  console.log('✅ Document Generator created successfully');
+
+  // Create a test project configuration
+  const projectConfig = {
+    name: 'Integration Test Project',
+    description: 'Testing As-Built Documenter integration',
+    author: 'As-Built Test Suite',
+    ipAddress: '127.0.0.1',
+    dataSources: [
+      {
+        name: 'httpbin-test',
+        url: 'https://httpbin.org/json',
+        method: 'GET',
+        enabled: true,
+      },
+      {
+        name: 'uuid-test',
+        url: 'https://httpbin.org/uuid',
+        method: 'GET',
+        enabled: true,
+      }
+    ],
+    outputSettings: {
+      format: 'markdown',
+      includeTimestamp: true,
+      includeMetadata: true,
+    },
+  };
+
+  const template = {
+    name: 'integration-test',
+    content: `# {{project.name}}
+
+{{project.description}}
+
+**Author**: {{project.author}}
+**Generated**: {{formatDate system.generatedAt}}
+
+## Data Sources Results
+
+{{#each data}}
+### {{@key}}
+{{#if this.success}}
+✅ **Success** - Duration: {{this.duration}}ms
+\`\`\`json
+{{json this.data true}}
+\`\`\`
+{{else}}
+❌ **Failed**: {{this.error}}
+{{/if}}
+
+{{/each}}
+
+---
+*Generated by As-Built Documenter v{{system.generatorVersion}}*`,
+    variables: [],
+  };
+
+  console.log('🚀 Starting document generation...');
+  
+  const generationResult = await documentGenerator.generateDocument(
+    projectConfig,
+    template,
+    {
+      progressCallback: (progress) => {
+        console.log(`📊 Progress: ${progress.phase} - ${Math.round(progress.progress)}% - ${progress.message}`);
+      },
+      includeFailedDataSources: true,
+      validateTemplate: true,
+    }
+  );
+
+  if (generationResult.success) {
+    console.log('\n✅ Document generation successful!');
+    console.log('📈 Generation Summary:');
+    console.log(`  - Project: ${generationResult.metadata.projectName}`);
+    console.log(`  - Template: ${generationResult.metadata.templateUsed}`);
+    console.log(`  - Data Sources: ${generationResult.metadata.dataSourcesUsed.join(', ')}`);
+    console.log(`  - Generation Time: ${generationResult.metadata.generationTime}ms`);
+    console.log(`  - Document Length: ${generationResult.metadata.documentLength} characters`);
+    
+    if (generationResult.metadata.warnings && generationResult.metadata.warnings.length > 0) {
+      console.log('⚠️ Warnings:', generationResult.metadata.warnings.join(', '));
+    }
+
+    console.log('\n📄 Generated Document:');
+    console.log('='.repeat(60));
+    console.log(generationResult.document);
+    console.log('='.repeat(60));
+  } else {
+    console.log('❌ Document generation failed:', generationResult.error);
+    if (generationResult.metadata.errors) {
+      console.log('🚨 Errors:', generationResult.metadata.errors.join(', '));
+    }
+  }
+} catch (error) {
+  console.log('❌ Document Generation test failed:', error.message);
+  console.error(error);
+}
+
+console.log('\n🎉 As-Built Documenter Services Testing Complete!');

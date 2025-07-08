@@ -1,4 +1,4 @@
-import React from "react";
+// React import not needed with automatic JSX transform
 import { Sidebar } from "../Sidebar/Sidebar.js";
 import styles from "./AppNavigation.module.css";
 

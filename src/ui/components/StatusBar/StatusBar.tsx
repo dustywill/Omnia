@@ -1,4 +1,4 @@
-import React from 'react';
+// React import not needed with automatic JSX transform
 import styles from './StatusBar.module.css';
 
 export interface StatusBarProps {

@@ -1,50 +1,176 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { loadNodeModule } from '../../src/ui/node-module-loader.js';
+import { Card, Button, Input } from '../../src/ui/components/index.js';
+import { defaultAsBuiltDocumenterConfig } from '../../src/lib/schemas/plugins/as-built-documenter.js';
+import { 
+  createHttpClient, 
+  createTemplateEngine, 
+  createDocumentGenerator,
+  type GenerationProgress,
+  type GenerationResult,
+  type ProjectConfig,
+  type Template 
+} from '../../src/core/services/index.js';
 
 export type AsBuiltDocumenterProps = {
-  templates?: string[];
-  onLoad?: (file: File) => void;
-  saveDir?: string;
-  initialContent?: string;
-  dataSources?: Record<string, { url: string }>;
-  configPath?: string;
+  context?: any; // Plugin context from Omnia system
 };
 
-const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({
-  templates = [],
-  onLoad,
-  saveDir = 'templates/as-built',
-  initialContent,
-  dataSources = {},
-  configPath,
-}) => {
-  // Ensure templates is always an array to prevent map errors
-  const safeTemplates = Array.isArray(templates) ? templates : [];
-  const safeSources = dataSources && typeof dataSources === 'object' ? dataSources : {};
+// Default configuration for the new three-tier architecture
+const createDefaultConfig = () => {
+  const now = new Date().toISOString();
+  return {
+    ...defaultAsBuiltDocumenterConfig,
+    // Add sample data sources
+    dataSources: {
+      'sample-resources': {
+        id: 'sample-resources',
+        name: 'Sample Resources API',
+        description: 'Sample resource data for demonstration',
+        url: 'http://{ipAddress}/api/resources',
+        method: 'GET' as const,
+        headers: {},
+        auth: { type: 'none' as const, credentials: {} },
+        timeout: 10000,
+        retries: 3,
+        tags: ['sample'],
+        createdAt: now,
+        updatedAt: now,
+      },
+      'sample-stations': {
+        id: 'sample-stations',
+        name: 'Sample Stations API',
+        description: 'Sample station configuration data',
+        url: 'http://{ipAddress}/api/stations',
+        method: 'GET' as const,
+        headers: {},
+        auth: { type: 'none' as const, credentials: {} },
+        timeout: 10000,
+        retries: 3,
+        tags: ['sample'],
+        createdAt: now,
+        updatedAt: now,
+      }
+    },
+    // Add sample templates
+    templates: {
+      'sample-template': {
+        id: 'sample-template',
+        name: 'Sample MES Template',
+        description: 'Sample as-built documentation template',
+        path: 'templates/as-built/MES_Template.md',
+        engine: 'simple' as const,
+        outputFormat: 'markdown' as const,
+        requiredVariables: ['project', 'data'],
+        optionalVariables: ['system'],
+        tags: ['sample', 'mes'],
+        version: '1.0.0',
+        author: 'Omnia Team',
+        createdAt: now,
+        updatedAt: now,
+      }
+    },
+    // Add sample project
+    projects: {
+      'sample-project': {
+        id: 'sample-project',
+        name: 'Sample Integration Project',
+        description: 'Demonstration project for As-Built documentation',
+        customer: {
+          name: 'Sample Customer Corp',
+          contactPerson: 'John Doe',
+          contactEmail: 'john.doe@samplecustomer.com',
+          contactPhone: '+1-555-0123',
+          address: '123 Customer Street, City, State',
+          notes: 'Sample customer for demonstration'
+        },
+        integrator: {
+          name: 'Integration Services Inc',
+          contactPerson: 'Jane Smith',
+          contactEmail: 'jane.smith@integrator.com',
+          contactPhone: '+1-555-0456',
+          address: '456 Integrator Ave, City, State',
+          notes: 'Sample integrator for demonstration'
+        },
+        dataSourceIds: ['sample-resources', 'sample-stations'],
+        templateIds: ['sample-template'],
+        outputDirectory: 'output/sample-project',
+        variables: { 
+          ipAddress: '192.168.1.100',
+          siteName: 'Sample Manufacturing Site',
+          commissioningDate: new Date().toISOString().split('T')[0]
+        },
+        status: 'active' as const,
+        startDate: now,
+        tags: ['sample'],
+        createdAt: now,
+        updatedAt: now,
+      }
+    },
+    activeProjectId: 'sample-project',
+    globalVariables: { 
+      ipAddress: '192.168.1.100'
+    }
+  };
+};
+
+const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = () => {
+  // Use the new three-tier configuration
+  const [config] = useState(() => createDefaultConfig());
+
+  // Core state
   const [template, setTemplate] = useState('');
-  const [content, setContent] = useState(initialContent ?? '');
-  const [sourceId, setSourceId] = useState('');
-  const [sources, setSources] = useState<Record<string, { url: string }>>(safeSources);
-  const [sample, setSample] = useState<unknown>(null);
-  const [sampleIndex, setSampleIndex] = useState(0);
-  const [copied, setCopied] = useState(false);
-  const [config, setConfig] = useState('');
+  const [templateContent, setTemplateContent] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationProgress, setGenerationProgress] = useState<GenerationProgress | null>(null);
+  const [generationResult, setGenerationResult] = useState<GenerationResult | null>(null);
+  const [sampleData, setSampleData] = useState<Record<string, any> | null>(null);
+  const [isFetchingSample, setIsFetchingSample] = useState(false);
+  const [validationResult, setValidationResult] = useState<any>(null);
+  
+  // UI state
+  const [activeTab, setActiveTab] = useState<'overview' | 'dataSources' | 'templates' | 'projects' | 'generate' | 'result'>('overview');
   const [CodeMirrorComponent, setCodeMirrorComponent] = useState<any>(null);
 
+  // Services - created once and reused
+  const [services, setServices] = useState<{
+    httpClient: any;
+    templateEngine: any;
+    documentGenerator: any;
+  } | null>(null);
+
+  // Get current project
+  const currentProject = config.activeProjectId ? config.projects[config.activeProjectId] : null;
+
+  // Initialize services on component mount
   useEffect(() => {
-    const loadConfig = async () => {
-      if (!configPath) return;
+    const initializeServices = async () => {
       try {
-        const fs = await loadNodeModule<typeof import('fs/promises')>('fs/promises');
-        const text = await fs.readFile(configPath, 'utf8');
-        setConfig(text);
-      } catch {
-        setConfig('');
+        const httpClient = createHttpClient({
+          timeout: config?.globalSettings?.connectionTimeout || 10000,
+          retries: config?.globalSettings?.maxRetries || 3,
+          retryDelay: 1000,
+        });
+
+        const templateEngine = createTemplateEngine();
+        const documentGenerator = createDocumentGenerator(httpClient, templateEngine);
+
+        setServices({
+          httpClient,
+          templateEngine,
+          documentGenerator,
+        });
+      } catch (error) {
+        console.error('Failed to initialize services:', error);
       }
     };
-    loadConfig();
-  }, [configPath]);
 
+    if (config) {
+      initializeServices();
+    }
+  }, [config]);
+
+  // Load CodeMirror component
   useEffect(() => {
     const loadCodeMirror = async () => {
       try {
@@ -52,7 +178,6 @@ const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({
         setCodeMirrorComponent(() => CodeMirror);
       } catch (err) {
         console.warn('CodeMirror not available, using textarea fallback');
-        // Set a fallback textarea component
         setCodeMirrorComponent(() => (props: any) => (
           <textarea
             value={props.value}
@@ -63,196 +188,604 @@ const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({
         ));
       }
     };
+
     loadCodeMirror();
   }, []);
 
-  const insertEach = () => {
-    setContent((c: string) => `${c}{{#each items}}\n{{/each}}`);
-  };
+  // Load default template content
+  useEffect(() => {
+    if (currentProject && currentProject.templateIds.length > 0) {
+      const templateId = currentProject.templateIds[0];
+      const template = config.templates[templateId];
+      if (template) {
+        setTemplate(template.path);
+        // For demo purposes, use a simple template
+        setTemplateContent(`# As-Built Documentation for {{project.name}}
 
-  const saveTemplate = async () => {
-    const fs = await loadNodeModule<typeof import('fs/promises')>('fs/promises');
-    const path = await loadNodeModule<typeof import('path')>('path');
-    await fs.mkdir(saveDir, { recursive: true });
-    const file = path.join(saveDir, template || 'template.md');
-    await fs.writeFile(file, content);
-  };
+**Customer:** {{project.customer.name}}
+**Integrator:** {{project.integrator.name}}
+**Generation Date:** {{system.generatedAt}}
 
-  const handleCopyField = async (field: string) => {
-    await navigator.clipboard.writeText(field);
-    setCopied(true);
-  };
+## Project Overview
+- **Site Name:** {{project.variables.siteName}}
+- **Commissioning Date:** {{project.variables.commissioningDate}}
 
-  const handleCopyLoop = async () => {
-    await navigator.clipboard.writeText('{{#each items}}');
-    setCopied(true);
-  };
-  return (
-    <>
-      <select
-        aria-label="Template File"
-        value={template}
-        onChange={(e) => setTemplate(e.target.value)}
-      >
-        <option value="">(none)</option>
-        {safeTemplates.map((t) => (
-          <option key={t} value={t}>
-            {t}
-          </option>
-        ))}
-      </select>
-      <input
-        type="file"
-        accept=".md"
-        aria-label="Load Template"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) {
-            onLoad?.(file);
-          }
-        }}
-      />
-      <div>
-        <button aria-label="Insert Each" onClick={insertEach}>
-          Each
-        </button>
-      </div>
-      <select
-        aria-label="Data Source"
-        value={sourceId}
-        onChange={(e) => setSourceId(e.target.value)}
-      >
-        <option value="">(none)</option>
-        {Object.keys(sources).map((id) => (
-          <option key={id} value={id}>
-            {id}
-          </option>
-        ))}
-      </select>
-      {configPath && (
-        <button
-          type="button"
-          aria-label="Add Data Source"
-          onClick={async () => {
-            const id = window.prompt('Data Source ID');
-            if (!id) return;
-            const url = window.prompt('Data Source URL');
-            if (!url) return;
-            const next = { ...sources, [id]: { url } };
-            setSources(next);
-            setConfig(JSON.stringify(next, null, 2));
-            if (configPath) {
-              const fs = await loadNodeModule<typeof import('fs/promises')>('fs/promises');
-              await fs.writeFile(configPath, JSON.stringify(next, null, 2));
+## Data Sources
+{{#each data}}
+### {{@key}}
+- **Status:** {{#if this.success}}✅ Success{{else}}❌ Failed{{/if}}
+- **Data:** {{json this.data true}}
+{{/each}}
+
+## Summary
+Documentation generated for {{project.customer.name}} on {{formatDate system.generatedAt 'long'}}.`);
+      }
+    }
+  }, [currentProject, config.templates]);
+
+  // Test data source functionality
+  const handleTestDataSource = useCallback(async () => {
+    if (!services || !currentProject) {
+      console.error('Services not initialized or no active project');
+      return;
+    }
+
+    setIsFetchingSample(true);
+    setSampleData(null);
+    
+    try {
+      const dataSourceResults: Record<string, any> = {};
+      
+      // Fetch data from all project data sources
+      for (const dataSourceId of currentProject.dataSourceIds) {
+        const dataSource = config.dataSources[dataSourceId];
+        if (dataSource) {
+          console.log(`Sample fetch progress: Fetching from ${dataSource.name}`);
+          
+          const result = await services.httpClient.fetchData(
+            {
+              url: dataSource.url,
+              method: dataSource.method,
+              headers: dataSource.headers,
+              auth: dataSource.auth,
+            },
+            currentProject.variables.ipAddress,
+            (progress: number, status: string) => {
+              console.log(`Sample fetch progress: ${progress}% - ${dataSource.url}: ${status}`);
             }
+          );
+          
+          dataSourceResults[dataSourceId] = result;
+        }
+      }
+      
+      setSampleData(dataSourceResults);
+    } catch (error) {
+      console.error('Error fetching sample data:', error);
+      setSampleData({ error: error instanceof Error ? error.message : 'Unknown error' });
+    } finally {
+      setIsFetchingSample(false);
+    }
+  }, [services, currentProject, config.dataSources]);
+
+  // Generate documentation
+  const handleGenerateDocumentation = useCallback(async () => {
+    if (!services || !currentProject) {
+      console.error('Services not initialized or no active project');
+      return;
+    }
+
+    setIsGenerating(true);
+    setGenerationProgress(null);
+    setGenerationResult(null);
+
+    try {
+      // Create project configuration for document generation
+      const projectConfig: ProjectConfig = {
+        name: currentProject.name,
+        description: currentProject.description,
+        customer: currentProject.customer,
+        integrator: currentProject.integrator,
+        outputDirectory: currentProject.outputDirectory,
+        variables: {
+          ...config.globalVariables,
+          ...currentProject.variables
+        }
+      };
+
+      // Create template object
+      const templateObj: Template = {
+        name: 'current-template',
+        content: templateContent,
+        variables: []
+      };
+
+      // Get data source endpoints
+      const endpoints = currentProject.dataSourceIds.map(id => {
+        const dataSource = config.dataSources[id];
+        return {
+          url: dataSource.url,
+          method: dataSource.method,
+          headers: dataSource.headers,
+          auth: dataSource.auth
+        };
+      });
+
+      // Generate documentation
+      const result = await services.documentGenerator.generateDocument(
+        projectConfig,
+        endpoints,
+        templateObj,
+        (progress: GenerationProgress) => {
+          setGenerationProgress(progress);
+        }
+      );
+
+      setGenerationResult(result);
+      
+      if (result.success) {
+        setActiveTab('result');
+      }
+    } catch (error) {
+      console.error('Error generating documentation:', error);
+      setGenerationResult({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        generatedAt: new Date().toISOString(),
+        duration: 0
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [services, currentProject, templateContent, config]);
+
+  // Validate template
+  const handleValidateTemplate = useCallback(async () => {
+    if (!services) {
+      console.error('Services not initialized');
+      return;
+    }
+
+    try {
+      const variables = services.templateEngine.extractVariables(templateContent);
+      setValidationResult({
+        success: true,
+        variables,
+        message: `Template is valid. Found ${variables.length} variables: ${variables.join(', ')}`
+      });
+    } catch (error) {
+      setValidationResult({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        message: 'Template validation failed'
+      });
+    }
+  }, [services, templateContent]);
+
+  // Render navigation tabs
+  const renderTabs = () => (
+    <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', borderBottom: '1px solid #e0e0e0' }}>
+      {[
+        { key: 'overview', label: 'Overview' },
+        { key: 'dataSources', label: 'Data Sources' },
+        { key: 'templates', label: 'Templates' },
+        { key: 'projects', label: 'Projects' },
+        { key: 'generate', label: 'Generate' },
+        { key: 'result', label: 'Result' }
+      ].map(({ key, label }) => (
+        <button
+          key={key}
+          onClick={() => setActiveTab(key as any)}
+          style={{
+            padding: '10px 16px',
+            border: 'none',
+            borderBottom: activeTab === key ? '2px solid #007bff' : '2px solid transparent',
+            background: activeTab === key ? '#f8f9fa' : 'transparent',
+            color: activeTab === key ? '#007bff' : '#666',
+            cursor: 'pointer',
+            fontWeight: activeTab === key ? 'bold' : 'normal'
           }}
         >
-          Add Data Source
+          {label}
         </button>
-      )}
-      <button
-        type="button"
-        onClick={async () => {
-          if (!sourceId) return;
-          const data = await (window as any).ipcRenderer.invoke(
-            'load-sample-data',
-            { id: sourceId, ...sources[sourceId] },
-          );
-          setSample(data);
-          setSampleIndex(0);
-          setCopied(false);
-        }}
-      >
-        Load Sample Data
-      </button>
-      {Array.isArray(sample) && sample.length > 0 && (
-        <>
-          <div>
-            <button
-              type="button"
-              aria-label="Prev Sample"
-              disabled={sampleIndex === 0}
-              onClick={() => setSampleIndex((i) => Math.max(i - 1, 0))}
-            >
-              Prev
-            </button>
-            <button
-              type="button"
-              aria-label="Next Sample"
-              disabled={sampleIndex === (sample as any).length - 1}
-              onClick={() =>
-                setSampleIndex((i) =>
-                  Math.min(i + 1, (sample as any).length - 1),
-                )
-              }
-            >
-              Next
-            </button>
+      ))}
+    </div>
+  );
+
+  // Render overview tab
+  const renderOverviewTab = () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <Card title="Three-Tier Architecture Overview">
+        <div style={{ lineHeight: '1.6' }}>
+          <p><strong>The As-Built Documenter now uses a three-tier architecture:</strong></p>
+          <ul>
+            <li><strong>Data Sources</strong> - Shared library of API endpoints that can be reused across projects</li>
+            <li><strong>Templates</strong> - Shared library of documentation templates</li>
+            <li><strong>Projects</strong> - Combine data sources and templates with customer-specific information</li>
+          </ul>
+          
+          {currentProject && (
+            <div style={{ marginTop: '20px', padding: '16px', backgroundColor: '#f8f9fa', borderRadius: '4px' }}>
+              <h4>Active Project: {currentProject.name}</h4>
+              <p><strong>Customer:</strong> {currentProject.customer.name}</p>
+              <p><strong>Integrator:</strong> {currentProject.integrator.name}</p>
+              <p><strong>Data Sources:</strong> {currentProject.dataSourceIds.length}</p>
+              <p><strong>Templates:</strong> {currentProject.templateIds.length}</p>
+              <p><strong>Status:</strong> {currentProject.status}</p>
+            </div>
+          )}
+        </div>
+      </Card>
+    </div>
+  );
+
+  // Render data sources tab
+  const renderDataSourcesTab = () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <Card title="Data Sources Library">
+        <p>Shared data sources that can be reused across multiple projects:</p>
+        {Object.values(config.dataSources).map((dataSource) => (
+          <div key={dataSource.id} style={{ 
+            padding: '12px', 
+            border: '1px solid #e0e0e0', 
+            borderRadius: '4px', 
+            marginBottom: '8px',
+            backgroundColor: currentProject?.dataSourceIds.includes(dataSource.id) ? '#e8f5e8' : 'white'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <strong>{dataSource.name}</strong>
+                {currentProject?.dataSourceIds.includes(dataSource.id) && (
+                  <span style={{ color: '#28a745', marginLeft: '8px' }}>✓ Used in active project</span>
+                )}
+                <br />
+                <small style={{ color: '#666' }}>{dataSource.description}</small>
+                <br />
+                <code style={{ fontSize: '12px', color: '#007bff' }}>{dataSource.url}</code>
+                <br />
+                <small>Method: {dataSource.method} | Timeout: {dataSource.timeout}ms | Retries: {dataSource.retries}</small>
+              </div>
+            </div>
           </div>
-          <pre>{JSON.stringify((sample as any)[sampleIndex], null, 2)}</pre>
-          <table>
-            <thead>
-              <tr>
-                <th>Field</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Array.isArray(sample) && sample.length > 0 && sample[0] && Object.keys(sample[0]).map((key: string) => (
-                <tr key={key}>
-                  <td>{key}</td>
-                  <td>
-                    <button
-                      type="button"
-                      aria-label={`Copy Field ${key}`}
-                      onClick={() => handleCopyField(key)}
-                    >
-                      Copy Field
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <button type="button" aria-label="Copy Loop" onClick={handleCopyLoop}>
-            Copy Loop
-          </button>
-        </>
-      )}
-      {sample && !Array.isArray(sample) && <pre>{JSON.stringify(sample, null, 2)}</pre>}
-      {copied && <div>Copied to clipboard</div>}
-      {CodeMirrorComponent ? (
-        <CodeMirrorComponent
-          aria-label="Template Editor"
-          value={content}
-          height="200px"
-          onChange={(v: string) => setContent(v)}
-        />
+        ))}
+      </Card>
+    </div>
+  );
+
+  // Render templates tab
+  const renderTemplatesTab = () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <Card title="Templates Library">
+        <p>Shared templates that can be reused across multiple projects:</p>
+        {Object.values(config.templates).map((template) => (
+          <div key={template.id} style={{ 
+            padding: '12px', 
+            border: '1px solid #e0e0e0', 
+            borderRadius: '4px', 
+            marginBottom: '8px',
+            backgroundColor: currentProject?.templateIds.includes(template.id) ? '#e8f5e8' : 'white'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <strong>{template.name}</strong>
+                {currentProject?.templateIds.includes(template.id) && (
+                  <span style={{ color: '#28a745', marginLeft: '8px' }}>✓ Used in active project</span>
+                )}
+                <br />
+                <small style={{ color: '#666' }}>{template.description}</small>
+                <br />
+                <code style={{ fontSize: '12px', color: '#007bff' }}>{template.path}</code>
+                <br />
+                <small>
+                  Engine: {template.engine} | Format: {template.outputFormat} | Version: {template.version}
+                  {template.author && ` | Author: ${template.author}`}
+                </small>
+              </div>
+            </div>
+          </div>
+        ))}
+      </Card>
+    </div>
+  );
+
+  // Render projects tab
+  const renderProjectsTab = () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <Card title="Projects">
+        <p>Projects combine data sources and templates with customer-specific information:</p>
+        {Object.values(config.projects).map((project) => (
+          <div key={project.id} style={{ 
+            padding: '16px', 
+            border: '2px solid ' + (project.id === config.activeProjectId ? '#007bff' : '#e0e0e0'), 
+            borderRadius: '4px', 
+            marginBottom: '12px',
+            backgroundColor: project.id === config.activeProjectId ? '#f8f9fa' : 'white'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <strong>{project.name}</strong>
+                  {project.id === config.activeProjectId && (
+                    <span style={{ 
+                      backgroundColor: '#007bff', 
+                      color: 'white', 
+                      padding: '2px 8px', 
+                      borderRadius: '12px', 
+                      fontSize: '12px' 
+                    }}>
+                      ACTIVE
+                    </span>
+                  )}
+                  <span style={{ 
+                    backgroundColor: project.status === 'active' ? '#28a745' : '#6c757d', 
+                    color: 'white', 
+                    padding: '2px 8px', 
+                    borderRadius: '12px', 
+                    fontSize: '12px' 
+                  }}>
+                    {project.status.toUpperCase()}
+                  </span>
+                </div>
+                <p style={{ margin: '8px 0', color: '#666' }}>{project.description}</p>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '12px' }}>
+                  <div>
+                    <h5 style={{ margin: '0 0 8px 0', color: '#007bff' }}>Customer</h5>
+                    <div style={{ fontSize: '14px' }}>
+                      <div><strong>{project.customer.name}</strong></div>
+                      {project.customer.contactPerson && <div>Contact: {project.customer.contactPerson}</div>}
+                      {project.customer.contactEmail && <div>Email: {project.customer.contactEmail}</div>}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h5 style={{ margin: '0 0 8px 0', color: '#007bff' }}>Integrator</h5>
+                    <div style={{ fontSize: '14px' }}>
+                      <div><strong>{project.integrator.name}</strong></div>
+                      {project.integrator.contactPerson && <div>Contact: {project.integrator.contactPerson}</div>}
+                      {project.integrator.contactEmail && <div>Email: {project.integrator.contactEmail}</div>}
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: '12px', display: 'flex', gap: '24px', fontSize: '14px' }}>
+                  <div>
+                    <strong>Data Sources:</strong> {project.dataSourceIds.length}
+                    {project.dataSourceIds.length > 0 && (
+                      <ul style={{ margin: '4px 0', paddingLeft: '20px' }}>
+                        {project.dataSourceIds.map(id => (
+                          <li key={id}>{config.dataSources[id]?.name || id}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <strong>Templates:</strong> {project.templateIds.length}
+                    {project.templateIds.length > 0 && (
+                      <ul style={{ margin: '4px 0', paddingLeft: '20px' }}>
+                        {project.templateIds.map(id => (
+                          <li key={id}>{config.templates[id]?.name || id}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+
+                {Object.keys(project.variables).length > 0 && (
+                  <div style={{ marginTop: '12px' }}>
+                    <strong>Project Variables:</strong>
+                    <div style={{ 
+                      backgroundColor: '#f8f9fa', 
+                      padding: '8px', 
+                      borderRadius: '4px', 
+                      marginTop: '4px',
+                      fontSize: '12px',
+                      fontFamily: 'monospace'
+                    }}>
+                      {JSON.stringify(project.variables, null, 2)}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </Card>
+    </div>
+  );
+
+  // Render generate tab
+  const renderGenerateTab = () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {!currentProject ? (
+        <Card title="No Active Project">
+          <p>Please select an active project to generate documentation.</p>
+        </Card>
       ) : (
-        <div>Loading editor...</div>
-      )}
-      {configPath && (
         <>
-          <textarea
-            aria-label="Configuration Editor"
-            value={config}
-            onChange={(e) => setConfig(e.target.value)}
-          />
-          <button
-            type="button"
-            onClick={async () => {
-              if (configPath) {
-                const fs = await loadNodeModule<typeof import('fs/promises')>('fs/promises');
-                await fs.writeFile(configPath, config);
-              }
-            }}
-          >
-            Save Config
-          </button>
+          <Card title="Data Source Preview">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <span>Test data sources from active project</span>
+              <Button 
+                onClick={handleTestDataSource}
+                disabled={isFetchingSample}
+                variant="secondary"
+              >
+                {isFetchingSample ? 'Testing...' : 'Test Data Sources'}
+              </Button>
+            </div>
+            
+            {sampleData && (
+              <div style={{ 
+                backgroundColor: '#f8f9fa', 
+                padding: '12px', 
+                borderRadius: '4px',
+                fontFamily: 'monospace',
+                fontSize: '12px',
+                maxHeight: '200px',
+                overflow: 'auto'
+              }}>
+                <pre>{JSON.stringify(sampleData, null, 2)}</pre>
+              </div>
+            )}
+          </Card>
+
+          <Card title="Template Editor">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <span>Current template: {template || 'None selected'}</span>
+              <Button 
+                onClick={handleValidateTemplate}
+                variant="secondary"
+              >
+                Validate Template
+              </Button>
+            </div>
+
+            {validationResult && (
+              <div style={{ 
+                padding: '8px 12px', 
+                borderRadius: '4px', 
+                marginBottom: '16px',
+                backgroundColor: validationResult.success ? '#d4edda' : '#f8d7da',
+                color: validationResult.success ? '#155724' : '#721c24',
+                border: `1px solid ${validationResult.success ? '#c3e6cb' : '#f5c6cb'}`
+              }}>
+                {validationResult.message}
+              </div>
+            )}
+
+            <div style={{ border: '1px solid #ddd', borderRadius: '4px' }}>
+              {CodeMirrorComponent ? (
+                <CodeMirrorComponent
+                  value={templateContent}
+                  onChange={setTemplateContent}
+                  height="300px"
+                  aria-label="Template content editor"
+                />
+              ) : (
+                <div>Loading editor...</div>
+              )}
+            </div>
+          </Card>
+
+          <Card title="Document Generation">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div>
+                <div><strong>Project:</strong> {currentProject.name}</div>
+                <div><strong>Customer:</strong> {currentProject.customer.name}</div>
+                <div><strong>Output:</strong> {currentProject.outputDirectory}</div>
+              </div>
+              <Button 
+                onClick={handleGenerateDocumentation}
+                disabled={isGenerating || !templateContent.trim()}
+                variant="primary"
+              >
+                {isGenerating ? 'Generating...' : 'Generate Documentation'}
+              </Button>
+            </div>
+
+            {generationProgress && (
+              <div style={{ marginBottom: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                  <span>{generationProgress.stage}</span>
+                  <span>{generationProgress.progress}%</span>
+                </div>
+                <div style={{ 
+                  width: '100%', 
+                  backgroundColor: '#e0e0e0', 
+                  borderRadius: '4px',
+                  height: '8px'
+                }}>
+                  <div style={{ 
+                    width: `${generationProgress.progress}%`, 
+                    backgroundColor: '#007bff',
+                    borderRadius: '4px',
+                    height: '100%',
+                    transition: 'width 0.3s ease'
+                  }} />
+                </div>
+                {generationProgress.details && (
+                  <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                    {generationProgress.details}
+                  </div>
+                )}
+              </div>
+            )}
+          </Card>
         </>
       )}
-      <button onClick={saveTemplate}>Save</button>
-    </>
+    </div>
+  );
+
+  // Render result tab
+  const renderResultTab = () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {generationResult ? (
+        <Card title={generationResult.success ? 'Documentation Generated Successfully' : 'Generation Failed'}>
+          <div style={{ marginBottom: '16px' }}>
+            <div><strong>Status:</strong> {generationResult.success ? '✅ Success' : '❌ Failed'}</div>
+            <div><strong>Duration:</strong> {generationResult.duration}ms</div>
+            <div><strong>Generated At:</strong> {new Date(generationResult.generatedAt).toLocaleString()}</div>
+            {generationResult.outputPath && (
+              <div><strong>Output Path:</strong> {generationResult.outputPath}</div>
+            )}
+          </div>
+
+          {generationResult.error && (
+            <div style={{ 
+              padding: '12px', 
+              backgroundColor: '#f8d7da', 
+              border: '1px solid #f5c6cb',
+              borderRadius: '4px',
+              color: '#721c24',
+              marginBottom: '16px'
+            }}>
+              <strong>Error:</strong> {generationResult.error}
+            </div>
+          )}
+
+          {generationResult.content && (
+            <div>
+              <h4>Generated Content:</h4>
+              <div style={{ 
+                backgroundColor: '#f8f9fa', 
+                padding: '16px', 
+                borderRadius: '4px',
+                border: '1px solid #e0e0e0',
+                fontFamily: 'monospace',
+                fontSize: '14px',
+                maxHeight: '400px',
+                overflow: 'auto'
+              }}>
+                <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{generationResult.content}</pre>
+              </div>
+            </div>
+          )}
+        </Card>
+      ) : (
+        <Card title="No Results">
+          <p>No documentation has been generated yet. Use the Generate tab to create documentation.</p>
+        </Card>
+      )}
+    </div>
+  );
+
+  return (
+    <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
+      <h2 style={{ marginBottom: '20px', color: '#333' }}>As-Built Documenter</h2>
+      
+      {renderTabs()}
+      
+      <div style={{ minHeight: '500px' }}>
+        {activeTab === 'overview' && renderOverviewTab()}
+        {activeTab === 'dataSources' && renderDataSourcesTab()}
+        {activeTab === 'templates' && renderTemplatesTab()}
+        {activeTab === 'projects' && renderProjectsTab()}
+        {activeTab === 'generate' && renderGenerateTab()}
+        {activeTab === 'result' && renderResultTab()}
+      </div>
+    </div>
   );
 };
 

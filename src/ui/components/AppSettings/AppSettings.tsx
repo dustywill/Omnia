@@ -5,7 +5,7 @@
  * This component needs refactoring to use dynamic schema loading.
  */
 
-import React from 'react';
+// React import not needed with automatic JSX transform
 import { Card } from '../Card/Card.js';
 import { SettingsManager } from '../../../core/settings-manager.js';
 import { type AppConfig } from '../../../lib/schemas/app-config.js';

@@ -4,7 +4,7 @@
  * Displays the Omnia logo and application branding
  */
 
-import React from 'react';
+// React import not needed with automatic JSX transform
 import styles from './AppHeader.module.css';
 
 export interface AppHeaderProps {

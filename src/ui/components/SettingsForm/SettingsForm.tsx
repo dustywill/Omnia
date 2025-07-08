@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { SchemaForm } from '../SchemaForm/SchemaForm.js';
 import { loadNodeModule } from '../../node-module-loader.js';
 import styles from './SettingsForm.module.css';

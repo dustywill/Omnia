@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { loadNodeModule } from '../node-module-loader.js';
 import { SettingsManager } from '../../core/settings-manager.js';
 import { type PluginInfo } from '../main-app-renderer.js';

@@ -19,6 +19,7 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
+    "@types/handlebars": "^4.0.40",
     "@types/jest": "^29.5.5",
     "@types/node": "^24.0.6",
     "@types/react": "^19.1.8",
@@ -42,6 +43,9 @@
   },
   "dependencies": {
     "@playwright/test": "^1.53.1",
+    "axios": "^1.10.0",
+    "handlebars": "^4.7.8",
+    "jsdom": "^26.1.0",
     "ts-node": "^10.9.2"
   }
 }

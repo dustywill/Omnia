@@ -72,11 +72,11 @@ async function copyAssets() {
     try {
       await fs.mkdir(destPluginDir, { recursive: true });
       
-      // Copy .js files from plugin directory
+      // Copy .js and plugin.json5 files from plugin directory
       try {
         const entries = await fs.readdir(srcPluginDir, { withFileTypes: true });
         for (const entry of entries) {
-          if (entry.isFile() && entry.name.endsWith('.js')) {
+          if (entry.isFile() && (entry.name.endsWith('.js') || entry.name === 'plugin.json5')) {
             const srcFile = `${srcPluginDir}/${entry.name}`;
             const destFile = `${destPluginDir}/${entry.name}`;
             await fs.copyFile(srcFile, destFile);
@@ -84,8 +84,8 @@ async function copyAssets() {
           }
         }
       } catch (err) {
-        // Plugin directory might not exist or have .js files
-        console.warn(`No .js files found in ${srcPluginDir}`);
+        // Plugin directory might not exist or have required files
+        console.warn(`No plugin files found in ${srcPluginDir}`);
       }
     } catch (err) {
       console.warn(`Could not process plugin directory ${pluginDir}:`, err.message);

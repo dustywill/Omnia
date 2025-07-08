@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '../components/Button/Button.js';
 import { Input } from '../components/Input/Input.js';
 import styles from './LogsView.module.css';

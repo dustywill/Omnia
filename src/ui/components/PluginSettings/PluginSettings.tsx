@@ -5,7 +5,7 @@
  * and real-time validation based on plugin configuration schemas.
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { loadNodeModule } from '../../node-module-loader.js';
 import { SchemaForm } from '../SchemaForm/SchemaForm.js';
 import { Card } from '../Card/Card.js';
