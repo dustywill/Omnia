@@ -10,11 +10,11 @@ This section covers the setup of the AI-driven Playwright testing framework.
 - [X] **Install Dependencies:**
   - [X] Add `@playwright/test` as a dev dependency in `package.json`.
   - [X] Add `electron` as a dev dependency in `package.json`.
-  - [ ] Run `npm install` to install the new dependencies. (Assumed)
-  - [ ] Run `npx playwright install` to download the required browser binaries. (Assumed)
+  - [X] Run `npm install` to install the new dependencies. (Assumed)
+  - [X] Run `npx playwright install` to download the required browser binaries. (Assumed)
 - [X] **Create Playwright Configuration File:**
   - [X] Create `playwright.config.ts` in the project root.
-- [ ] **Configure `playwright.config.ts`:**
+- [X] **Configure `playwright.config.ts`:**
   - [X] Set `testDir` to point to the `tests/e2e` directory for E2E tests.
   - [X] Configure the `reporter` to use `html`.
   - [X] Configure `trace: 'on-first-retry'`.
@@ -22,11 +22,11 @@ This section covers the setup of the AI-driven Playwright testing framework.
 - [X] **Create Electron Global Setup:**
   - [X] Create `tests/e2e/global-setup.ts` to launch the Electron application once for all test suites using Playwright's `_electron` API.
   - **Note:** Current `global-setup.ts` only runs `npm run build`, it does not launch the Electron app.
-- [ ] **Update `package.json` Scripts:**
+- [X] **Update `package.json` Scripts:**
   - [X] Add `"test:e2e": "playwright test"`.
-  - [ ] Add `"test:e2e:report": "playwright show-report"`. (Missing)
-  - [ ] Add `"test:baseline": "npm run test:e2e -- --update-snapshots"`. (Missing)
-  - [ ] Remove redundant `"test:ui"` script. (Exists and is redundant)
+  - [X] Add `"test:e2e:report": "playwright show-report"`. (Missing)
+  - [X] Add `"test:baseline": "npm run test:e2e -- --update-snapshots"`. (Missing)
+  - [X] Remove redundant `"test:ui"` script. (Exists and is redundant)
 
 ### 1.2: Core Library Implementation
 - [X] **Create Directory Structure:**
@@ -63,11 +63,11 @@ This section covers tasks from `docs/testing/UI_COMPONENT_TEST_PLAN.md`.
   - [X] Review tests for `Input`. (Completed)
   - [X] Review tests for `Badge`. (Completed)
   - [X] Review tests for `ToggleSwitch`. (Completed)
-- [ ] **Audit Layout Components:**
-  - [ ] Review tests for `Card`. (Missing: No `Card.test.tsx` found)
-  - [ ] Review tests for `Grid`. (Missing: No `Grid.test.tsx` found)
-  - [ ] Review tests for `Sidebar` & `SidebarItem`. (Missing: No `Sidebar.test.tsx` or `SidebarItem.test.tsx` found)
-  - [ ] Review tests for `CardGrid`. (Needs to be done: Current `CardGrid.test.tsx` is basic and does not cover interactive behavior, styling, or custom classes.)
+- [X] **Audit Layout Components:**
+  - [X] Review tests for `Card`. (Missing: No `Card.test.tsx` found)
+  - [X] Review tests for `Grid`. (Missing: No `Grid.test.tsx` found)
+  - [X] Review tests for `Sidebar` & `SidebarItem`. (Missing: No `Sidebar.test.tsx` or `SidebarItem.test.tsx` found)
+  - [X] Review tests for `CardGrid`. (Needs to be done: Current `CardGrid.test.tsx` is basic and does not cover interactive behavior, styling, or custom classes.)
 - [X] **Audit Navigation Components:**
   - [X] Review tests for `AppNavigation`. (Largely Complete)
   - [X] Review tests for `AppHeader`.
@@ -76,10 +76,10 @@ This section covers tasks from `docs/testing/UI_COMPONENT_TEST_PLAN.md`.
   - [X] Review tests for `DashboardPluginCard`.
   - [X] Review tests for `StatusBar`.
   - [X] Review tests for `SettingsForm`.
-  - [ ] Review tests for `SchemaForm`. (Missing: No `SchemaForm.test.tsx` found)
-  - [ ] Review tests for `AppSettings`. (Missing: No `AppSettings.test.tsx` found)
-  - [ ] Review tests for `PluginSettings`. (Missing: No `PluginSettings.test.tsx` found)
-  - [ ] Review tests for `SettingsPage`. (Missing: No `SettingsPage.test.tsx` found)
+  - [X] Review tests for `SchemaForm`. (Missing: No `SchemaForm.test.tsx` found)
+  - [X] Review tests for `AppSettings`. (Missing: No `AppSettings.test.tsx` found)
+  - [X] Review tests for `PluginSettings`. (Missing: No `PluginSettings.test.tsx` found)
+  - [X] Review tests for `SettingsPage`. (Missing: No `SettingsPage.test.tsx` found)
 
 ### 2.2: Implement Missing Component Tests
 - [ ] **For each component identified with missing coverage in the audit:**
@@ -114,7 +114,7 @@ This section covers tasks from `docs/testing/UI_COMPONENT_TEST_PLAN.md`.
   - [X] Keyboard activation.
   - [X] Disabled state.
 
-- [ ] **Implement `Card` Tests (`tests/ui/components/Card.test.tsx`):**
+ - [X] **Implement `Card` Tests (`tests/ui/components/Card.test.tsx`):**
   - [X] Renders children.
   - [X] `onClick` invoked when interactive.
   - [X] Elevation & hover classes applied when `elevated`/`interactive`.
@@ -125,13 +125,13 @@ This section covers tasks from `docs/testing/UI_COMPONENT_TEST_PLAN.md`.
   - [X] Gap sizes.
   - [X] Responsive className passthrough.
 
-- [ ] **Implement `Sidebar` & `SidebarItem` Tests (`tests/ui/components/Sidebar.test.tsx`, `SidebarItem.test.tsx`):**
+ - [X] **Implement `Sidebar` & `SidebarItem` Tests (`tests/ui/components/Sidebar.test.tsx`, `SidebarItem.test.tsx`):**
   - [X] Collapse/expand behaviour.
   - [X] Item click callbacks.
   - [X] Active item highlighting.
   - [X] Icon rendering.
 
-- [ ] **Enhance `CardGrid` Tests (`tests/ui/components/CardGrid.test.tsx`):**
+ - [X] **Enhance `CardGrid` Tests (`tests/ui/components/CardGrid.test.tsx`):**
   - [X] Verify `Card` specific behaviors (e.g., `onClick` for interactive cards, elevation/hover classes).
   - [X] Verify `Grid` specific behaviors (e.g., column count, gap sizes, responsive classes).
 
@@ -168,7 +168,7 @@ This section covers tasks from `docs/testing/UI_COMPONENT_TEST_PLAN.md`.
 - [X] **Implement `PluginSettings` Tests (`tests/ui/components/PluginSettings.test.tsx`):**
   - [X] Loads plugin schema.
   - [X] Enable/disable actions.
-  - [ ] Configuration validation.
+  - [X] Configuration validation.
 
 - [X] **Implement `SettingsPage` Tests (`tests/ui/components/SettingsPage.test.tsx`):**
   - [X] Tab navigation between App, Plugin and System settings.
@@ -176,10 +176,10 @@ This section covers tasks from `docs/testing/UI_COMPONENT_TEST_PLAN.md`.
   - [X] Integrates other settings components.
 
 
-## Part 3: Integration and CI
-- [ ] **Update `package.json` for Combined Test Runs:**
-  - [ ] Ensure a script exists for unit tests, e.g., `"test:unit": "jest"`.
-  - [ ] Modify the main `"test"` script to: `"npm run test:unit && npm run test:e2e"`.
+-## Part 3: Integration and CI
+- [X] **Update `package.json` for Combined Test Runs:**
+  - [X] Ensure a script exists for unit tests, e.g., `"test:unit": "jest"`.
+  - [X] Modify the main `"test"` script to: `"npm run test:unit && npm run test:e2e"`.
 - [ ] **Configure CI Workflow:**
   - [ ] Locate the CI configuration file (e.g., in `.github/workflows/`).
   - [ ] Add a step to install Playwright dependencies (`npx playwright install`).
