@@ -4,6 +4,8 @@ import { SettingsManager } from '../../core/settings-manager.js';
 import { type PluginInfo } from '../main-app-renderer.js';
 import { SchemaForm } from '../components/SchemaForm/SchemaForm.js';
 import { PluginSettings } from '../components/PluginSettings/PluginSettings.js';
+import { Card } from '../components/Card/Card.js';
+import { notificationService } from '../../core/notification-service.js';
 import styles from './SettingsView.module.css';
 
 // We'll initialize the demo schema dynamically to avoid direct zod imports
@@ -67,17 +69,13 @@ export interface SettingsViewProps {
     pluginId: string;
     focusEditor?: boolean;
   } | null;
-  viewMode?: 'full' | 'plugin-only'; // New prop to control view mode
-  targetPluginId?: string | null; // Specific plugin to show in plugin-only mode
 }
 
 export function SettingsView({ 
   settingsManager, 
   plugins, 
   pluginManager, 
-  navigationTarget, 
-  viewMode = 'full',
-  targetPluginId 
+  navigationTarget
 }: SettingsViewProps) {
   // Navigation state
   const [activeSection, setActiveSection] = useState<SettingsSection>('app-config');
@@ -201,13 +199,6 @@ export function SettingsView({
         section: 'Core Settings'
       },
       {
-        id: 'plugin-config' as SettingsSection,
-        label: 'Plugin Settings',
-        icon: '🔌',
-        section: 'Plugin Settings',
-        badge: plugins.length.toString()
-      },
-      {
         id: 'system-info' as SettingsSection,
         label: 'System Information',
         icon: '📊',
@@ -215,8 +206,15 @@ export function SettingsView({
       }
     ];
 
-    // Plugin selection is now handled within PluginSettings component
-    const allItems = sidebarItems;
+    // Add individual plugin items to the Plugin Settings section
+    const pluginItems = plugins.filter(p => p.enabled).map(plugin => ({
+      id: `plugin-${plugin.id}` as SettingsSection,
+      label: plugin.name,
+      icon: plugin.name.charAt(0).toUpperCase(), // Use first letter as icon
+      section: 'Plugin Settings'
+    }));
+
+    const allItems = [...sidebarItems, ...pluginItems];
     const sections = ['Core Settings', 'Plugin Settings', 'System'];
 
     return (
@@ -329,25 +327,6 @@ export function SettingsView({
           </div>
         );
 
-      case 'plugin-config':
-        return pluginManager ? (
-          <PluginSettings
-            settingsManager={settingsManager}
-            pluginManager={pluginManager}
-            onSettingsChange={(pluginId, settings) => {
-              console.log('Plugin settings changed:', pluginId, settings);
-            }}
-          />
-        ) : (
-          <div className={styles.contentSection}>
-            <div className={styles.contentHeader}>
-              <h2 className={styles.contentTitle}>Plugin Settings</h2>
-              <p className={styles.contentDescription}>
-                Plugin manager not available. Please try refreshing the page.
-              </p>
-            </div>
-          </div>
-        );
 
       case 'system-info':
         const environment = typeof window !== 'undefined' && (window as any).electronAPI ? 'Electron' : 'Web';
@@ -362,65 +341,98 @@ export function SettingsView({
               <p className={styles.contentDescription}>
                 View detailed application and environment information.
               </p>
+              
+              {/* Notification System Test */}
+              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h4 className="text-sm font-semibold text-blue-800 mb-2">Test Notification System</h4>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => notificationService.info('This is an info notification', { title: 'Info' })}
+                    className="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600 transition-colors"
+                  >
+                    Info
+                  </button>
+                  <button
+                    onClick={() => notificationService.success('Operation completed successfully!', { title: 'Success' })}
+                    className="px-3 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600 transition-colors"
+                  >
+                    Success
+                  </button>
+                  <button
+                    onClick={() => notificationService.warning('This action might have consequences', { title: 'Warning' })}
+                    className="px-3 py-1 bg-yellow-500 text-white text-xs rounded hover:bg-yellow-600 transition-colors"
+                  >
+                    Warning
+                  </button>
+                  <button
+                    onClick={() => notificationService.error('Something went wrong!', { title: 'Error' })}
+                    className="px-3 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 transition-colors"
+                  >
+                    Error
+                  </button>
+                  <button
+                    onClick={() => notificationService.debug('Debug information', { title: 'Debug' })}
+                    className="px-3 py-1 bg-purple-500 text-white text-xs rounded hover:bg-purple-600 transition-colors"
+                  >
+                    Debug
+                  </button>
+                </div>
+              </div>
             </div>
             <div className={styles.contentBody}>
-              <div className="space-y-6">
+              <div className="flex flex-wrap gap-6">
                 
-                {/* Application Information */}
-                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                {/* Application Information Card */}
+                <Card className="flex-1 min-w-[300px]">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                     <span className="mr-2">🏗️</span>
                     Application Information
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                        <span className="font-medium text-gray-700">Version</span>
-                        <span className="text-gray-600 font-mono">0.1.0</span>
-                      </div>
-                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                        <span className="font-medium text-gray-700">Environment</span>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          environment === 'Electron' 
-                            ? 'bg-blue-100 text-blue-800' 
-                            : 'bg-green-100 text-green-800'
-                        }`}>
-                          {environment}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                        <span className="font-medium text-gray-700">Build Mode</span>
-                        <span className="text-gray-600">
-                          {typeof process !== 'undefined' && process.env?.NODE_ENV === 'production' ? 'Production' : 'Development'}
-                        </span>
-                      </div>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                      <span className="font-medium text-gray-700">Version</span>
+                      <span className="text-gray-600 font-mono">0.1.0</span>
                     </div>
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                        <span className="font-medium text-gray-700">User Agent</span>
-                        <span className="text-gray-600 text-sm truncate max-w-48" title={navigator.userAgent}>
-                          {navigator.userAgent.split(' ')[0]}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                        <span className="font-medium text-gray-700">Platform</span>
-                        <span className="text-gray-600">{navigator.platform}</span>
-                      </div>
-                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                        <span className="font-medium text-gray-700">Language</span>
-                        <span className="text-gray-600">{navigator.language}</span>
-                      </div>
+                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                      <span className="font-medium text-gray-700">Environment</span>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        environment === 'Electron' 
+                          ? 'bg-blue-100 text-blue-800' 
+                          : 'bg-green-100 text-green-800'
+                      }`}>
+                        {environment}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                      <span className="font-medium text-gray-700">Build Mode</span>
+                      <span className="text-gray-600">
+                        {typeof process !== 'undefined' && process.env?.NODE_ENV === 'production' ? 'Production' : 'Development'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                      <span className="font-medium text-gray-700">User Agent</span>
+                      <span className="text-gray-600 text-sm truncate max-w-48" title={navigator.userAgent}>
+                        {navigator.userAgent.split(' ')[0]}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                      <span className="font-medium text-gray-700">Platform</span>
+                      <span className="text-gray-600">{navigator.platform}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2">
+                      <span className="font-medium text-gray-700">Language</span>
+                      <span className="text-gray-600">{navigator.language}</span>
                     </div>
                   </div>
-                </div>
+                </Card>
 
-                {/* Plugin System Status */}
-                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                {/* Plugin System Status Card */}
+                <Card className="flex-1 min-w-[300px]">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                     <span className="mr-2">🔌</span>
                     Plugin System Status
                   </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                  <div className="grid grid-cols-2 gap-4 mb-4">
                     <div className="text-center p-4 bg-green-50 border border-green-200 rounded-lg">
                       <div className="text-2xl font-bold text-green-600">{activePlugins.length}</div>
                       <div className="text-sm text-green-700">Active</div>
@@ -438,132 +450,137 @@ export function SettingsView({
                       <div className="text-sm text-blue-700">Total</div>
                     </div>
                   </div>
-                  
-                  {/* Plugin Details */}
-                  {plugins.length > 0 && (
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-gray-700 mb-2">Plugin Details</h4>
-                      <div className="max-h-48 overflow-y-auto space-y-1">
-                        {plugins.map((plugin) => (
-                          <div key={plugin.id} className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded border">
-                            <div className="flex items-center space-x-3">
-                              <div className={`w-2 h-2 rounded-full ${
-                                plugin.status === 'active' ? 'bg-green-500' : 
-                                plugin.status === 'loading' ? 'bg-yellow-500' : 
-                                plugin.status === 'error' ? 'bg-red-500' : 'bg-gray-400'
-                              }`} />
-                              <span className="font-medium text-sm">{plugin.name}</span>
-                              <span className="text-xs text-gray-500">v{plugin.version}</span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                plugin.type === 'simple' ? 'bg-gray-100 text-gray-700' :
-                                plugin.type === 'configured' ? 'bg-blue-100 text-blue-700' :
-                                plugin.type === 'hybrid' ? 'bg-purple-100 text-purple-700' :
-                                'bg-gray-100 text-gray-700'
-                              }`}>
-                                {plugin.type}
-                              </span>
-                              <span className={`px-2 py-1 rounded-full text-xs capitalize ${
-                                plugin.status === 'active' ? 'bg-green-100 text-green-700' :
-                                plugin.status === 'loading' ? 'bg-yellow-100 text-yellow-700' :
-                                plugin.status === 'error' ? 'bg-red-100 text-red-700' :
-                                'bg-gray-100 text-gray-700'
-                              }`}>
-                                {plugin.status}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
+                </Card>
 
-                {/* System Performance */}
-                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                {/* System Performance Card */}
+                <Card className="flex-1 min-w-[300px]">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                     <span className="mr-2">⚡</span>
                     Performance Metrics
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                        <span className="font-medium text-gray-700">Memory Usage</span>
-                        <span className="text-gray-600">
-                          {typeof (performance as any).memory !== 'undefined' 
-                            ? `${Math.round((performance as any).memory.usedJSHeapSize / 1024 / 1024)} MB`
-                            : 'Not available'
-                          }
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                        <span className="font-medium text-gray-700">Heap Limit</span>
-                        <span className="text-gray-600">
-                          {typeof (performance as any).memory !== 'undefined'
-                            ? `${Math.round((performance as any).memory.jsHeapSizeLimit / 1024 / 1024)} MB`
-                            : 'Not available'
-                          }
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                        <span className="font-medium text-gray-700">Online Status</span>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          navigator.onLine ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                          {navigator.onLine ? 'Online' : 'Offline'}
-                        </span>
-                      </div>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                      <span className="font-medium text-gray-700">Memory Usage</span>
+                      <span className="text-gray-600">
+                        {typeof (performance as any).memory !== 'undefined' 
+                          ? `${Math.round((performance as any).memory.usedJSHeapSize / 1024 / 1024)} MB`
+                          : 'Not available'
+                        }
+                      </span>
                     </div>
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                        <span className="font-medium text-gray-700">Hardware Concurrency</span>
-                        <span className="text-gray-600">{navigator.hardwareConcurrency} cores</span>
-                      </div>
-                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                        <span className="font-medium text-gray-700">Connection Type</span>
-                        <span className="text-gray-600">
-                          {(navigator as any).connection?.effectiveType || 'Unknown'}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                        <span className="font-medium text-gray-700">Device Memory</span>
-                        <span className="text-gray-600">
-                          {(navigator as any).deviceMemory 
-                            ? `${(navigator as any).deviceMemory} GB`
-                            : 'Not available'
-                          }
-                        </span>
-                      </div>
+                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                      <span className="font-medium text-gray-700">Heap Limit</span>
+                      <span className="text-gray-600">
+                        {typeof (performance as any).memory !== 'undefined'
+                          ? `${Math.round((performance as any).memory.jsHeapSizeLimit / 1024 / 1024)} MB`
+                          : 'Not available'
+                        }
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                      <span className="font-medium text-gray-700">Online Status</span>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        navigator.onLine ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
+                        {navigator.onLine ? 'Online' : 'Offline'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                      <span className="font-medium text-gray-700">Hardware Concurrency</span>
+                      <span className="text-gray-600">{navigator.hardwareConcurrency} cores</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                      <span className="font-medium text-gray-700">Connection Type</span>
+                      <span className="text-gray-600">
+                        {(navigator as any).connection?.effectiveType || 'Unknown'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center py-2">
+                      <span className="font-medium text-gray-700">Device Memory</span>
+                      <span className="text-gray-600">
+                        {(navigator as any).deviceMemory 
+                          ? `${(navigator as any).deviceMemory} GB`
+                          : 'Not available'
+                        }
+                      </span>
                     </div>
                   </div>
-                </div>
+                </Card>
 
-                {/* Configuration Paths */}
-                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                {/* Plugin Details Card */}
+                {plugins.length > 0 && (
+                  <Card className="flex-1 min-w-[300px]">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                      <span className="mr-2">🧩</span>
+                      Plugin Details
+                    </h3>
+                    <div className="max-h-64 overflow-y-auto space-y-2">
+                      {plugins.map((plugin) => (
+                        <div key={plugin.id} className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded border">
+                          <div className="flex items-center space-x-3">
+                            <div className={`w-2 h-2 rounded-full ${
+                              plugin.status === 'active' ? 'bg-green-500' : 
+                              plugin.status === 'loading' ? 'bg-yellow-500' : 
+                              plugin.status === 'error' ? 'bg-red-500' : 'bg-gray-400'
+                            }`} />
+                            <span className="font-medium text-sm">{plugin.name}</span>
+                            <span className="text-xs text-gray-500">v{plugin.version}</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              plugin.type === 'simple' ? 'bg-gray-100 text-gray-700' :
+                              plugin.type === 'configured' ? 'bg-blue-100 text-blue-700' :
+                              plugin.type === 'hybrid' ? 'bg-purple-100 text-purple-700' :
+                              'bg-gray-100 text-gray-700'
+                            }`}>
+                              {plugin.type}
+                            </span>
+                            <span className={`px-2 py-1 rounded-full text-xs capitalize ${
+                              plugin.status === 'active' ? 'bg-green-100 text-green-700' :
+                              plugin.status === 'loading' ? 'bg-yellow-100 text-yellow-700' :
+                              plugin.status === 'error' ? 'bg-red-100 text-red-700' :
+                              'bg-gray-100 text-gray-700'
+                            }`}>
+                              {plugin.status}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+                )}
+
+                {/* Directory Structure Card */}
+                <Card className="flex-1 min-w-[300px]">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                     <span className="mr-2">📁</span>
                     Directory Structure
                   </h3>
-                  <div className="space-y-2 font-mono text-sm">
+                  <div className="space-y-3 font-mono text-sm">
                     <div className="p-3 bg-gray-50 rounded border">
-                      <div className="font-medium text-gray-700 mb-1">Configuration</div>
-                      <div className="text-gray-600">config/app.json5</div>
-                      <div className="text-gray-600">config/plugins.json5</div>
-                      <div className="text-gray-600">config/plugins/</div>
+                      <div className="font-medium text-gray-700 mb-2">Configuration</div>
+                      <div className="text-gray-600 space-y-1">
+                        <div>config/app.json5</div>
+                        <div>config/plugins.json5</div>
+                        <div>config/plugins/</div>
+                      </div>
                     </div>
                     <div className="p-3 bg-gray-50 rounded border">
-                      <div className="font-medium text-gray-700 mb-1">Plugins</div>
-                      <div className="text-gray-600">plugins/ (source)</div>
-                      <div className="text-gray-600">dist/plugins/ (compiled)</div>
+                      <div className="font-medium text-gray-700 mb-2">Plugins</div>
+                      <div className="text-gray-600 space-y-1">
+                        <div>plugins/ (source)</div>
+                        <div>dist/plugins/ (compiled)</div>
+                      </div>
                     </div>
                     <div className="p-3 bg-gray-50 rounded border">
-                      <div className="font-medium text-gray-700 mb-1">Application</div>
-                      <div className="text-gray-600">dist/ (built application)</div>
-                      <div className="text-gray-600">logs/ (application logs)</div>
+                      <div className="font-medium text-gray-700 mb-2">Application</div>
+                      <div className="text-gray-600 space-y-1">
+                        <div>dist/ (built application)</div>
+                        <div>logs/ (application logs)</div>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Card>
 
               </div>
             </div>
@@ -571,6 +588,35 @@ export function SettingsView({
         );
 
       default:
+        // Check if this is a plugin-specific section
+        if (activeSection.startsWith('plugin-') && pluginManager) {
+          const pluginId = activeSection.replace('plugin-', '');
+          const targetPlugin = plugins.find(p => p.id === pluginId);
+          
+          return (
+            <div className={styles.contentSection}>
+              <div className={styles.contentHeader}>
+                <h2 className={styles.contentTitle}>
+                  {targetPlugin ? `${targetPlugin.name} Settings` : 'Plugin Settings'}
+                </h2>
+                <p className={styles.contentDescription}>
+                  {targetPlugin ? targetPlugin.description || 'Configure plugin settings' : 'Plugin configuration'}
+                </p>
+              </div>
+              <div className={styles.contentBody}>
+                <PluginSettings
+                  settingsManager={settingsManager}
+                  pluginManager={pluginManager}
+                  targetPluginId={pluginId}
+                  onSettingsChange={(pluginId, settings) => {
+                    console.log('Plugin settings changed:', pluginId, settings);
+                  }}
+                />
+              </div>
+            </div>
+          );
+        }
+        
         return (
           <div className={styles.emptyState}>
             <h3 className={styles.emptyStateTitle}>Select a section</h3>
@@ -582,38 +628,7 @@ export function SettingsView({
     }
   };
 
-  // For plugin-only mode, render directly without sidebar
-  if (viewMode === 'plugin-only' && targetPluginId && pluginManager) {
-    const targetPlugin = plugins.find(p => p.id === targetPluginId);
-    
-    return (
-      <div className={styles.settingsView}>
-        {/* Header */}
-        <header className={styles.header}>
-          <h1 className={styles.title}>
-            {targetPlugin ? `${targetPlugin.name} Settings` : 'Plugin Settings'}
-          </h1>
-          <p className={styles.subtitle}>
-            {targetPlugin ? targetPlugin.description || 'Configure plugin settings' : 'Plugin configuration'}
-          </p>
-        </header>
-
-        {/* Direct plugin settings content */}
-        <main className={styles.pluginOnlyContent}>
-          <PluginSettings
-            settingsManager={settingsManager}
-            pluginManager={pluginManager}
-            targetPluginId={targetPluginId}
-            onSettingsChange={(pluginId, settings) => {
-              console.log('Plugin settings changed:', pluginId, settings);
-            }}
-          />
-        </main>
-      </div>
-    );
-  }
-
-  // Full mode with sidebar (original behavior)
+  // Always use full mode with sidebar
   return (
     <div className={styles.settingsView}>
       {/* Header */}

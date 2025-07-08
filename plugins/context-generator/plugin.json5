@@ -5,7 +5,7 @@
   version: "1.0.0",
   description: "Generate context information and documentation for projects",
   author: "Omnia Team",
-  type: "simple",
+  type: "configured",
   main: "index.js",
   engine: {
     ttCommanderVersion: ">=0.1.0"

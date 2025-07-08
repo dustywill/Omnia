@@ -24,6 +24,22 @@
   position: relative;
 }
 
+.objectArrayField {
+  position: relative;
+}
+
+.objectArrayField .objectArrayItem {
+  background-color: var(--tt-color-surface-secondary);
+  border: 1px solid var(--tt-color-border);
+  border-radius: var(--tt-radius-md);
+  padding: var(--tt-space-4);
+  margin-bottom: var(--tt-space-3);
+}
+
+.objectArrayField .objectArrayItem:last-of-type {
+  margin-bottom: var(--tt-space-3);
+}
+
 .formActions {
   display: flex;
   justify-content: space-between;

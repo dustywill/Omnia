@@ -22,6 +22,9 @@ async function main() {
 
     // Create Settings Manager instance
     const settingsManager = new SettingsManager(testConfigDir);
+    
+    // Initialize the settings manager
+    await settingsManager.init();
 
     console.log('✅ Created SettingsManager instance');
     console.log(`   Config directory: ${settingsManager.configDir}`);

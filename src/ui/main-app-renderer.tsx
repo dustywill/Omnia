@@ -2,6 +2,7 @@ import React from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { AppNavigation } from "./components/AppNavigation/AppNavigation.js";
 import { StatusBar } from "./components/StatusBar/StatusBar.js";
+import { NotificationSystem, useNotifications } from "./components/NotificationSystem/NotificationSystem.js";
 import { DashboardView } from "./views/DashboardView.js";
 import { PluginsView } from "./views/PluginsView.js";
 import { SettingsView } from "./views/SettingsView.js";
@@ -12,6 +13,7 @@ import { ServiceRegistry } from "../core/service-registry.js";
 import { SettingsManager } from "../core/settings-manager.js";
 import { NavigationService } from "../core/navigation-service.js";
 import { createEventBus } from "../core/event-bus.js";
+import { notificationService } from "../core/notification-service.js";
 import { loadNodeModule } from "./node-module-loader.js";
 // Client logger is imported to initialize console capture
 import "./client-logger.js";
@@ -59,9 +61,6 @@ const MainApp: React.FC<{
   navigationService,
 }) => {
   const [currentView, setCurrentView] = React.useState<AppView>("dashboard");
-  const [currentPluginSettingsId, setCurrentPluginSettingsId] = React.useState<
-    string | null
-  >(null);
   const [selectedPluginId, setSelectedPluginId] = React.useState<string | null>(
     null,
   );
@@ -72,6 +71,30 @@ const MainApp: React.FC<{
   const [pluginFilter, setPluginFilter] = React.useState<
     "all" | "active" | "inactive" | "error"
   >("all");
+
+  // Notification system
+  const { notifications, addNotification, removeNotification, clearNotifications } = useNotifications();
+
+  // Subscribe to notification service events
+  React.useEffect(() => {
+    const unsubscribeAdd = notificationService.subscribe('notification:add', (notification) => {
+      addNotification(notification);
+    });
+
+    const unsubscribeRemove = notificationService.subscribe('notification:remove', (id) => {
+      removeNotification(id);
+    });
+
+    const unsubscribeClear = notificationService.subscribe('notification:clear', () => {
+      clearNotifications();
+    });
+
+    return () => {
+      unsubscribeAdd();
+      unsubscribeRemove();
+      unsubscribeClear();
+    };
+  }, [addNotification, removeNotification, clearNotifications]);
 
   // Subscribe to navigation changes
   React.useEffect(() => {
@@ -90,29 +113,18 @@ const MainApp: React.FC<{
   }, [navigationService]);
 
   const handleViewChange = (
-    view: "dashboard" | "plugins" | "settings" | "logs" | string,
+    view: "dashboard" | "plugins" | "settings" | "logs",
   ) => {
-    // Check if this is a plugin settings view
-    if (view.startsWith("plugin-")) {
-      const pluginId = view.replace("plugin-", "");
-      setCurrentView(view);
-      setCurrentPluginSettingsId(pluginId);
-      // Set settings target for the specific plugin
-      setSettingsTarget({ pluginId });
-      return;
+    // Reset plugin settings when navigating away from settings
+    if (view !== "settings") {
+      setSettingsTarget(null);
     }
-
-    // Reset plugin settings when navigating away
-    setCurrentPluginSettingsId(null);
-    setSettingsTarget(null);
 
     // Reset filter when navigating to plugins view normally
     if (view === "plugins") {
       setPluginFilter("all");
     }
-    navigationService.navigateTo(
-      view as "dashboard" | "plugins" | "settings" | "logs",
-    );
+    navigationService.navigateTo(view);
   };
 
   const handlePluginSelect = (pluginId: string) => {
@@ -170,14 +182,9 @@ const MainApp: React.FC<{
       <div style={appBodyStyle}>
         <AppNavigation
           currentView={
-            currentView === "plugin-detail" ? "plugins" : currentView
+            currentView === "plugin-detail" ? "plugins" : (currentView as "dashboard" | "plugins" | "settings" | "logs")
           }
           onViewChange={handleViewChange}
-          plugins={pluginInfos.map((p) => ({
-            id: p.id,
-            name: p.name,
-            enabled: p.enabled,
-          }))}
         />
 
         <main style={contentStyle}>
@@ -209,17 +216,12 @@ const MainApp: React.FC<{
             />
           )}
 
-          {(currentView === "settings" ||
-            currentView.startsWith("plugin-")) && (
+          {currentView === "settings" && (
             <SettingsView
               settingsManager={settingsManager}
               plugins={pluginInfos}
               pluginManager={pluginManager}
               navigationTarget={settingsTarget}
-              viewMode={
-                currentView.startsWith("plugin-") ? "plugin-only" : "full"
-              }
-              targetPluginId={currentPluginSettingsId}
             />
           )}
 
@@ -260,6 +262,14 @@ const MainApp: React.FC<{
               }
             : null
         }
+      />
+      
+      {/* Global Notification System */}
+      <NotificationSystem
+        notifications={notifications}
+        onRemove={removeNotification}
+        position="top-right"
+        maxNotifications={5}
       />
     </div>
   );

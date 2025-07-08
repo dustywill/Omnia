@@ -15,7 +15,50 @@ export const createSchemas = async () => {
   const zodModule = await loadZod();
   const z = zodModule.z || zodModule.default || zodModule;
 
-  // Script definition schema
+  // Script configuration schema (matches ttCommander structure)
+  const ScriptConfigurationSchema = z.object({
+    enabled: z.boolean()
+      .default(true)
+      .describe('Enable this script configuration'),
+    
+    id: z.string()
+      .min(1, 'Script ID is required')
+      .describe('Unique identifier for this script configuration'),
+    
+    name: z.string()
+      .min(1, 'Script name is required')
+      .describe('User-friendly display name for UI'),
+    
+    description: z.string()
+      .default('')
+      .describe('Description of what this script does'),
+    
+    group: z.string()
+      .default('')
+      .describe('Category for UI grouping (e.g., VPN, Administration)'),
+    
+    scriptPath: z.string()
+      .min(1, 'Script path is required')
+      .describe('Path to the script file, relative to scripts directory'),
+    
+    defaultShellParameters: z.record(z.any())
+      .default({})
+      .describe('Default parameters to pass to the script'),
+    
+    elevated: z.boolean()
+      .default(false)
+      .describe('Run script as administrator'),
+    
+    parameters: z.array(z.object({
+      name: z.string().min(1, 'Parameter name is required'),
+      label: z.string().optional(),
+      description: z.string().default(''),
+      value: z.string().optional()
+    })).default([])
+      .describe('Runtime parameter definitions')
+  });
+
+  // Legacy script definition schema
   const ScriptSchema = z.object({
     id: z.string().min(1, 'Script ID is required'),
     name: z.string().min(1, 'Script name is required'),
@@ -33,10 +76,19 @@ export const createSchemas = async () => {
 
   // Configuration schema for the Script Runner plugin
   const ScriptRunnerConfigSchema = z.object({
+    // Core settings matching ttCommander
+    enabled: z.boolean()
+      .default(true)
+      .describe('Enable the Script Runner plugin'),
+    
     // Directory settings
     scriptsDirectory: z.string()
       .default('scripts')
       .describe('Directory containing PowerShell scripts'),
+    
+    scriptConfigurations: z.array(ScriptConfigurationSchema)
+      .default([])
+      .describe('Pre-configured scripts with their settings'),
     
     outputDirectory: z.string()
       .default('output/script-runner')
@@ -102,7 +154,7 @@ export const createSchemas = async () => {
       .describe('API key for service authentication (optional)')
   });
 
-  return { ScriptSchema, ScriptRunnerConfigSchema, z };
+  return { ScriptSchema, ScriptConfigurationSchema, ScriptRunnerConfigSchema, z };
 };
 
 // Type definitions for backwards compatibility

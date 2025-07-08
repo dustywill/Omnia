@@ -208,18 +208,27 @@ export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
         return json5Module;
 
       case "url":
-        console.log(`[loadNodeModule] Loading URL module via Electron require...`);
+        if (isDevelopment()) {
+          console.debug(`[loadNodeModule] Loading URL module via Electron require...`);
+        }
         try {
           if (typeof window !== 'undefined' && (window as any).require) {
             const url = (window as any).require('url');
-            console.log(`[loadNodeModule] URL module loaded successfully:`, url);
+            if (isDevelopment()) {
+              console.debug(`[loadNodeModule] URL module loaded successfully via require`);
+            }
+            moduleCache.set(name, url);
             return url as T;
           }
         } catch (err) {
-          console.error(`[loadNodeModule] Failed to load url via Electron require:`, err);
+          if (isDevelopment()) {
+            console.debug(`[loadNodeModule] Failed to load url via Electron require:`, err);
+          }
         }
         // Fallback - provide basic pathToFileURL implementation
-        console.warn(`[loadNodeModule] URL module not available, providing fallback pathToFileURL`);
+        if (isDevelopment()) {
+          console.debug(`[loadNodeModule] Using fallback pathToFileURL implementation`);
+        }
         return {
           pathToFileURL: (path: string) => {
             // Simple fallback for pathToFileURL
