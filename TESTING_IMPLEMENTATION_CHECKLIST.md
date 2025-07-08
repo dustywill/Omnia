@@ -17,8 +17,8 @@ This section covers the setup of the AI-driven Playwright testing framework.
 - [ ] **Configure `playwright.config.ts`:**
   - [X] Set `testDir` to point to the `tests/e2e` directory for E2E tests.
   - [X] Configure the `reporter` to use `html`.
-  - [ ] Configure `trace: 'on-first-retry'`. (Missing)
-  - [ ] Define a project named `'Electron App'`. (Missing)
+  - [X] Configure `trace: 'on-first-retry'`.
+  - [X] Define a project named `'Electron App'`.
 - [X] **Create Electron Global Setup:**
   - [X] Create `tests/e2e/global-setup.ts` to launch the Electron application once for all test suites using Playwright's `_electron` API.
   - **Note:** Current `global-setup.ts` only runs `npm run build`, it does not launch the Electron app.
@@ -31,26 +31,26 @@ This section covers the setup of the AI-driven Playwright testing framework.
 ### 1.2: Core Library Implementation
 - [X] **Create Directory Structure:**
   - [X] Verify `tests/lib/` exists.
-  - [ ] Create `tests/snapshots/` for baseline images and styles. (Missing)
-  - [ ] Add `tests/snapshots/` to the root `.gitignore` file. (Missing)
+  - [X] Create `tests/snapshots/` for baseline images and styles.
+  - [X] Add `tests/snapshots/` to the root `.gitignore` file.
 - [ ] **Implement `UIElementScanner.ts`:**
-  - [ ] Create the file `tests/lib/UIElementScanner.ts`. (Missing)
-  - [ ] Define and export a function `findElements(page: Page)`.
-  - [ ] Inside `findElements`, use `page.locator()` to select all interactive elements (e.g., `'button, a, input, [role="button"], [data-testid]'`).
-  - [ ] The function should return an array of `Locator` objects.
+  - [X] Create the file `tests/lib/UIElementScanner.ts`.
+  - [X] Define and export a function `findElements(page: Page)`.
+  - [X] Inside `findElements`, use `page.locator()` to select all interactive elements (e.g., `'button, a, input, [role="button"], [data-testid]'`).
+  - [X] The function should return an array of `Locator` objects.
 - [ ] **Implement `SnapshotManager.ts`:**
-  - [ ] Create the file `tests/lib/SnapshotManager.ts`. (Missing)
-  - [ ] Implement `captureSnapshot(locator: Locator, state: string, testInfo: TestInfo)`.
-    - [ ] It should get the element's computed CSS using `locator.evaluate(el => JSON.stringify(window.getComputedStyle(el)))`.
-    - [ ] It should save the CSS JSON to a file in the `tests/snapshots` directory, structured by test name and a unique element identifier.
-    - [ ] It should take a screenshot using `locator.screenshot()` and save it to the same directory.
-  - [ ] Implement `compareSnapshots(locator: Locator, state: string, testInfo: TestInfo)`.
-    - [ ] It should use `expect(locator).toHaveScreenshot(...)` for visual comparison against the baseline.
-    - [ ] It should read the baseline CSS JSON, get the current CSS, and perform a deep equality check, asserting that they match.
+  - [X] Create the file `tests/lib/SnapshotManager.ts`.
+  - [X] Implement `captureSnapshot(locator: Locator, state: string, testInfo: TestInfo)`.
+    - [X] It should get the element's computed CSS using `locator.evaluate(el => JSON.stringify(window.getComputedStyle(el)))`.
+    - [X] It should save the CSS JSON to a file in the `tests/snapshots` directory, structured by test name and a unique element identifier.
+    - [X] It should take a screenshot using `locator.screenshot()` and save it to the same directory.
+  - [X] Implement `compareSnapshots(locator: Locator, state: string, testInfo: TestInfo)`.
+    - [X] It should use `expect(locator).toHaveScreenshot(...)` for visual comparison against the baseline.
+    - [X] It should read the baseline CSS JSON, get the current CSS, and perform a deep equality check, asserting that they match.
 
 ### 1.3: AI-Driven Test Generation & Execution
-- [ ] **Create a Generic Test Spec for Baseline Generation & Validation:**
-  - [ ] Create a new spec file, e.g., `tests/e2e/visual-regression.spec.ts`. (Missing)
+- [X] **Create a Generic Test Spec for Baseline Generation & Validation:**
+  - [X] Create a new spec file, e.g., `tests/e2e/visual-regression.spec.ts`.
   - **Note:** `tests/e2e/ui-screens.spec.ts` exists but does not implement the required element-specific scanning, state-based snapshotting, and comparison logic.
 
 ## Part 2: Component Test Coverage (Jest & RTL)
@@ -70,12 +70,12 @@ This section covers tasks from `docs/testing/UI_COMPONENT_TEST_PLAN.md`.
   - [ ] Review tests for `CardGrid`. (Needs to be done: Current `CardGrid.test.tsx` is basic and does not cover interactive behavior, styling, or custom classes.)
 - [X] **Audit Navigation Components:**
   - [X] Review tests for `AppNavigation`. (Largely Complete)
-  - [ ] Review tests for `AppHeader`. (Missing: No `AppHeader.test.tsx` found)
+  - [X] Review tests for `AppHeader`.
 - [X] **Audit Complex Components:**
   - [X] Review tests for `PluginCard`. (Largely Complete)
-  - [ ] Review tests for `DashboardPluginCard`. (Missing: No `DashboardPluginCard.test.tsx` found)
-  - [ ] Review tests for `StatusBar`. (Missing: No `StatusBar.test.tsx` found)
-  - [ ] Review tests for `SettingsForm`. (Missing: No `SettingsForm.test.tsx` found)
+  - [X] Review tests for `DashboardPluginCard`.
+  - [X] Review tests for `StatusBar`.
+  - [X] Review tests for `SettingsForm`.
   - [ ] Review tests for `SchemaForm`. (Missing: No `SchemaForm.test.tsx` found)
   - [ ] Review tests for `AppSettings`. (Missing: No `AppSettings.test.tsx` found)
   - [ ] Review tests for `PluginSettings`. (Missing: No `PluginSettings.test.tsx` found)
@@ -135,24 +135,24 @@ This section covers tasks from `docs/testing/UI_COMPONENT_TEST_PLAN.md`.
   - [X] Verify `Card` specific behaviors (e.g., `onClick` for interactive cards, elevation/hover classes).
   - [X] Verify `Grid` specific behaviors (e.g., column count, gap sizes, responsive classes).
 
-- [ ] **Implement `AppHeader` Tests (`tests/ui/components/AppHeader.test.tsx`):**
+- [X] **Implement `AppHeader` Tests (`tests/ui/components/AppHeader.test.tsx`):**
   - [X] Displays title and optional actions.
   - [X] Ensures semantic `<header>` element.
 
-- [ ] **Implement `DashboardPluginCard` Tests (`tests/ui/components/DashboardPluginCard.test.tsx`):**
+- [X] **Implement `DashboardPluginCard` Tests (`tests/ui/components/DashboardPluginCard.test.tsx`):**
   - [X] Entire card clickable when plugin active.
   - [X] Hover animation.
   - [X] Displays plugin metadata.
 
-- [ ] **Implement `StatusBar` Tests (`tests/ui/components/StatusBar.test.tsx`):**
+- [X] **Implement `StatusBar` Tests (`tests/ui/components/StatusBar.test.tsx`):**
   - [X] Displays plugin counts and view label.
   - [X] Hides counts on Dashboard.
   - [X] Colour indicators for active/error plugins.
 
-- [ ] **Implement `SettingsForm` Tests (`tests/ui/components/SettingsForm.test.tsx`):**
-  - [ ] Generates fields from schema.
-  - [ ] Validates input.
-  - [ ] Calls `onSubmit` with values.
+- [X] **Implement `SettingsForm` Tests (`tests/ui/components/SettingsForm.test.tsx`):**
+  - [X] Generates fields from schema.
+  - [X] Validates input.
+  - [X] Calls `onSubmit` with values.
   - [ ] Change tracking via `onChange`.
 
 - [ ] **Implement `SchemaForm` Tests (`tests/ui/components/SchemaForm.test.tsx`):**
