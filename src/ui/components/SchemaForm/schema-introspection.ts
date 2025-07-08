@@ -169,10 +169,18 @@ function analyzeSchemaType(schema: any, field: SchemaFormField): void {
     
     // Analyze array element type for better UX
     const elementType = schema._def.type;
-    if (isZodType(elementType, 'ZodString')) {
+    
+    if (isZodType(elementType, 'ZodObject')) {
+      // This is an array of objects - store the element schema for structured rendering
+      field.type = 'object-array';
+      field.schema = elementType;
+      field.placeholder = 'Array of structured objects';
+    } else if (isZodType(elementType, 'ZodString')) {
       field.placeholder = 'Enter comma-separated text values';
     } else if (isZodType(elementType, 'ZodNumber')) {
       field.placeholder = 'Enter comma-separated numbers';
+    } else {
+      field.placeholder = 'Enter comma-separated values';
     }
   }
   

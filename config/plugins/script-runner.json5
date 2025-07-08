@@ -15,5 +15,58 @@
   "restrictToScriptsDirectory": true,
   "maxOutputLength": 100000,
   "preserveOutputFormatting": true,
-  "enableService": true
+  "enableService": true,
+  "scriptConfigurations": [
+    {
+      "enabled": true,
+      "id": "manageroutes-add",
+      "name": "Add VPN Routes",
+      "description": "Add VPN Routes TCP",
+      "group": "VPN",
+      "scriptPath": "manageRoutes.ps1",
+      "defaultShellParameters": {
+        "Action": "add"
+      },
+      "elevated": true,
+      "parameters": []
+    },
+    {
+      "enabled": true,
+      "id": "manageroutes-remove",
+      "name": "Remove VPN Routes",
+      "description": "Remove VPN Routes TCP", 
+      "group": "VPN",
+      "scriptPath": "manageRoutes.ps1",
+      "defaultShellParameters": {
+        "Action": "remove"
+      },
+      "elevated": true,
+      "parameters": []
+    },
+    {
+      "enabled": true,
+      "id": "copy-from-release",
+      "name": "Copy Tutelar Release",
+      "description": "Copy release files from server to local install",
+      "group": "Administration",
+      "scriptPath": "copy-from-release.ps1",
+      "defaultShellParameters": {
+        "SourceRoot": "\\\\Server02\\data\\tutelar\\release",
+        "DestRoot": "C:\\Tutelar"
+      },
+      "elevated": false,
+      "parameters": []
+    },
+    {
+      "enabled": true,
+      "id": "test",
+      "name": "test Script Name",
+      "description": "thisis a test only a test",
+      "group": "",
+      "scriptPath": "test.ps1",
+      "defaultShellParameters": {},
+      "elevated": false,
+      "parameters": []
+    }
+  ]
 }

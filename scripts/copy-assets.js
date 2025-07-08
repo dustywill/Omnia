@@ -19,7 +19,7 @@ async function copyAssets() {
   // Copy all CSS files from components
   const componentDirs = [
     'AppHeader', 'AppNavigation', 'AppSettings', 'Card', 'PluginCard',
-    'PluginSettings', 'SchemaForm', 'SettingsForm', 'SettingsPage', 'Sidebar', 'JsonEditor', 'StatusBar', 'ToggleSwitch'
+    'PluginSettings', 'SchemaForm', 'SettingsForm', 'SettingsPage', 'Sidebar', 'JsonEditor', 'StatusBar', 'ToggleSwitch', 'NotificationSystem'
   ];
   
   for (const dir of componentDirs) {
@@ -63,7 +63,7 @@ async function copyAssets() {
   }
   
   // Copy plugin JavaScript dependencies
-  const pluginDirs = ['customer-links', 'script-runner']; // Add other plugins as needed
+  const pluginDirs = ['customer-links', 'script-runner', 'as-built-documenter', 'context-generator']; // Add other plugins as needed
   
   for (const pluginDir of pluginDirs) {
     const srcPluginDir = `plugins/${pluginDir}`;

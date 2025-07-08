@@ -2,25 +2,9 @@ import React from "react";
 import { Sidebar } from "../Sidebar/Sidebar.js";
 import styles from "./AppNavigation.module.css";
 
-export interface PluginInfo {
-  id: string;
-  name: string;
-  enabled: boolean;
-}
-
-export interface PluginInfo {
-  id: string;
-  name: string;
-  enabled: boolean;
-}
-
 export interface AppNavigationProps {
-  currentView: string; // Allow any string for plugin views
-  onViewChange: (view: string) => void;
-  plugins?: PluginInfo[]; // Add plugins prop for individual navigation
-  currentView: string; // Allow any string for plugin views
-  onViewChange: (view: string) => void;
-  plugins?: PluginInfo[]; // Add plugins prop for individual navigation
+  currentView: 'dashboard' | 'plugins' | 'settings' | 'logs';
+  onViewChange: (view: 'dashboard' | 'plugins' | 'settings' | 'logs') => void;
 }
 
 // Colorful navigation icons (Unus-inspired design)
@@ -100,26 +84,6 @@ const LogsIcon = () => (
   </div>
 );
 
-// Plugin settings icon
-const PluginSettingsIcon = ({ pluginName }: { pluginName: string }) => (
-  <div
-    style={{
-      width: "32px",
-      height: "32px",
-      borderRadius: "8px",
-      background: "linear-gradient(135deg, #f97316 0%, #ea580c 100%)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      color: "white",
-      fontSize: "12px",
-      fontWeight: "bold",
-    }}
-  >
-    {pluginName.charAt(0).toUpperCase()}
-  </div>
-);
-
 // Omnia logo icon for the header
 const OmniaIcon = () => (
   <div
@@ -142,48 +106,10 @@ const OmniaIcon = () => (
   </div>
 );
 
-// Plugin settings icon component for individual plugins
-const PluginSettingsIcon = ({ pluginName }: { pluginName: string }) => {
-  // Generate a color based on plugin name for visual distinction
-  const colors = [
-    "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)", // red
-    "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)", // orange
-    "linear-gradient(135deg, #eab308 0%, #ca8a04 100%)", // yellow
-    "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)", // green
-    "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)", // cyan
-    "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)", // blue
-    "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)", // purple
-    "linear-gradient(135deg, #ec4899 0%, #db2777 100%)", // pink
-  ];
-
-  const colorIndex =
-    pluginName.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) %
-    colors.length;
-
-  return (
-    <div
-      style={{
-        width: "24px",
-        height: "24px",
-        borderRadius: "6px",
-        background: colors[colorIndex],
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        color: "white",
-        fontSize: "12px",
-        fontWeight: "bold",
-      }}
-    >
-      {pluginName.charAt(0).toUpperCase()}
-    </div>
-  );
-};
 
 export function AppNavigation({
   currentView,
   onViewChange,
-  plugins = [],
 }: AppNavigationProps) {
   return (
     <div className={styles.navigationWrapper}>
@@ -410,94 +336,6 @@ export function AppNavigation({
               </div>
             </div>
 
-            {/* Plugin Settings Section */}
-            {plugins && plugins.length > 0 && (
-              <>
-                {/* Divider */}
-                <div
-                  style={{
-                    height: "1px",
-                    backgroundColor: "#e5e7eb",
-                    margin: "12px 0",
-                  }}
-                />
-
-                {/* Plugin Settings Title */}
-                <div
-                  style={{
-                    fontSize: "0.75rem",
-                    fontWeight: "600",
-                    color: "#9ca3af",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.05em",
-                    textAlign: "center",
-                    marginBottom: "12px",
-                  }}
-                >
-                  Plugin Settings
-                </div>
-
-                {/* Individual Plugin Navigation Items */}
-                {plugins
-                  .filter((plugin: PluginInfo) => plugin.enabled)
-                  .map((plugin: PluginInfo) => (
-                    <div
-                      key={plugin.id}
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        textAlign: "center",
-                        gap: "8px",
-                        cursor: "pointer",
-                        padding: "8px",
-                        borderRadius: "8px",
-                        transition: "background-color 0.2s ease",
-                        backgroundColor:
-                          currentView === `plugin-${plugin.id}`
-                            ? "rgba(37, 99, 235, 0.1)"
-                            : "transparent",
-                      }}
-                      onClick={() => onViewChange(`plugin-${plugin.id}`)}
-                      onMouseEnter={(e) => {
-                        if (currentView !== `plugin-${plugin.id}`) {
-                          e.currentTarget.style.backgroundColor =
-                            "rgba(107, 114, 128, 0.05)";
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (currentView !== `plugin-${plugin.id}`) {
-                          e.currentTarget.style.backgroundColor = "transparent";
-                        }
-                      }}
-                    >
-                      <div
-                        style={{ display: "flex", justifyContent: "center" }}
-                      >
-                        <PluginSettingsIcon pluginName={plugin.name} />
-                      </div>
-                      <div
-                        style={{
-                          color:
-                            currentView === `plugin-${plugin.id}`
-                              ? "#2563eb"
-                              : "#6b7280",
-                          fontSize: "0.75rem",
-                          fontWeight:
-                            currentView === `plugin-${plugin.id}`
-                              ? "600"
-                              : "400",
-                          lineHeight: "1.2",
-                          maxWidth: "80px",
-                          wordWrap: "break-word",
-                        }}
-                      >
-                        {plugin.name}
-                      </div>
-                    </div>
-                  ))}
-              </>
-            )}
           </div>
 
           {/* Footer with Version */}

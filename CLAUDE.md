@@ -132,6 +132,25 @@ The build compiles both main application code and plugin UIs to JavaScript with 
 
 **Critical Note**: CSS modules are automatically processed during build. The system converts CSS module imports like `import styles from './Card.module.css'` to JavaScript imports like `import styles from './Card.module.css.js'` to enable dynamic loading in the browser environment.
 
+### Electron Build Requirements
+
+**IMPORTANT FOR ELECTRON COMPATIBILITY**: When adding new components with CSS modules, you MUST update the build scripts:
+
+1. **Add to copy-assets.js**: Every new component directory must be added to the `componentDirs` array in `scripts/copy-assets.js`
+   ```javascript
+   const componentDirs = [
+     'AppHeader', 'AppNavigation', 'AppSettings', 'Card', 'PluginCard',
+     'PluginSettings', 'SchemaForm', 'SettingsForm', 'SettingsPage', 'Sidebar', 
+     'JsonEditor', 'StatusBar', 'ToggleSwitch', 'NotificationSystem' // <- Add new components here
+   ];
+   ```
+
+2. **Electron uses file:// protocol**: Unlike web browsers, Electron loads files using the `file://` protocol, which requires all assets to be physically present in the dist/ directory.
+
+3. **CSS Module Processing**: The `process-css-modules.js` script automatically finds and processes all `.module.css` files in the dist/ directory, converting them to `.module.css.js` files that export JavaScript objects.
+
+4. **Always Test in Electron**: After adding new components, always run `npm run electron` to verify the build works in the Electron environment, not just `npm run dev`.
+
 ## Testing Configuration
 
 - **Jest**: Unit tests with TypeScript, ESM support, JSDOM environment

@@ -17,7 +17,7 @@ import styles from './SchemaForm.module.css';
 export interface SchemaFormField {
   key: string;
   label: string;
-  type: 'string' | 'number' | 'boolean' | 'enum' | 'array' | 'object';
+  type: 'string' | 'number' | 'boolean' | 'enum' | 'array' | 'object' | 'object-array';
   description?: string;
   defaultValue?: any;
   required?: boolean;
@@ -327,6 +327,97 @@ export function SchemaForm({
           </div>
         );
 
+      case 'object-array':
+        return (
+          <div key={key} className={styles.fieldGroup}>
+            <label className="block text-sm font-medium text-theme-primary mb-2">
+              {label}
+              {required && <span className="text-danger ml-1">*</span>}
+            </label>
+            <div className={styles.objectArrayField}>
+              {description && (
+                <p className="text-sm text-theme-secondary mb-3">{description}</p>
+              )}
+              
+              {/* Array items */}
+              {Array.isArray(value) && value.map((item, index) => (
+                <div key={index} className="bg-theme-surface border border-theme rounded-lg p-4 mb-3">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-sm font-medium text-theme-primary">
+                      {label} #{index + 1}
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newArray = [...(value || [])];
+                        newArray.splice(index, 1);
+                        handleFieldChange(key, newArray);
+                      }}
+                      className="text-danger hover:text-danger-dark text-sm"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  
+                  {/* Render object fields inline */}
+                  {field.schema && field.schema.shape && Object.entries(field.schema.shape).map(([subKey, subSchema]: [string, any]) => {
+                    const subField = analyzeSubField(subKey, subSchema);
+                    const subValue = item?.[subKey] ?? '';
+                    
+                    return (
+                      <div key={subKey} className="mb-3 last:mb-0">
+                        <Input
+                          label={subField.label}
+                          type={subField.type === 'number' ? 'number' : 'text'}
+                          value={typeof subValue === 'object' ? JSON.stringify(subValue) : (subValue?.toString() || '')}
+                          onChange={(e) => {
+                            const newArray = [...(value || [])];
+                            const newValue = subField.type === 'number' ? Number(e.target.value) : 
+                                           subField.type === 'boolean' ? e.target.checked :
+                                           e.target.value;
+                            newArray[index] = { ...newArray[index], [subKey]: newValue };
+                            handleFieldChange(key, newArray);
+                          }}
+                          placeholder={subField.placeholder}
+                          helperText={subField.description}
+                          required={subField.required}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+              
+              {/* Add new item button */}
+              <button
+                type="button"
+                onClick={() => {
+                  const newItem: Record<string, any> = {};
+                  // Initialize with default values if available
+                  if (field.schema && field.schema.shape) {
+                    Object.entries(field.schema.shape).forEach(([subKey, subSchema]: [string, any]) => {
+                      if (subSchema._def?.defaultValue) {
+                        newItem[subKey] = typeof subSchema._def.defaultValue === 'function' 
+                          ? subSchema._def.defaultValue() 
+                          : subSchema._def.defaultValue;
+                      }
+                    });
+                  }
+                  const newArray = [...(value || []), newItem];
+                  handleFieldChange(key, newArray);
+                }}
+                className="w-full px-4 py-2 border-2 border-dashed border-theme text-theme-secondary hover:border-action hover:text-action rounded-lg transition-colors"
+              >
+                + Add {label.slice(0, -1)} {/* Remove 's' from plural label */}
+              </button>
+              
+              {error && (
+                <p className="text-sm text-danger mt-2">{error}</p>
+              )}
+            </div>
+          </div>
+        );
+
       case 'array':
         return (
           <div key={key} className={styles.fieldGroup}>
@@ -350,12 +441,46 @@ export function SchemaForm({
                 <div className="flex flex-wrap gap-1 mt-2">
                   {value.map((item, index) => (
                     <Badge key={index} variant="neutral" size="sm">
-                      {item}
+                      {typeof item === 'object' ? JSON.stringify(item) : String(item)}
                     </Badge>
                   ))}
                 </div>
               )}
             </div>
+          </div>
+        );
+
+      case 'object':
+        return (
+          <div key={key} className={styles.fieldGroup}>
+            <label htmlFor={key} className="block text-sm font-medium text-theme-primary mb-1">
+              {label}
+              {required && <span className="text-danger ml-1">*</span>}
+            </label>
+            <textarea
+              id={key}
+              value={typeof value === 'object' ? JSON.stringify(value, null, 2) : value || ''}
+              onChange={(e) => {
+                try {
+                  const parsedValue = JSON.parse(e.target.value);
+                  handleFieldChange(key, parsedValue);
+                } catch {
+                  // If it's not valid JSON, store as string for now
+                  handleFieldChange(key, e.target.value);
+                }
+              }}
+              className={`w-full px-4 py-2 bg-theme-surface border rounded-lg focus:outline-none focus:ring-2 focus:ring-action/20 ${
+                error ? 'border-danger' : 'border-theme'
+              }`}
+              rows={4}
+              placeholder={placeholder || 'Enter JSON object'}
+            />
+            {description && (
+              <p className="text-sm text-theme-secondary mt-1">{description}</p>
+            )}
+            {error && (
+              <p className="text-sm text-danger mt-1">{error}</p>
+            )}
           </div>
         );
 
@@ -365,7 +490,7 @@ export function SchemaForm({
             <Input
               label={label}
               type="text"
-              value={value?.toString() || ''}
+              value={typeof value === 'object' ? JSON.stringify(value) : (value?.toString() || '')}
               onChange={(e) => handleFieldChange(key, e.target.value)}
               error={error}
               helperText={description}
@@ -375,6 +500,63 @@ export function SchemaForm({
           </div>
         );
     }
+  };
+
+  // Helper function to analyze sub-fields for object arrays
+  const analyzeSubField = (key: string, fieldSchema: any) => {
+    const field = {
+      key,
+      label: formatLabel(key),
+      type: 'string',
+      required: !isOptional(fieldSchema),
+      placeholder: '',
+      description: ''
+    };
+
+    // Unwrap optional and nullable schemas
+    let innerSchema = fieldSchema;
+    while (innerSchema?._def?.typeName === 'ZodOptional' || innerSchema?._def?.typeName === 'ZodNullable') {
+      innerSchema = innerSchema._def.innerType;
+    }
+
+    // Extract description
+    if (fieldSchema._def?.description) {
+      field.description = fieldSchema._def.description;
+    }
+
+    // Determine field type
+    if (innerSchema?._def?.typeName === 'ZodString') {
+      field.type = 'string';
+      if (innerSchema._def.checks) {
+        innerSchema._def.checks.forEach((check: any) => {
+          if (check.kind === 'email') field.placeholder = 'example@domain.com';
+          if (check.kind === 'url') field.placeholder = 'https://example.com';
+        });
+      }
+    } else if (innerSchema?._def?.typeName === 'ZodNumber') {
+      field.type = 'number';
+    } else if (innerSchema?._def?.typeName === 'ZodBoolean') {
+      field.type = 'boolean';
+    }
+
+    return field;
+  };
+
+  // Helper function to check if schema is optional
+  const isOptional = (schema: any): boolean => {
+    return schema?._def?.typeName === 'ZodOptional' || 
+           schema?._def?.typeName === 'ZodNullable' ||
+           schema?._def?.typeName === 'ZodDefault';
+  };
+
+  // Helper function to format field labels
+  const formatLabel = (key: string): string => {
+    return key
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, str => str.toUpperCase())
+      .replace(/_/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
   };
 
   const showModeToggle = mode === 'hybrid';

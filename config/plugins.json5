@@ -23,14 +23,16 @@
     "as-built-documenter": {
       id: "as-built-documenter",
       enabled: true,
-      type: "simple",
+      configPath: "plugins/as-built-documenter.json5",
+      type: "configured",
       version: "1.0.0"
     },
     
     "context-generator": {
       id: "context-generator",
-      enabled: true, 
-      type: "simple",
+      enabled: true,
+      configPath: "plugins/context-generator.json5", 
+      type: "configured",
       version: "1.0.0"
     },
     

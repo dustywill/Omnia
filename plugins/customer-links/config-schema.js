@@ -24,6 +24,15 @@ export const createSchemas = async () => {
 
   // Configuration schema for the Customer Links plugin
   const CustomerLinksConfigSchema = z.object({
+    // Core settings matching ttCommander
+    enabled: z.boolean()
+      .default(true)
+      .describe('Enable the Customer Links plugin'),
+    
+    savePath: z.string()
+      .default('output/customer-links/customers.html')
+      .describe('File path where the standalone customer links page will be written'),
+    
     // File paths
     configFilePath: z.string()
       .default('config/customer-sites.json')

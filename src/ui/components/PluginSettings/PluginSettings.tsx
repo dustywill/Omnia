@@ -93,12 +93,32 @@ export function PluginSettings({
       const registry = await settingsManager.loadPluginRegistry();
       const registryEntry = registry.plugins[pluginId];
       
-      // For now, use a simple configuration structure
-      // In a full implementation, you'd load the actual plugin config file
+      // Load the actual plugin schema and configuration
+      const schema = await createPluginSchema(selectedPlugin!);
+      let settings = {};
+      
+      // Try to load the actual plugin configuration file
+      if (selectedPlugin?.manifest.type !== 'simple') {
+        try {
+          settings = await settingsManager.loadPluginConfig(pluginId, schema);
+        } catch (err) {
+          // If config file doesn't exist, use defaults from schema
+          console.log(`No config file found for ${pluginId}, using defaults`);
+          if (schema && typeof schema.parse === 'function') {
+            try {
+              settings = schema.parse({});
+            } catch (parseErr) {
+              console.warn(`Failed to parse default config for ${pluginId}:`, parseErr);
+              settings = {};
+            }
+          }
+        }
+      }
+      
       const config: PluginConfig = {
         enabled: registryEntry?.enabled ?? true,
-        settings: {},
-        schema: await createPluginSchema(selectedPlugin!)
+        settings,
+        schema
       };
 
       setPluginConfig(config);
@@ -136,15 +156,24 @@ export function PluginSettings({
       setSaving(true);
       setError(null);
 
-      // Update plugin configuration
+      // Save the plugin configuration to the actual config file
+      await settingsManager.savePluginConfig(
+        selectedPlugin.manifest.id, 
+        values, 
+        pluginConfig.schema
+      );
+
+      // Update local state
       const updatedConfig: PluginConfig = {
         ...pluginConfig,
         settings: values
       };
-
-      // In a full implementation, you'd save this to the plugin's config file
+      
       setPluginConfig(updatedConfig);
       onSettingsChange?.(selectedPlugin.manifest.id, values);
+
+      // Show success message (you could add a success state for better UX)
+      console.log(`Plugin ${selectedPlugin.manifest.id} configuration saved successfully`);
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save plugin settings');
@@ -419,35 +448,69 @@ export function PluginSettings({
  * Create a schema for plugin configuration based on plugin type
  */
 async function createPluginSchema(plugin: LoadedPlugin): Promise<any> {
-  // This would normally be loaded from the plugin's schema file
-  // For now, create a basic schema based on plugin type
-  
   try {
     const zodModule = await loadNodeModule<typeof import('zod')>('zod');
     const z = zodModule.z || zodModule.default || zodModule;
     
-    switch (plugin.manifest.type) {
-      case 'simple':
-        return z.object({});
-        
-      case 'configured':
-        return z.object({
-          title: z.string().min(1).default(plugin.manifest.name).describe('Display title'),
-          enabled: z.boolean().default(true).describe('Enable this plugin feature'),
-          refreshInterval: z.number().min(1000).max(60000).default(5000).describe('Refresh interval in milliseconds'),
-        });
-        
-      case 'advanced':
-        return z.object({
-          logLevel: z.enum(['error', 'warn', 'info', 'debug']).default('info').describe('Plugin logging level'),
-          maxRetries: z.number().min(0).max(10).default(3).describe('Maximum retry attempts'),
-          timeout: z.number().min(1000).max(30000).default(10000).describe('Operation timeout in milliseconds'),
-          enableMetrics: z.boolean().default(false).describe('Enable performance metrics collection'),
-        });
-        
-      default:
-        return z.object({});
+    // For simple plugins, return empty schema
+    if (plugin.manifest.type === 'simple') {
+      return z.object({});
     }
+    
+    // Load plugin-specific schemas for configured/advanced plugins
+    const pluginId = plugin.manifest.id;
+    
+    try {
+      // Try to load the specific plugin schema
+      switch (pluginId) {
+        case 'script-runner':
+          const scriptModule = await import('../../../lib/schemas/plugins/script-runner.js');
+          const { scriptRunnerConfigSchema } = await scriptModule.createScriptRunnerSchemas();
+          return scriptRunnerConfigSchema;
+          
+        case 'as-built-documenter':
+          const asBuiltModule = await import('../../../lib/schemas/plugins/as-built-documenter.js');
+          const { asBuiltDocumenterConfigSchema } = await asBuiltModule.createAsBuiltDocumenterSchemas();
+          return asBuiltDocumenterConfigSchema;
+          
+        case 'context-generator':
+          const contextModule = await import('../../../lib/schemas/plugins/context-generator.js');
+          const { contextGeneratorConfigSchema } = await contextModule.createContextGeneratorSchemas();
+          return contextGeneratorConfigSchema;
+          
+        case 'customer-links':
+          const customerModule = await import('../../../lib/schemas/plugins/customer-links.js');
+          const { customerLinksConfigSchema } = await customerModule.createCustomerLinksSchemas();
+          return customerLinksConfigSchema;
+          
+        default:
+          // Try to load plugin config schema from plugin directory
+          try {
+            const configSchemaModule = await import(`../../../plugins/${pluginId}/config-schema.js`);
+            if (configSchemaModule.createSchemas) {
+              const schemas = await configSchemaModule.createSchemas();
+              // Return the main config schema (usually the last one in the object)
+              const schemaKeys = Object.keys(schemas);
+              const configSchemaKey = schemaKeys.find(key => key.toLowerCase().includes('config'));
+              if (configSchemaKey) {
+                return schemas[configSchemaKey];
+              }
+              // Fallback to the first schema if no config schema found
+              return schemas[schemaKeys[0]];
+            }
+            return configSchemaModule.default || z.object({});
+          } catch (schemaError) {
+            console.warn(`Could not load schema for plugin ${pluginId}:`, schemaError);
+            // Fall back to a generic schema based on plugin type
+            return createFallbackSchema(plugin, z);
+          }
+      }
+    } catch (error) {
+      console.warn(`Could not load specific schema for plugin ${pluginId}:`, error);
+      // Fall back to a generic schema based on plugin type
+      return createFallbackSchema(plugin, z);
+    }
+    
   } catch (error) {
     console.error('Failed to load Zod for plugin schema:', error);
     // Return a simple fallback schema
@@ -455,5 +518,31 @@ async function createPluginSchema(plugin: LoadedPlugin): Promise<any> {
       parse: () => ({}),
       safeParse: () => ({ success: true, data: {} })
     };
+  }
+}
+
+/**
+ * Create a fallback schema when plugin-specific schema cannot be loaded
+ */
+function createFallbackSchema(plugin: LoadedPlugin, z: any): any {
+  switch (plugin.manifest.type) {
+    case 'configured':
+      return z.object({
+        enabled: z.boolean().default(true).describe('Enable this plugin'),
+        title: z.string().min(1).default(plugin.manifest.name).describe('Display title'),
+        refreshInterval: z.number().min(1000).max(60000).default(5000).describe('Refresh interval in milliseconds'),
+      });
+      
+    case 'advanced':
+      return z.object({
+        enabled: z.boolean().default(true).describe('Enable this plugin'),
+        logLevel: z.enum(['error', 'warn', 'info', 'debug']).default('info').describe('Plugin logging level'),
+        maxRetries: z.number().min(0).max(10).default(3).describe('Maximum retry attempts'),
+        timeout: z.number().min(1000).max(30000).default(10000).describe('Operation timeout in milliseconds'),
+        enableMetrics: z.boolean().default(false).describe('Enable performance metrics collection'),
+      });
+      
+    default:
+      return z.object({});
   }
 }

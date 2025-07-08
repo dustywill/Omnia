@@ -235,7 +235,47 @@ export class SettingsManager {
     
     // Write formatted JSON5
     const configPath = this.path.join(this.pluginConfigsDir, `${pluginId}.json5`);
-    const content = this.JSON5.stringify(validatedConfig, null, 2);
+    
+    // Ensure we have a string to write
+    let content: string;
+    try {
+      if (this.JSON5 && typeof this.JSON5.stringify === 'function') {
+        const result = this.JSON5.stringify(validatedConfig, null, 2);
+        // Ensure the result is resolved if it's a promise
+        content = await Promise.resolve(result);
+      } else {
+        // Fallback to regular JSON if JSON5 is not available
+        content = JSON.stringify(validatedConfig, null, 2);
+      }
+    } catch (error) {
+      console.error('Error stringifying config:', error, validatedConfig);
+      // Last resort fallback
+      try {
+        content = JSON.stringify(validatedConfig, null, 2);
+      } catch (jsonError) {
+        console.error('JSON stringify also failed:', jsonError);
+        content = '{}'; // Emergency fallback
+      }
+    }
+    
+    // Ensure content is definitely a string and not a promise
+    if (content && typeof (content as any).then === 'function') {
+      console.error('Content is a promise, awaiting it');
+      content = await (content as any);
+    }
+    
+    // Final type check
+    if (typeof content !== 'string') {
+      console.error('Content is still not a string:', typeof content, content);
+      content = String(content);
+    }
+    
+    // Additional validation before writing
+    if (content === '[object Promise]' || content === '[object Object]') {
+      console.error('Content contains invalid serialization, using fallback');
+      content = JSON.stringify(validatedConfig, null, 2);
+    }
+    
     await this.fs.writeFile(configPath, content, 'utf8');
   }
 
