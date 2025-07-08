@@ -94,6 +94,7 @@ export interface SettingsFormProps {
   title: string;
   fields: SettingsField[];
   onSave: (values: Record<string, any>) => void;
+  onChange?: (values: Record<string, any>, isValid: boolean) => void;
   onCancel?: () => void;
   className?: string;
   loading?: boolean;
@@ -104,9 +105,10 @@ export interface SettingsFormProps {
 export function SettingsForm({ 
   title, 
   fields, 
-  onSave, 
-  onCancel, 
-  className = '', 
+  onSave,
+  onChange,
+  onCancel,
+  className = '',
   loading = false,
   enableJsonToggle = false,
   defaultMode = 'form'
@@ -173,6 +175,7 @@ export function SettingsForm({
       schema={schema}
       initialValues={initialValues}
       onSubmit={handleSubmit}
+      onChange={onChange}
       onCancel={onCancel}
       loading={loading}
       className={className}
