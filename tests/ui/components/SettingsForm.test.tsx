@@ -34,4 +34,15 @@ describe('SettingsForm', () => {
     await user.click(screen.getByRole('button', { name: 'Save' }));
     expect(onSave).toHaveBeenCalledWith({ name: 'Alice' });
   });
+
+  it('triggers onChange when values update', async () => {
+    const user = userEvent.setup();
+    const onChange = jest.fn();
+    render(
+      <SettingsForm title="Test" fields={fields} onSave={jest.fn()} onChange={onChange} />
+    );
+    const input = await screen.findByLabelText('Name');
+    await user.type(input, 'Bob');
+    expect(onChange).toHaveBeenLastCalledWith({ name: 'Bob' }, true);
+  });
 });

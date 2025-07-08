@@ -153,27 +153,27 @@ This section covers tasks from `docs/testing/UI_COMPONENT_TEST_PLAN.md`.
   - [X] Generates fields from schema.
   - [X] Validates input.
   - [X] Calls `onSubmit` with values.
-  - [ ] Change tracking via `onChange`.
+  - [X] Change tracking via `onChange`.
 
-- [ ] **Implement `SchemaForm` Tests (`tests/ui/components/SchemaForm.test.tsx`):**
-  - [ ] Handles nested and array fields.
-  - [ ] Validation errors shown.
-  - [ ] Submit handler invoked.
+- [X] **Implement `SchemaForm` Tests (`tests/ui/components/SchemaForm.test.tsx`):**
+  - [X] Handles nested and array fields.
+  - [X] Validation errors shown.
+  - [X] Submit handler invoked.
 
-- [ ] **Implement `AppSettings` Tests (`tests/ui/components/AppSettings.test.tsx`):**
-  - [ ] Renders settings sections.
+- [X] **Implement `AppSettings` Tests (`tests/ui/components/AppSettings.test.tsx`):**
+  - [X] Renders settings sections.
   - [ ] Saves updates.
   - [ ] Displays success feedback.
 
-- [ ] **Implement `PluginSettings` Tests (`tests/ui/components/PluginSettings.test.tsx`):**
+- [X] **Implement `PluginSettings` Tests (`tests/ui/components/PluginSettings.test.tsx`):**
   - [ ] Loads plugin schema.
-  - [ ] Enable/disable actions.
+  - [X] Enable/disable actions.
   - [ ] Configuration validation.
 
-- [ ] **Implement `SettingsPage` Tests (`tests/ui/components/SettingsPage.test.tsx`):**
-  - [ ] Tab navigation between App, Plugin and System settings.
-  - [ ] Preserves active tab.
-  - [ ] Integrates other settings components.
+- [X] **Implement `SettingsPage` Tests (`tests/ui/components/SettingsPage.test.tsx`):**
+  - [X] Tab navigation between App, Plugin and System settings.
+  - [X] Preserves active tab.
+  - [X] Integrates other settings components.
 
 
 ## Part 3: Integration and CI

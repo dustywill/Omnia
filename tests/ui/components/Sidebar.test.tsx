@@ -10,6 +10,12 @@ describe('Sidebar and SidebarItem', () => {
     expect(aside.className).toContain('w-80');
   });
 
+  it('supports collapsed width', () => {
+    const { container } = render(<Sidebar width="sm" />);
+    const aside = container.firstElementChild as HTMLElement;
+    expect(aside.className).toContain('w-48');
+  });
+
   it('handles item click callbacks', async () => {
     const user = userEvent.setup();
     const onClick = jest.fn();
