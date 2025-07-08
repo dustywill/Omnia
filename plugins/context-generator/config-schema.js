@@ -17,17 +17,17 @@ export const createSchemas = async () => {
 
   // Saved filter schema
   const SavedFilterSchema = z.object({
-    name: z.string().min(1, 'Filter name is required'),
     fileRegex: z.string().default(''),
     fileFilterType: z.enum(['include', 'exclude']).default('exclude'),
     folderRegex: z.string().default(''),
     folderFilterType: z.enum(['include', 'exclude']).default('exclude'),
     maxDepth: z.number().default(-1),
-    description: z.string().default('')
   });
 
   // Configuration schema for the Context Generator plugin
   const ContextGeneratorConfigSchema = z.object({
+    title: z.string().default('Context Generator'),
+    description: z.string().default('Generates context from selected files in a directory.'),
     // Core settings matching ttCommander
     enabled: z.boolean()
       .default(true)
@@ -39,19 +39,19 @@ export const createSchemas = async () => {
       .describe('Last folder path used for context generation'),
     
     lastFileRegex: z.string()
-      .default('\\.(php|inc|module|install)$')
+      .default('')
       .describe('Last file regex pattern used'),
     
     lastFileFilterType: z.enum(['include', 'exclude'])
-      .default('exclude')
+      .default('include')
       .describe('Last file filter type (include or exclude matching files)'),
     
     lastFolderRegex: z.string()
-      .default('node_modules|vendor|\\.git|\\.hg|logs|\\.qodo')
+      .default('')
       .describe('Last folder regex pattern used'),
     
     lastFolderFilterType: z.enum(['include', 'exclude'])
-      .default('exclude')
+      .default('include')
       .describe('Last folder filter type (include or exclude matching folders)'),
     
     lastMaxDepth: z.number()

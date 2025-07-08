@@ -248,6 +248,149 @@ export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
           }
         } as T;
 
+      case "@radix-ui/react-slot":
+        if (isDevelopment()) {
+          console.debug(`[loadNodeModule] Loading Radix UI React Slot...`);
+        }
+        // Create a compatible Slot component that behaves like the real one
+        const SlotComponent = React.forwardRef<HTMLElement, any>(({ children, asChild, ...props }, ref) => {
+          if (asChild && React.isValidElement(children)) {
+            // When asChild is true, clone the child element with the props
+            return React.cloneElement(children, { ...props, ref });
+          }
+          // When asChild is false, render as a span
+          return React.createElement('span', { ...props, ref }, children);
+        });
+        SlotComponent.displayName = 'Slot';
+        
+        const slotModule = { Slot: SlotComponent } as T;
+        moduleCache.set(name, slotModule);
+        return slotModule;
+
+      case "class-variance-authority":
+        if (isDevelopment()) {
+          console.debug(`[loadNodeModule] Loading Class Variance Authority...`);
+        }
+        // Create a compatible cva function
+        const cva = (base: string, options: any = {}) => {
+          const variants = options.variants || {};
+          const defaultVariants = options.defaultVariants || {};
+          
+          return (props: any = {}) => {
+            let classes = base;
+            
+            // Apply variant classes
+            for (const [key, value] of Object.entries(props)) {
+              if (variants[key] && variants[key][value]) {
+                classes += ' ' + variants[key][value];
+              }
+            }
+            
+            // Apply default variant classes for missing props
+            for (const [key, value] of Object.entries(defaultVariants)) {
+              if (!(key in props) && variants[key] && variants[key][value]) {
+                classes += ' ' + variants[key][value];
+              }
+            }
+            
+            return classes;
+          };
+        };
+        
+        const cvaModule = { cva } as T;
+        moduleCache.set(name, cvaModule);
+        return cvaModule;
+
+      case "clsx":
+        if (isDevelopment()) {
+          console.debug(`[loadNodeModule] Loading clsx...`);
+        }
+        // Create a compatible clsx function
+        const clsx = (...args: any[]) => {
+          return args
+            .filter(Boolean)
+            .map((arg) => {
+              if (typeof arg === 'string') return arg;
+              if (typeof arg === 'object' && arg !== null) {
+                return Object.entries(arg)
+                  .filter(([_, value]) => Boolean(value))
+                  .map(([key]) => key)
+                  .join(' ');
+              }
+              return '';
+            })
+            .join(' ')
+            .trim();
+        };
+        
+        const clsxModule = { clsx, default: clsx } as T;
+        moduleCache.set(name, clsxModule);
+        return clsxModule;
+
+      case "tailwind-merge":
+        if (isDevelopment()) {
+          console.debug(`[loadNodeModule] Loading tailwind-merge...`);
+        }
+        // Create a compatible twMerge function
+        const twMerge = (...classes: any[]) => {
+          // Simple implementation - just join and dedupe
+          const classString = classes.filter(Boolean).join(' ');
+          const classArray = classString.split(/\s+/).filter(Boolean);
+          
+          // Basic deduplication - remove duplicates (keep last occurrence)
+          const uniqueClasses = [...new Set(classArray)];
+          
+          return uniqueClasses.join(' ');
+        };
+        
+        const twMergeModule = { twMerge } as T;
+        moduleCache.set(name, twMergeModule);
+        return twMergeModule;
+
+      case "lucide-react":
+        if (isDevelopment()) {
+          console.debug(`[loadNodeModule] Loading lucide-react...`);
+        }
+        // Create fallback icon components
+        const createIconComponent = (name: string) => {
+          return React.forwardRef<SVGSVGElement, any>((props, ref) => {
+            return React.createElement('svg', {
+              ...props,
+              ref,
+              width: props.size || 24,
+              height: props.size || 24,
+              viewBox: '0 0 24 24',
+              fill: 'none',
+              stroke: 'currentColor',
+              strokeWidth: 2,
+              strokeLinecap: 'round',
+              strokeLinejoin: 'round',
+              'aria-label': name
+            }, React.createElement('text', {
+              x: 12,
+              y: 16,
+              textAnchor: 'middle',
+              fontSize: 6,
+              fill: 'currentColor'
+            }, name.slice(0, 3)));
+          });
+        };
+        
+        const lucideModule = new Proxy({} as any, {
+          get: (target, prop) => {
+            if (typeof prop === 'string') {
+              if (!target[prop]) {
+                target[prop] = createIconComponent(prop);
+              }
+              return target[prop];
+            }
+            return undefined;
+          }
+        });
+        
+        moduleCache.set(name, lucideModule);
+        return lucideModule;
+
       case "zod":
         if (isDevelopment()) {
           console.debug(`[loadNodeModule] Loading Zod via Electron IPC...`);

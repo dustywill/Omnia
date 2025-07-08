@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { loadNodeModule } from '../../src/ui/node-module-loader.js';
 import { Card } from '../../src/ui/components/Card/Card.js';
 import { Button } from '../../src/ui/components/Button/Button.js';
+import { SchemaForm } from '../../src/ui/components/SchemaForm/SchemaForm.js';
 import { defaultAsBuiltDocumenterConfig } from '../../src/lib/schemas/plugins/as-built-documenter.js';
 
 export type AsBuiltDocumenterProps = {
@@ -206,13 +207,18 @@ const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({ context }) => {
   const [validationResult, setValidationResult] = useState<any>(null);
   
   // UI state
-  const [activeTab, setActiveTab] = useState<'overview' | 'dataSources' | 'templates' | 'projects' | 'generate' | 'result'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'projects' | 'dataSources' | 'templates' | 'generate' | 'result'>('overview');
   const [CodeMirrorComponent, setCodeMirrorComponent] = useState<any>(null);
+  
+  // Editing state
+  const [editingItem, setEditingItem] = useState<{type: 'project' | 'dataSource' | 'template', id?: string, data?: any} | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingSchemas, setEditingSchemas] = useState<any>(null);
 
   // Get current project
   const currentProject = config.activeProjectId ? config.projects[config.activeProjectId] : null;
 
-  // Load CodeMirror component
+  // Load CodeMirror component and schemas
   useEffect(() => {
     const loadCodeMirror = async () => {
       try {
@@ -231,7 +237,18 @@ const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({ context }) => {
       }
     };
 
+    const loadSchemas = async () => {
+      try {
+        const { createAsBuiltDocumenterSchemas } = await import('../../src/lib/schemas/plugins/as-built-documenter.js');
+        const schemas = await createAsBuiltDocumenterSchemas();
+        setEditingSchemas(schemas);
+      } catch (err) {
+        console.warn('Could not load schemas:', err);
+      }
+    };
+
     loadCodeMirror();
+    loadSchemas();
   }, []);
 
   // Load default template content
@@ -394,14 +411,66 @@ Documentation generated successfully for ${currentProject.customer.name}.`
     }
   }, [templateContent]);
 
+  // Handlers for CRUD operations
+  const handleAddItem = useCallback((type: 'project' | 'dataSource' | 'template') => {
+    setEditingItem({ type, id: undefined, data: undefined });
+    setIsFormOpen(true);
+  }, []);
+
+  const handleEditItem = useCallback((type: 'project' | 'dataSource' | 'template', id: string, data: any) => {
+    setEditingItem({ type, id, data });
+    setIsFormOpen(true);
+  }, []);
+
+  const handleSaveItem = useCallback((data: any) => {
+    if (!editingItem || !editingSchemas) return;
+
+    const now = new Date().toISOString();
+    const isNew = !editingItem.id;
+    const id = editingItem.id || `${editingItem.type}-${Date.now()}`;
+
+    // Add timestamps
+    const itemData = {
+      ...data,
+      id,
+      createdAt: isNew ? now : editingItem.data?.createdAt || now,
+      updatedAt: now
+    };
+
+    // Update config based on type
+    const newConfig = { ...config };
+    switch (editingItem.type) {
+      case 'project':
+        newConfig.projects = { ...newConfig.projects, [id]: itemData };
+        break;
+      case 'dataSource':
+        newConfig.dataSources = { ...newConfig.dataSources, [id]: itemData };
+        break;
+      case 'template':
+        newConfig.templates = { ...newConfig.templates, [id]: itemData };
+        break;
+    }
+
+    // In a real implementation, this would save to the configuration system
+    console.log('Saving item:', editingItem.type, itemData);
+    
+    setIsFormOpen(false);
+    setEditingItem(null);
+  }, [editingItem, editingSchemas, config]);
+
+  const handleCancelEdit = useCallback(() => {
+    setIsFormOpen(false);
+    setEditingItem(null);
+  }, []);
+
   // Render navigation tabs
   const renderTabs = () => (
     <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', borderBottom: '1px solid #e0e0e0' }}>
       {[
         { key: 'overview', label: 'Overview' },
+        { key: 'projects', label: 'Projects' },
         { key: 'dataSources', label: 'Data Sources' },
         { key: 'templates', label: 'Templates' },
-        { key: 'projects', label: 'Projects' },
         { key: 'generate', label: 'Generate' },
         { key: 'result', label: 'Result' }
       ].map(({ key, label }) => (
@@ -456,8 +525,18 @@ Documentation generated successfully for ${currentProject.customer.name}.`
   const renderDataSourcesTab = () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       <Card>
-        <h3>Data Sources Library</h3>
-        <p>Shared data sources that can be reused across multiple projects:</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <div>
+            <h3 style={{ margin: '0 0 8px 0' }}>Data Sources Library</h3>
+            <p style={{ margin: 0 }}>Shared data sources that can be reused across multiple projects:</p>
+          </div>
+          <ShadcnButton 
+            variant="default"
+            onClick={() => handleAddItem('dataSource')}
+          >
+            Add Data Source
+          </ShadcnButton>
+        </div>
         {(Object.values(config.dataSources) as DataSource[]).map((dataSource) => (
           <div key={dataSource.id} style={{ 
             padding: '12px', 
@@ -467,7 +546,7 @@ Documentation generated successfully for ${currentProject.customer.name}.`
             backgroundColor: currentProject?.dataSourceIds.includes(dataSource.id) ? '#e8f5e8' : 'white'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <div>
+              <div style={{ flex: 1 }}>
                 <strong>{dataSource.name}</strong>
                 {currentProject?.dataSourceIds.includes(dataSource.id) && (
                   <span style={{ color: '#28a745', marginLeft: '8px' }}>✓ Used in active project</span>
@@ -478,6 +557,15 @@ Documentation generated successfully for ${currentProject.customer.name}.`
                 <code style={{ fontSize: '12px', color: '#007bff' }}>{dataSource.url}</code>
                 <br />
                 <small>Method: {dataSource.method} | Timeout: {dataSource.timeout}ms | Retries: {dataSource.retries}</small>
+              </div>
+              <div style={{ marginLeft: '16px' }}>
+                <ShadcnButton 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleEditItem('dataSource', dataSource.id, dataSource)}
+                >
+                  Edit
+                </ShadcnButton>
               </div>
             </div>
           </div>
@@ -490,8 +578,18 @@ Documentation generated successfully for ${currentProject.customer.name}.`
   const renderTemplatesTab = () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       <Card>
-        <h3>Templates Library</h3>
-        <p>Shared templates that can be reused across multiple projects:</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <div>
+            <h3 style={{ margin: '0 0 8px 0' }}>Templates Library</h3>
+            <p style={{ margin: 0 }}>Shared templates that can be reused across multiple projects:</p>
+          </div>
+          <ShadcnButton 
+            variant="default"
+            onClick={() => handleAddItem('template')}
+          >
+            Add Template
+          </ShadcnButton>
+        </div>
         {(Object.values(config.templates) as Template[]).map((template) => (
           <div key={template.id} style={{ 
             padding: '12px', 
@@ -501,7 +599,7 @@ Documentation generated successfully for ${currentProject.customer.name}.`
             backgroundColor: currentProject?.templateIds.includes(template.id) ? '#e8f5e8' : 'white'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <div>
+              <div style={{ flex: 1 }}>
                 <strong>{template.name}</strong>
                 {currentProject?.templateIds.includes(template.id) && (
                   <span style={{ color: '#28a745', marginLeft: '8px' }}>✓ Used in active project</span>
@@ -516,6 +614,15 @@ Documentation generated successfully for ${currentProject.customer.name}.`
                   {template.author && ` | Author: ${template.author}`}
                 </small>
               </div>
+              <div style={{ marginLeft: '16px' }}>
+                <ShadcnButton 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleEditItem('template', template.id, template)}
+                >
+                  Edit
+                </ShadcnButton>
+              </div>
             </div>
           </div>
         ))}
@@ -527,8 +634,18 @@ Documentation generated successfully for ${currentProject.customer.name}.`
   const renderProjectsTab = () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       <Card>
-        <h3>Projects</h3>
-        <p>Projects combine data sources and templates with customer-specific information:</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <div>
+            <h3 style={{ margin: '0 0 8px 0' }}>Projects</h3>
+            <p style={{ margin: 0 }}>Projects combine data sources and templates with customer-specific information:</p>
+          </div>
+          <ShadcnButton 
+            variant="default"
+            onClick={() => handleAddItem('project')}
+          >
+            Add Project
+          </ShadcnButton>
+        </div>
         {(Object.values(config.projects) as Project[]).map((project) => (
           <div key={project.id} style={{ 
             padding: '16px', 
@@ -623,6 +740,15 @@ Documentation generated successfully for ${currentProject.customer.name}.`
                     </div>
                   </div>
                 )}
+              </div>
+              <div style={{ marginLeft: '16px' }}>
+                <ShadcnButton 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleEditItem('project', project.id, project)}
+                >
+                  Edit
+                </ShadcnButton>
               </div>
             </div>
           </div>
@@ -822,12 +948,61 @@ Documentation generated successfully for ${currentProject.customer.name}.`
       
       <div style={{ minHeight: '500px' }}>
         {activeTab === 'overview' && renderOverviewTab()}
+        {activeTab === 'projects' && renderProjectsTab()}
         {activeTab === 'dataSources' && renderDataSourcesTab()}
         {activeTab === 'templates' && renderTemplatesTab()}
-        {activeTab === 'projects' && renderProjectsTab()}
         {activeTab === 'generate' && renderGenerateTab()}
         {activeTab === 'result' && renderResultTab()}
       </div>
+
+      {/* Editing Modal */}
+      {isFormOpen && editingItem && editingSchemas && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            padding: '24px',
+            maxWidth: '600px',
+            maxHeight: '80vh',
+            overflow: 'auto',
+            width: '90%'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
+              <ShadcnButton variant="ghost" size="sm" onClick={handleCancelEdit}>
+                ✕
+              </ShadcnButton>
+            </div>
+            
+            <SchemaForm
+              title={`${editingItem.id ? 'Edit' : 'Add'} ${editingItem.type === 'dataSource' ? 'Data Source' : editingItem.type === 'template' ? 'Template' : 'Project'}`}
+              schema={editingItem.type === 'project' ? editingSchemas.projectSchema :
+                     editingItem.type === 'dataSource' ? editingSchemas.dataSourceSchema :
+                     editingSchemas.templateSchema}
+              initialValues={editingItem.data || {}}
+              onSubmit={(values, isValid) => {
+                if (isValid) {
+                  handleSaveItem(values);
+                }
+              }}
+              onCancel={handleCancelEdit}
+              submitLabel={editingItem.id ? 'Update' : 'Create'}
+              showCancelButton={true}
+              realTimeValidation={true}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
