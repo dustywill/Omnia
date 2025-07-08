@@ -126,7 +126,7 @@ This section covers tasks from `docs/testing/UI_COMPONENT_TEST_PLAN.md`.
   - [X] Responsive className passthrough.
 
 - [ ] **Implement `Sidebar` & `SidebarItem` Tests (`tests/ui/components/Sidebar.test.tsx`, `SidebarItem.test.tsx`):**
-  - [ ] Collapse/expand behaviour.
+  - [X] Collapse/expand behaviour.
   - [X] Item click callbacks.
   - [X] Active item highlighting.
   - [X] Icon rendering.
@@ -166,7 +166,7 @@ This section covers tasks from `docs/testing/UI_COMPONENT_TEST_PLAN.md`.
   - [ ] Displays success feedback.
 
 - [X] **Implement `PluginSettings` Tests (`tests/ui/components/PluginSettings.test.tsx`):**
-  - [ ] Loads plugin schema.
+  - [X] Loads plugin schema.
   - [X] Enable/disable actions.
   - [ ] Configuration validation.
 
