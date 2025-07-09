@@ -1,4 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
+import { jest } from '@jest/globals';
 import { AppNavigation } from '../../../src/ui/components/AppNavigation/AppNavigation.js';
 import type { AppView } from '../../../src/ui/main-app-renderer.js';
 

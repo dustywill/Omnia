@@ -1,4 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
+import { jest } from '@jest/globals';
 import { StatusBar } from '../../../src/ui/components/StatusBar/StatusBar.js';
 
 describe('StatusBar', () => {

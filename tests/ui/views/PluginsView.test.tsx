@@ -1,4 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
+import { jest } from '@jest/globals';
 import { PluginsView } from '../../../src/ui/views/PluginsView.js';
 import type { PluginInfo } from '../../../src/ui/main-app-renderer.js';
 

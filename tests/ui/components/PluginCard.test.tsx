@@ -1,4 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
+import { jest } from '@jest/globals';
 import { PluginCard } from '../../../src/ui/components/PluginCard/PluginCard.js';
 import type { PluginInfo } from '../../../src/ui/main-app-renderer.js';
 

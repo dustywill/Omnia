@@ -33,12 +33,12 @@ This section covers the setup of the AI-driven Playwright testing framework.
   - [X] Verify `tests/lib/` exists.
   - [X] Create `tests/snapshots/` for baseline images and styles.
   - [X] Add `tests/snapshots/` to the root `.gitignore` file.
-- [ ] **Implement `UIElementScanner.ts`:**
+ - [X] **Implement `UIElementScanner.ts`:**
   - [X] Create the file `tests/lib/UIElementScanner.ts`.
   - [X] Define and export a function `findElements(page: Page)`.
   - [X] Inside `findElements`, use `page.locator()` to select all interactive elements (e.g., `'button, a, input, [role="button"], [data-testid]'`).
   - [X] The function should return an array of `Locator` objects.
-- [ ] **Implement `SnapshotManager.ts`:**
+ - [X] **Implement `SnapshotManager.ts`:**
   - [X] Create the file `tests/lib/SnapshotManager.ts`.
   - [X] Implement `captureSnapshot(locator: Locator, state: string, testInfo: TestInfo)`.
     - [X] It should get the element's computed CSS using `locator.evaluate(el => JSON.stringify(window.getComputedStyle(el)))`.
@@ -162,8 +162,8 @@ This section covers tasks from `docs/testing/UI_COMPONENT_TEST_PLAN.md`.
 
 - [X] **Implement `AppSettings` Tests (`tests/ui/components/AppSettings.test.tsx`):**
   - [X] Renders settings sections.
-  - [ ] Saves updates.
-  - [ ] Displays success feedback.
+  - [X] Saves updates.
+  - [X] Displays success feedback.
 
 - [X] **Implement `PluginSettings` Tests (`tests/ui/components/PluginSettings.test.tsx`):**
   - [X] Loads plugin schema.
