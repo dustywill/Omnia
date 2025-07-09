@@ -59,23 +59,23 @@ This section covers tasks from `docs/testing/UI_COMPONENT_TEST_PLAN.md`.
 
 ### 2.1: Review and Audit Existing Tests
 - [ ] **Audit Primitive Components:**
-  - [ ] Review tests for `Button` in `tests/ui/components/`. (Missing: No `Button.test.tsx` found)
-  - [ ] Review tests for `Input`. (Missing: No `Input.test.tsx` found)
-  - [ ] Review tests for `Badge`. (Missing: No `Badge.test.tsx` found)
-  - [ ] Review tests for `ToggleSwitch`. (Missing: No `ToggleSwitch.test.tsx` found)
+  - [X] Review tests for `Button` in `tests/ui/components/`. (Largely Complete)
+  - [X] Review tests for `Input`. (Largely Complete)
+  - [X] Review tests for `Badge`. (Added `Badge.test.tsx`)
+  - [X] Review tests for `ToggleSwitch`. (Added `ToggleSwitch.test.tsx`)
 - [ ] **Audit Layout Components:**
-  - [ ] Review tests for `Card`. (Missing: No `Card.test.tsx` found)
-  - [ ] Review tests for `Grid`. (Missing: No `Grid.test.tsx` found)
-  - [ ] Review tests for `Sidebar` & `SidebarItem`. (Missing: No `Sidebar.test.tsx` or `SidebarItem.test.tsx` found)
+  - [X] Review tests for `Card`. (Added `Card.test.tsx`)
+  - [X] Review tests for `Grid`. (Added `Grid.test.tsx`)
+  - [X] Review tests for `Sidebar` & `SidebarItem`. (Added `Sidebar.test.tsx`)
   - [ ] Review tests for `CardGrid`. (Needs to be done: Current `CardGrid.test.tsx` is basic and does not cover interactive behavior, styling, or custom classes.)
 - [X] **Audit Navigation Components:**
   - [X] Review tests for `AppNavigation`. (Largely Complete)
-  - [ ] Review tests for `AppHeader`. (Missing: No `AppHeader.test.tsx` found)
+  - [X] Review tests for `AppHeader`. (Added `AppHeader.test.tsx`)
 - [X] **Audit Complex Components:**
   - [X] Review tests for `PluginCard`. (Largely Complete)
-  - [ ] Review tests for `DashboardPluginCard`. (Missing: No `DashboardPluginCard.test.tsx` found)
-  - [ ] Review tests for `StatusBar`. (Missing: No `StatusBar.test.tsx` found)
-  - [ ] Review tests for `SettingsForm`. (Missing: No `SettingsForm.test.tsx` found)
+  - [X] Review tests for `DashboardPluginCard`. (Added `DashboardPluginCard.test.tsx`)
+  - [X] Review tests for `StatusBar`. (Added `StatusBar.test.tsx`)
+  - [X] Review tests for `SettingsForm`. (Added `SettingsForm.test.tsx`)
   - [ ] Review tests for `SchemaForm`. (Missing: No `SchemaForm.test.tsx` found)
   - [ ] Review tests for `AppSettings`. (Missing: No `AppSettings.test.tsx` found)
   - [ ] Review tests for `PluginSettings`. (Missing: No `PluginSettings.test.tsx` found)
@@ -88,72 +88,72 @@ This section covers tasks from `docs/testing/UI_COMPONENT_TEST_PLAN.md`.
   - [ ] If applicable, update the component to make the test pass.
   - [ ] Refactor the tests for clarity and ensure all conditions from the component matrix are met.
 
-- [ ] **Implement `Button` Tests (`tests/ui/components/Button.test.tsx`):**
-  - [ ] Renders text/children.
-  - [ ] Calls `onClick` when clicked.
-  - [ ] Applies variants & sizes.
-  - [ ] Disabled state prevents clicks.
-  - [ ] Hover/focus classes are added.
+ - [X] **Implement `Button` Tests (`tests/ui/components/Button.test.tsx`):**
+  - [X] Renders text/children.
+  - [X] Calls `onClick` when clicked.
+  - [X] Applies variants & sizes.
+  - [X] Disabled state prevents clicks.
+  - [X] Hover/focus classes are added.
 
-- [ ] **Implement `Input` Tests (`tests/ui/components/Input.test.tsx`):**
-  - [ ] Renders label and helper text.
-  - [ ] Accepts typing.
-  - [ ] Error state styling.
-  - [ ] Icon rendering.
-  - [ ] Generates unique `id`.
-  - [ ] Focus management.
+- [X] **Implement `Input` Tests (`tests/ui/components/Input.test.tsx`):**
+  - [X] Renders label and helper text.
+  - [X] Accepts typing.
+  - [X] Error state styling.
+  - [X] Icon rendering.
+  - [X] Generates unique `id`.
+  - [X] Focus management.
 
-- [ ] **Implement `Badge` Tests (`tests/ui/components/Badge.test.tsx`):**
-  - [ ] Displays children.
-  - [ ] Variant colours.
-  - [ ] Size options.
+ - [X] **Implement `Badge` Tests (`tests/ui/components/Badge.test.tsx`):**
+  - [X] Displays children.
+  - [X] Variant colours.
+  - [X] Size options.
 
-- [ ] **Implement `ToggleSwitch` Tests (`tests/ui/components/ToggleSwitch.test.tsx`):**
-  - [ ] Toggles checked state on click.
-  - [ ] Calls `onChange`.
-  - [ ] Keyboard activation.
-  - [ ] Disabled state.
+ - [X] **Implement `ToggleSwitch` Tests (`tests/ui/components/ToggleSwitch.test.tsx`):**
+  - [X] Toggles checked state on click.
+  - [X] Calls `onChange`.
+  - [X] Keyboard activation.
+  - [X] Disabled state.
 
-- [ ] **Implement `Card` Tests (`tests/ui/components/Card.test.tsx`):**
-  - [ ] Renders children.
-  - [ ] `onClick` invoked when interactive.
-  - [ ] Elevation & hover classes applied when `elevated`/`interactive`.
-  - [ ] Respects custom className.
+- [X] **Implement `Card` Tests (`tests/ui/components/Card.test.tsx`):**
+  - [X] Renders children.
+  - [X] `onClick` invoked when interactive.
+  - [X] Elevation & hover classes applied when `elevated`/`interactive`.
+  - [X] Respects custom className.
 
-- [ ] **Implement `Grid` Tests (`tests/ui/components/Grid.test.tsx`):**
-  - [ ] Creates correct column count.
-  - [ ] Gap sizes.
-  - [ ] Responsive className passthrough.
+- [X] **Implement `Grid` Tests (`tests/ui/components/Grid.test.tsx`):**
+  - [X] Creates correct column count.
+  - [X] Gap sizes.
+  - [X] Responsive className passthrough.
 
-- [ ] **Implement `Sidebar` & `SidebarItem` Tests (`tests/ui/components/Sidebar.test.tsx`, `SidebarItem.test.tsx`):**
-  - [ ] Collapse/expand behaviour.
-  - [ ] Item click callbacks.
-  - [ ] Active item highlighting.
-  - [ ] Icon rendering.
+- [X] **Implement `Sidebar` & `SidebarItem` Tests (`tests/ui/components/Sidebar.test.tsx`, `SidebarItem.test.tsx`):**
+  - [X] Collapse/expand behaviour.
+  - [X] Item click callbacks.
+  - [X] Active item highlighting.
+  - [X] Icon rendering.
 
 - [ ] **Enhance `CardGrid` Tests (`tests/ui/components/CardGrid.test.tsx`):**
   - [ ] Verify `Card` specific behaviors (e.g., `onClick` for interactive cards, elevation/hover classes).
   - [ ] Verify `Grid` specific behaviors (e.g., column count, gap sizes, responsive classes).
 
-- [ ] **Implement `AppHeader` Tests (`tests/ui/components/AppHeader.test.tsx`):**
-  - [ ] Displays title and optional actions.
-  - [ ] Ensures semantic `<header>` element.
+ - [X] **Implement `AppHeader` Tests (`tests/ui/components/AppHeader.test.tsx`):**
+  - [X] Displays title and optional actions.
+  - [X] Ensures semantic `<header>` element.
 
-- [ ] **Implement `DashboardPluginCard` Tests (`tests/ui/components/DashboardPluginCard.test.tsx`):**
-  - [ ] Entire card clickable when plugin active.
-  - [ ] Hover animation.
-  - [ ] Displays plugin metadata.
+- [X] **Implement `DashboardPluginCard` Tests (`tests/ui/components/DashboardPluginCard.test.tsx`):**
+  - [X] Entire card clickable when plugin active.
+  - [X] Hover animation.
+  - [X] Displays plugin metadata.
 
-- [ ] **Implement `StatusBar` Tests (`tests/ui/components/StatusBar.test.tsx`):**
-  - [ ] Displays plugin counts and view label.
-  - [ ] Hides counts on Dashboard.
-  - [ ] Colour indicators for active/error plugins.
+- [X] **Implement `StatusBar` Tests (`tests/ui/components/StatusBar.test.tsx`):**
+  - [X] Displays plugin counts and view label.
+  - [X] Hides counts on Dashboard.
+  - [X] Colour indicators for active/error plugins.
 
-- [ ] **Implement `SettingsForm` Tests (`tests/ui/components/SettingsForm.test.tsx`):**
-  - [ ] Generates fields from schema.
-  - [ ] Validates input.
-  - [ ] Calls `onSubmit` with values.
-  - [ ] Change tracking via `onChange`.
+- [X] **Implement `SettingsForm` Tests (`tests/ui/components/SettingsForm.test.tsx`):**
+  - [X] Generates fields from schema.
+  - [X] Validates input.
+  - [X] Calls `onSubmit` with values.
+  - [X] Change tracking via `onChange`.
 
 - [ ] **Implement `SchemaForm` Tests (`tests/ui/components/SchemaForm.test.tsx`):**
   - [ ] Handles nested and array fields.
