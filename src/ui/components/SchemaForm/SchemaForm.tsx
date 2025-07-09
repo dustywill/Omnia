@@ -559,6 +559,57 @@ export function SchemaForm({
       .trim();
   };
 
+  // Group fields by their parent object for nested object visualization
+  const renderGroupedFields = () => {
+    const groups: { [key: string]: SchemaFormField[] } = {};
+    const standaloneFields: SchemaFormField[] = [];
+
+    // Group fields by their parent object
+    fields.forEach(field => {
+      if (field.key.includes('.')) {
+        const [parentKey] = field.key.split('.');
+        if (!groups[parentKey]) {
+          groups[parentKey] = [];
+        }
+        groups[parentKey].push(field);
+      } else {
+        standaloneFields.push(field);
+      }
+    });
+
+    const renderedElements: React.ReactElement[] = [];
+
+    // Render standalone fields first
+    standaloneFields.forEach(field => {
+      renderedElements.push(renderField(field));
+    });
+
+    // Render grouped fields
+    Object.entries(groups).forEach(([groupKey, groupFields]) => {
+      const groupLabel = formatLabel(groupKey);
+      
+      renderedElements.push(
+        <div key={`group-${groupKey}`} className={styles.fieldGroupContainer}>
+          <h3 className={styles.fieldGroupTitle}>
+            {groupLabel}
+          </h3>
+          <div className={styles.fieldGroupContent}>
+            {groupFields.map(field => {
+              // Create a modified field with the group prefix removed from the label
+              const modifiedField = {
+                ...field,
+                label: field.label.replace(`${groupLabel} - `, '')
+              };
+              return renderField(modifiedField);
+            })}
+          </div>
+        </div>
+      );
+    });
+
+    return renderedElements;
+  };
+
   const showModeToggle = mode === 'hybrid';
   const effectiveMode = mode === 'hybrid' ? currentMode : mode;
 
@@ -611,7 +662,7 @@ export function SchemaForm({
       <form onSubmit={handleSubmit} className="space-y-6">
         {effectiveMode === 'form' ? (
           // Form Mode
-          fields.map(renderField)
+          renderGroupedFields()
         ) : (
           // JSON Mode
           <div className="space-y-4">

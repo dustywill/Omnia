@@ -253,10 +253,10 @@ export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
           console.debug(`[loadNodeModule] Loading Radix UI React Slot...`);
         }
         // Create a compatible Slot component that behaves like the real one
-        const SlotComponent = React.forwardRef<HTMLElement, any>(({ children, asChild, ...props }, ref) => {
+        const SlotComponent = React.forwardRef<HTMLElement, { children?: React.ReactNode; asChild?: boolean; [key: string]: any }>(({ children, asChild, ...props }, ref) => {
           if (asChild && React.isValidElement(children)) {
             // When asChild is true, clone the child element with the props
-            return React.cloneElement(children, { ...props, ref });
+            return React.cloneElement(children, { ...props, ref } as any);
           }
           // When asChild is false, render as a span
           return React.createElement('span', { ...props, ref }, children);
@@ -281,15 +281,15 @@ export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
             
             // Apply variant classes
             for (const [key, value] of Object.entries(props)) {
-              if (variants[key] && variants[key][value]) {
-                classes += ' ' + variants[key][value];
+              if (variants[key] && variants[key][value as string]) {
+                classes += ' ' + variants[key][value as string];
               }
             }
             
             // Apply default variant classes for missing props
             for (const [key, value] of Object.entries(defaultVariants)) {
-              if (!(key in props) && variants[key] && variants[key][value]) {
-                classes += ' ' + variants[key][value];
+              if (!(key in props) && variants[key] && variants[key][value as string]) {
+                classes += ' ' + variants[key][value as string];
               }
             }
             
@@ -353,7 +353,7 @@ export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
         }
         // Create fallback icon components
         const createIconComponent = (name: string) => {
-          return React.forwardRef<SVGSVGElement, any>((props, ref) => {
+          return React.forwardRef<SVGSVGElement, { size?: number; [key: string]: any }>((props, ref) => {
             return React.createElement('svg', {
               ...props,
               ref,
@@ -447,6 +447,7 @@ export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
                   email: () => createIPCZodProxy(type, { ...options, email: true }, shape),
                   url: () => createIPCZodProxy(type, { ...options, url: true }, shape),
                   uuid: () => createIPCZodProxy(type, { ...options, uuid: true }, shape),
+                  datetime: () => createIPCZodProxy(type, { ...options, datetime: true }, shape),
                   regex: (pattern: RegExp) => createIPCZodProxy(type, { ...options, regex: pattern.source }, shape),
                   int: () => createIPCZodProxy(type, { ...options, int: true }, shape),
                   positive: () => createIPCZodProxy(type, { ...options, positive: true }, shape),

@@ -9,7 +9,7 @@
     "test:ui": "playwright test",
     "clean": "node -e \"import('fs').then(fs=>fs.rmSync('dist',{recursive:true,force:true}))\"",
     "clear-logs": "node scripts/clear-logs.js",
-    "build": "npm run clean && tsc -p tsconfig.build.json && tsc -p tsconfig.plugins.json && node scripts/copy-assets.js && node scripts/process-css-modules.js && node scripts/fix-plugin-imports.js",
+    "build": "tsc -p tsconfig.build.json && tsc -p tsconfig.plugins.json && node scripts/copy-assets.js && node scripts/process-css-modules.js && node scripts/fix-plugin-imports.js",
     "electron": "npm run clear-logs && npm run build && electron dist/electron-main.js",
     "dev": "node --loader ts-node/esm --loader ./loaders/css-loader.js src/index.ts",
     "start": "node --loader ./loaders/css-loader.js dist/index.js"
@@ -52,6 +52,7 @@
     "lucide-react": "^0.525.0",
     "shadcn-ui": "^0.9.5",
     "tailwind-merge": "^3.3.1",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "framer-motion": "^12.0.0"
   }
 }

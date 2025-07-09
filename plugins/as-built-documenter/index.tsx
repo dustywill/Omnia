@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { loadNodeModule } from '../../src/ui/node-module-loader.js';
 import { Card } from '../../src/ui/components/Card/Card.js';
 import { Button } from '../../src/ui/components/Button/Button.js';
+import { ShadcnButton } from '../../src/ui/components/index.js';
 import { SchemaForm } from '../../src/ui/components/SchemaForm/SchemaForm.js';
 import { defaultAsBuiltDocumenterConfig } from '../../src/lib/schemas/plugins/as-built-documenter.js';
 
@@ -207,13 +208,22 @@ const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({ context }) => {
   const [validationResult, setValidationResult] = useState<any>(null);
   
   // UI state
-  const [activeTab, setActiveTab] = useState<'overview' | 'projects' | 'dataSources' | 'templates' | 'generate' | 'result'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'projects' | 'dataSources' | 'templates' | 'templateEditor' | 'generate' | 'result'>('overview');
   const [CodeMirrorComponent, setCodeMirrorComponent] = useState<any>(null);
   
   // Editing state
   const [editingItem, setEditingItem] = useState<{type: 'project' | 'dataSource' | 'template', id?: string, data?: any} | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingSchemas, setEditingSchemas] = useState<any>(null);
+  const [schemasLoaded, setSchemasLoaded] = useState(false);
+  
+  // Template editor state
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
+  const [templateEditorContent, setTemplateEditorContent] = useState<string>('');
+  const [selectedSampleSource, setSelectedSampleSource] = useState<string>('');
+  const [sampleSourceData, setSampleSourceData] = useState<any[]>([]);
+  const [isSavingTemplate, setIsSavingTemplate] = useState(false);
+  const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
 
   // Get current project
   const currentProject = config.activeProjectId ? config.projects[config.activeProjectId] : null;
@@ -239,11 +249,17 @@ const AsBuiltDocumenter: React.FC<AsBuiltDocumenterProps> = ({ context }) => {
 
     const loadSchemas = async () => {
       try {
+        console.log('Loading as-built documenter schemas...');
         const { createAsBuiltDocumenterSchemas } = await import('../../src/lib/schemas/plugins/as-built-documenter.js');
+        console.log('Schema module loaded, creating schemas...');
         const schemas = await createAsBuiltDocumenterSchemas();
+        console.log('Schemas created:', schemas);
         setEditingSchemas(schemas);
+        setSchemasLoaded(true);
+        console.log('Schemas loaded successfully');
       } catch (err) {
-        console.warn('Could not load schemas:', err);
+        console.error('Could not load schemas:', err);
+        setSchemasLoaded(false);
       }
     };
 
@@ -413,14 +429,24 @@ Documentation generated successfully for ${currentProject.customer.name}.`
 
   // Handlers for CRUD operations
   const handleAddItem = useCallback((type: 'project' | 'dataSource' | 'template') => {
+    console.log('Adding item:', type, 'Schemas loaded:', schemasLoaded, 'EditingSchemas:', editingSchemas);
+    if (!schemasLoaded || !editingSchemas) {
+      console.warn('Schemas not loaded yet, cannot add item');
+      return;
+    }
     setEditingItem({ type, id: undefined, data: undefined });
     setIsFormOpen(true);
-  }, []);
+  }, [schemasLoaded, editingSchemas]);
 
   const handleEditItem = useCallback((type: 'project' | 'dataSource' | 'template', id: string, data: any) => {
+    console.log('Editing item:', type, id, 'Schemas loaded:', schemasLoaded, 'EditingSchemas:', editingSchemas);
+    if (!schemasLoaded || !editingSchemas) {
+      console.warn('Schemas not loaded yet, cannot edit item');
+      return;
+    }
     setEditingItem({ type, id, data });
     setIsFormOpen(true);
-  }, []);
+  }, [schemasLoaded, editingSchemas]);
 
   const handleSaveItem = useCallback((data: any) => {
     if (!editingItem || !editingSchemas) return;
@@ -463,6 +489,160 @@ Documentation generated successfully for ${currentProject.customer.name}.`
     setEditingItem(null);
   }, []);
 
+  // Template editor functions
+  const handleTemplateSelect = useCallback(async (templateId: string) => {
+    setSelectedTemplateId(templateId);
+    if (templateId && config.templates[templateId]) {
+      setIsLoadingTemplate(true);
+      const template = config.templates[templateId];
+      console.log('Loading template content from:', template.path);
+      
+      try {
+        // For demonstration, we'll load a sample template based on the template type
+        let sampleContent = '';
+        
+        if (template.name.toLowerCase().includes('mes')) {
+          sampleContent = `# As-Built Documentation for {{project.name}}
+
+**Customer:** {{project.customer.name}}
+**Integrator:** {{project.integrator.name}}
+**Generation Date:** {{system.generatedAt}}
+
+## Project Overview
+- **Site Name:** {{project.variables.siteName}}
+- **Commissioning Date:** {{project.variables.commissioningDate}}
+
+## Data Sources
+{{#each data}}
+### {{@key}}
+- **Status:** {{#if this.success}}✅ Success{{else}}❌ Failed{{/if}}
+- **Data:** {{json this.data true}}
+{{/each}}
+
+## Summary
+Documentation generated for {{project.customer.name}} on {{formatDate system.generatedAt 'long'}}.`;
+        } else {
+          sampleContent = `# {{project.name}} Documentation
+
+Generated on {{system.generatedAt}}
+
+## Customer Information
+**Name:** {{project.customer.name}}
+**Contact:** {{project.customer.contactPerson}}
+{{#if project.customer.contactEmail}}
+**Email:** {{project.customer.contactEmail}}
+{{/if}}
+
+## Project Details
+{{project.description}}
+
+## Data Sources
+{{#each data}}
+- **{{@key}}:** {{#if this.success}}Available{{else}}Unavailable{{/if}}
+{{/each}}`;
+        }
+        
+        setTemplateEditorContent(sampleContent);
+        console.log('Template content loaded successfully');
+      } catch (error) {
+        console.error('Error loading template content:', error);
+        setTemplateEditorContent('# Template content could not be loaded\n\n<!-- Please edit this template -->');
+      } finally {
+        setIsLoadingTemplate(false);
+      }
+    } else {
+      setTemplateEditorContent('');
+      setIsLoadingTemplate(false);
+    }
+  }, [config.templates]);
+
+  const handleLoadSampleData = useCallback(async () => {
+    if (!selectedSampleSource || !config.dataSources[selectedSampleSource]) {
+      return;
+    }
+    
+    setIsFetchingSample(true);
+    try {
+      const dataSource = config.dataSources[selectedSampleSource];
+      console.log(`Loading sample data from ${dataSource.name}`);
+      
+      // Mock sample data - in a real implementation, this would fetch from the actual data source
+      const mockSampleData = [
+        { id: '1', name: 'Sample Item 1', status: 'Active', value: 100, timestamp: new Date().toISOString() },
+        { id: '2', name: 'Sample Item 2', status: 'Inactive', value: 200, timestamp: new Date().toISOString() },
+        { id: '3', name: 'Sample Item 3', status: 'Active', value: 150, timestamp: new Date().toISOString() },
+      ];
+      
+      setSampleSourceData(mockSampleData);
+    } catch (error) {
+      console.error('Error loading sample data:', error);
+      setSampleSourceData([]);
+    } finally {
+      setIsFetchingSample(false);
+    }
+  }, [selectedSampleSource, config.dataSources]);
+
+  const handleInsertVariable = useCallback((variable: string) => {
+    const textarea = document.getElementById('template-editor-textarea') as HTMLTextAreaElement;
+    if (!textarea) return;
+    
+    const start = textarea.selectionStart || 0;
+    const end = textarea.selectionEnd || 0;
+    const variableText = `{{${variable}}}`;
+    
+    const newContent = templateEditorContent.slice(0, start) + variableText + templateEditorContent.slice(end);
+    setTemplateEditorContent(newContent);
+    
+    // Set cursor position after the inserted variable
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + variableText.length, start + variableText.length);
+    }, 0);
+  }, [templateEditorContent]);
+
+  const handleInsertLoop = useCallback(() => {
+    if (!selectedSampleSource) return;
+    
+    const textarea = document.getElementById('template-editor-textarea') as HTMLTextAreaElement;
+    if (!textarea) return;
+    
+    const start = textarea.selectionStart || 0;
+    const end = textarea.selectionEnd || 0;
+    const loopText = `{{#each ${selectedSampleSource}}}\n  {{name}}: {{value}}\n{{/each}}`;
+    
+    const newContent = templateEditorContent.slice(0, start) + loopText + templateEditorContent.slice(end);
+    setTemplateEditorContent(newContent);
+    
+    // Set cursor position after the inserted loop
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + loopText.length, start + loopText.length);
+    }, 0);
+  }, [selectedSampleSource, templateEditorContent]);
+
+  const handleSaveTemplate = useCallback(async () => {
+    if (!selectedTemplateId) {
+      console.warn('No template selected');
+      return;
+    }
+    
+    setIsSavingTemplate(true);
+    try {
+      console.log('Saving template:', selectedTemplateId);
+      console.log('Template content:', templateEditorContent);
+      
+      // In a real implementation, this would save the template to the file system
+      // For now, we'll just simulate saving
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      console.log('Template saved successfully');
+    } catch (error) {
+      console.error('Error saving template:', error);
+    } finally {
+      setIsSavingTemplate(false);
+    }
+  }, [selectedTemplateId, templateEditorContent]);
+
   // Render navigation tabs
   const renderTabs = () => (
     <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', borderBottom: '1px solid #e0e0e0' }}>
@@ -471,6 +651,7 @@ Documentation generated successfully for ${currentProject.customer.name}.`
         { key: 'projects', label: 'Projects' },
         { key: 'dataSources', label: 'Data Sources' },
         { key: 'templates', label: 'Templates' },
+        { key: 'templateEditor', label: 'Template Editor' },
         { key: 'generate', label: 'Generate' },
         { key: 'result', label: 'Result' }
       ].map(({ key, label }) => (
@@ -533,8 +714,9 @@ Documentation generated successfully for ${currentProject.customer.name}.`
           <ShadcnButton 
             variant="default"
             onClick={() => handleAddItem('dataSource')}
+            disabled={!schemasLoaded}
           >
-            Add Data Source
+            {schemasLoaded ? 'Add Data Source' : 'Loading...'}
           </ShadcnButton>
         </div>
         {(Object.values(config.dataSources) as DataSource[]).map((dataSource) => (
@@ -563,8 +745,9 @@ Documentation generated successfully for ${currentProject.customer.name}.`
                   variant="outline" 
                   size="sm"
                   onClick={() => handleEditItem('dataSource', dataSource.id, dataSource)}
+                  disabled={!schemasLoaded}
                 >
-                  Edit
+                  {schemasLoaded ? 'Edit' : 'Loading...'}
                 </ShadcnButton>
               </div>
             </div>
@@ -586,8 +769,9 @@ Documentation generated successfully for ${currentProject.customer.name}.`
           <ShadcnButton 
             variant="default"
             onClick={() => handleAddItem('template')}
+            disabled={!schemasLoaded}
           >
-            Add Template
+            {schemasLoaded ? 'Add Template' : 'Loading...'}
           </ShadcnButton>
         </div>
         {(Object.values(config.templates) as Template[]).map((template) => (
@@ -619,8 +803,9 @@ Documentation generated successfully for ${currentProject.customer.name}.`
                   variant="outline" 
                   size="sm"
                   onClick={() => handleEditItem('template', template.id, template)}
+                  disabled={!schemasLoaded}
                 >
-                  Edit
+                  {schemasLoaded ? 'Edit' : 'Loading...'}
                 </ShadcnButton>
               </div>
             </div>
@@ -642,8 +827,9 @@ Documentation generated successfully for ${currentProject.customer.name}.`
           <ShadcnButton 
             variant="default"
             onClick={() => handleAddItem('project')}
+            disabled={!schemasLoaded}
           >
-            Add Project
+            {schemasLoaded ? 'Add Project' : 'Loading...'}
           </ShadcnButton>
         </div>
         {(Object.values(config.projects) as Project[]).map((project) => (
@@ -746,8 +932,9 @@ Documentation generated successfully for ${currentProject.customer.name}.`
                   variant="outline" 
                   size="sm"
                   onClick={() => handleEditItem('project', project.id, project)}
+                  disabled={!schemasLoaded}
                 >
-                  Edit
+                  {schemasLoaded ? 'Edit' : 'Loading...'}
                 </ShadcnButton>
               </div>
             </div>
@@ -884,6 +1071,226 @@ Documentation generated successfully for ${currentProject.customer.name}.`
     </div>
   );
 
+  // Render template editor tab
+  const renderTemplateEditorTab = () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <Card>
+        <h3>Template Editor</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+          {/* Left Panel - Template Selection and Editor */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Select Template</label>
+              <select
+                value={selectedTemplateId}
+                onChange={(e) => {
+                  const templateId = e.target.value;
+                  handleTemplateSelect(templateId);
+                }}
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px'
+                }}
+              >
+                <option value="">Select a template...</option>
+                {Object.values(config.templates).map((template: any) => (
+                  <option key={template.id} value={template.id}>
+                    {template.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            <div>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Template Content</label>
+              {isLoadingTemplate ? (
+                <div style={{
+                  width: '100%',
+                  height: '400px',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: '#f9f9f9'
+                }}>
+                  Loading template content...
+                </div>
+              ) : (
+                <textarea
+                  id="template-editor-textarea"
+                  value={templateEditorContent}
+                  onChange={(e) => setTemplateEditorContent(e.target.value)}
+                  style={{
+                    width: '100%',
+                    height: '400px',
+                    padding: '12px',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    fontFamily: 'monospace',
+                    fontSize: '14px',
+                    resize: 'vertical'
+                  }}
+                  placeholder="Enter your mustache template here..."
+                />
+              )}
+            </div>
+            
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <ShadcnButton
+                onClick={handleSaveTemplate}
+                disabled={isSavingTemplate || !selectedTemplateId}
+                variant="default"
+              >
+                {isSavingTemplate ? 'Saving...' : 'Save Template'}
+              </ShadcnButton>
+              <ShadcnButton
+                onClick={handleValidateTemplate}
+                variant="secondary"
+              >
+                Validate Template
+              </ShadcnButton>
+            </div>
+          </div>
+          
+          {/* Right Panel - Variables and Sample Data */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {/* Project Variables */}
+            <div>
+              <h4 style={{ margin: '0 0 12px 0' }}>Project Variables</h4>
+              <p style={{ margin: '0 0 12px 0', fontSize: '14px', color: '#666' }}>Click to insert into template</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                {currentProject && [
+                  { key: 'project.name', label: 'Project Name' },
+                  { key: 'project.description', label: 'Description' },
+                  { key: 'project.customer.name', label: 'Customer' },
+                  { key: 'project.customer.contactPerson', label: 'Contact' },
+                  { key: 'project.integrator.name', label: 'Integrator' },
+                  { key: 'project.startDate', label: 'Start Date' },
+                  { key: 'system.generatedAt', label: 'Generated At' }
+                ].map(({ key, label }) => (
+                  <button
+                    key={key}
+                    onClick={() => handleInsertVariable(key)}
+                    style={{
+                      padding: '6px 8px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      background: 'white',
+                      cursor: 'pointer',
+                      fontSize: '12px',
+                      textAlign: 'left'
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            {/* Sample Data */}
+            <div>
+              <h4 style={{ margin: '0 0 12px 0' }}>Sample Data</h4>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+                <select
+                  value={selectedSampleSource}
+                  onChange={(e) => setSelectedSampleSource(e.target.value)}
+                  style={{
+                    flex: 1,
+                    padding: '6px',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px'
+                  }}
+                >
+                  <option value="">Select data source...</option>
+                  {Object.values(config.dataSources).map((source: any) => (
+                    <option key={source.id} value={source.id}>
+                      {source.name}
+                    </option>
+                  ))}
+                </select>
+                <ShadcnButton
+                  onClick={handleLoadSampleData}
+                  disabled={!selectedSampleSource || isFetchingSample}
+                  variant="secondary"
+                  size="sm"
+                >
+                  {isFetchingSample ? 'Loading...' : 'Load'}
+                </ShadcnButton>
+              </div>
+              
+              <div style={{ marginBottom: '12px' }}>
+                <ShadcnButton
+                  onClick={handleInsertLoop}
+                  disabled={!selectedSampleSource}
+                  variant="outline"
+                  size="sm"
+                >
+                  Insert Loop
+                </ShadcnButton>
+              </div>
+              
+              {sampleSourceData.length > 0 && (
+                <div style={{ 
+                  border: '1px solid #ddd', 
+                  borderRadius: '4px',
+                  maxHeight: '200px',
+                  overflow: 'auto'
+                }}>
+                  <table style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ backgroundColor: '#f5f5f5' }}>
+                        {Object.keys(sampleSourceData[0]).map(header => (
+                          <th
+                            key={header}
+                            onClick={() => handleInsertVariable(header)}
+                            style={{
+                              padding: '6px 8px',
+                              border: '1px solid #ddd',
+                              cursor: 'pointer',
+                              textAlign: 'left'
+                            }}
+                          >
+                            {header}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sampleSourceData.slice(0, 5).map((row, index) => (
+                        <tr key={index}>
+                          {Object.keys(row).map(key => (
+                            <td
+                              key={key}
+                              onClick={() => handleInsertVariable(key)}
+                              style={{
+                                padding: '6px 8px',
+                                border: '1px solid #ddd',
+                                cursor: 'pointer',
+                                maxWidth: '100px',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap'
+                              }}
+                            >
+                              {typeof row[key] === 'object' ? JSON.stringify(row[key]) : String(row[key])}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+
   // Render result tab
   const renderResultTab = () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -951,12 +1358,13 @@ Documentation generated successfully for ${currentProject.customer.name}.`
         {activeTab === 'projects' && renderProjectsTab()}
         {activeTab === 'dataSources' && renderDataSourcesTab()}
         {activeTab === 'templates' && renderTemplatesTab()}
+        {activeTab === 'templateEditor' && renderTemplateEditorTab()}
         {activeTab === 'generate' && renderGenerateTab()}
         {activeTab === 'result' && renderResultTab()}
       </div>
 
       {/* Editing Modal */}
-      {isFormOpen && editingItem && editingSchemas && (
+      {isFormOpen && editingItem && (
         <div style={{
           position: 'fixed',
           top: 0,
@@ -984,22 +1392,29 @@ Documentation generated successfully for ${currentProject.customer.name}.`
               </ShadcnButton>
             </div>
             
-            <SchemaForm
-              title={`${editingItem.id ? 'Edit' : 'Add'} ${editingItem.type === 'dataSource' ? 'Data Source' : editingItem.type === 'template' ? 'Template' : 'Project'}`}
-              schema={editingItem.type === 'project' ? editingSchemas.projectSchema :
-                     editingItem.type === 'dataSource' ? editingSchemas.dataSourceSchema :
-                     editingSchemas.templateSchema}
-              initialValues={editingItem.data || {}}
-              onSubmit={(values, isValid) => {
-                if (isValid) {
-                  handleSaveItem(values);
-                }
-              }}
-              onCancel={handleCancelEdit}
-              submitLabel={editingItem.id ? 'Update' : 'Create'}
-              showCancelButton={true}
-              realTimeValidation={true}
-            />
+            {schemasLoaded && editingSchemas ? (
+              <SchemaForm
+                title={`${editingItem.id ? 'Edit' : 'Add'} ${editingItem.type === 'dataSource' ? 'Data Source' : editingItem.type === 'template' ? 'Template' : 'Project'}`}
+                schema={editingItem.type === 'project' ? editingSchemas.projectSchema :
+                       editingItem.type === 'dataSource' ? editingSchemas.dataSourceSchema :
+                       editingSchemas.templateSchema}
+                initialValues={editingItem.data || {}}
+                onSubmit={(values, isValid) => {
+                  if (isValid) {
+                    handleSaveItem(values);
+                  }
+                }}
+                onCancel={handleCancelEdit}
+                submitLabel={editingItem.id ? 'Update' : 'Create'}
+                showCancelButton={true}
+                realTimeValidation={true}
+              />
+            ) : (
+              <div style={{ textAlign: 'center', padding: '40px' }}>
+                <h3>Loading Schema...</h3>
+                <p>Please wait while the form schema is being loaded.</p>
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -1,34 +1,25 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { loadNodeModule } from '../../src/ui/node-module-loader.js';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Button } from '../../src/ui/components/Button/Button.js';
 import { Input } from '../../src/ui/components/Input/Input.js';
+import { FileTree, FileTreeNode, SelectionState } from '../../inspiration/components/FileTree.js'; // Adjust path as needed
 
 // Enhanced types for comprehensive file tree
-export interface FileTreeNode {
-  name: string;
-  path: string;
-  type: 'file' | 'directory';
-  children?: FileTreeNode[];
-  size?: number;
-  extension?: string;
-}
 
-export interface FilterOptions {
-  fileRegex: string;
-  fileFilterType: 'include' | 'exclude';
-  folderRegex: string;
-  folderFilterType: 'include' | 'exclude';
-  maxDepth: number;
-}
 
-export interface FilterPreset {
+// The FileTreeNode interface is now imported from FileTree.tsx, so we don't redefine it here.
+// We will ensure our data generation matches its structure.
+
+
+
+
+export type FilterPreset = {
   name: string;
   fileRegex: string;
   fileFilterType: 'include' | 'exclude';
   folderRegex: string;
   folderFilterType: 'include' | 'exclude';
   maxDepth: number;
-}
+};
 
 const defaultPresets: FilterPreset[] = [
   {
@@ -66,40 +57,100 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
   const [rootPath, setRootPath] = useState<string>('');
   const [fileTree, setFileTree] = useState<FileTreeNode | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
-  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
-  const [loading] = useState(false);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
   const [generating, setGenerating] = useState(false);
-  
+  const pluginId = 'context-generator';
+
   // Filter state
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
-    fileRegex: '\\.(ts|tsx|js|jsx|md|json)$',
+    fileRegex: '',
     fileFilterType: 'include',
-    folderRegex: 'node_modules|\\.git|dist|build|coverage',
-    folderFilterType: 'exclude',
-    maxDepth: 10
+    folderRegex: '',
+    folderFilterType: 'include',
+    maxDepth: -1
   });
-  const [selectedPreset, setSelectedPreset] = useState<string>('Common Files');
+  const [selectedPreset, setSelectedPreset] = useState<string>('');
+  const [customPresets, setCustomPresets] = useState<FilterPreset[]>([]);
+
+  const allPresets = useMemo(() => [
+    ...defaultPresets,
+    ...customPresets
+  ], [customPresets]);
   
   // Output state
   const [output, setOutput] = useState('');
   const [progress, setProgress] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
   const [copied, setCopied] = useState(false);
+
+  // Memoized and filtered file tree for search
+  const filteredFileTree = useMemo(() => {
+    if (!fileTree || !searchTerm) return fileTree;
+
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+
+    const filterNode = (node: FileTreeNode): FileTreeNode | null => {
+      if (node.type === 'file') {
+        return node.name.toLowerCase().includes(lowerCaseSearchTerm) ? node : null;
+      } else { // folder
+        const filteredChildren = node.children
+          ?.map(filterNode)
+          .filter((child): child is FileTreeNode => child !== null) || [];
+
+        if (node.name.toLowerCase().includes(lowerCaseSearchTerm) || filteredChildren.length > 0) {
+          return { ...node, children: filteredChildren };
+        }
+        return null;
+      }
+    };
+
+    return filterNode(fileTree);
+  }, [fileTree, searchTerm]);
   
   // UI state
   const [showFilters, setShowFilters] = useState(false);
+  const [newPresetName, setNewPresetName] = useState('');
 
-  // Initialize with current directory
+  // Initialize with current directory and load configuration
   useEffect(() => {
-    const initPath = initialPath || (typeof process !== 'undefined' ? process.cwd() : '.');
-    setRootPath(initPath);
-    scanDirectory(initPath);
-  }, [initialPath]);
+    const initializePlugin = async () => {
+      setLoading(true);
+      try {
+        const configResult = await window.configAPI.getConfigAndSchema(pluginId);
+        if (configResult && configResult.config) {
+          const loadedConfig = configResult.config;
+          setFilterOptions({
+            fileRegex: loadedConfig.lastFileRegex || '',
+            fileFilterType: loadedConfig.lastFileFilterType || 'include',
+            folderRegex: loadedConfig.lastFolderRegex || '',
+            folderFilterType: loadedConfig.lastFolderFilterType || 'include',
+            maxDepth: loadedConfig.lastMaxDepth !== undefined ? loadedConfig.lastMaxDepth : -1
+          });
+          setRootPath(loadedConfig.lastUsedFolderPath || '');
+          setCustomPresets(Object.values(loadedConfig.savedFilters || {}));
+        }
+
+        const initPath = initialPath || (window.fileSystemAPI ? await window.fileSystemAPI.getRootPath() : '.');
+        setRootPath(prevPath => prevPath || initPath); // Only set if not loaded from config
+        scanDirectory(initPath);
+      } catch (error) {
+        console.error('Failed to load plugin configuration:', error);
+        // Fallback to defaults if config loading fails
+        const initPath = initialPath || (window.fileSystemAPI ? await window.fileSystemAPI.getRootPath() : '.');
+        setRootPath(initPath);
+        scanDirectory(initPath);
+      } finally {
+        setLoading(false);
+      }
+    };
+    initializePlugin();
+  }, [initialPath, scanDirectory, pluginId]);
 
   // Apply preset when selected
-  useEffect(() => {
-    const preset = defaultPresets.find(p => p.name === selectedPreset);
+  const applyPreset = useCallback((presetName: string) => {
+    const preset = [...defaultPresets, ...customPresets].find(p => p.name === presetName);
     if (preset) {
       setFilterOptions({
         fileRegex: preset.fileRegex,
@@ -108,8 +159,82 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
         folderFilterType: preset.folderFilterType,
         maxDepth: preset.maxDepth
       });
+      setSelectedPreset(presetName);
     }
-  }, [selectedPreset]);
+  }, [customPresets]);
+
+  useEffect(() => {
+    if (selectedPreset) {
+      applyPreset(selectedPreset);
+    }
+  }, [selectedPreset, applyPreset]);
+
+  // Save custom filter
+  const saveCustomFilter = useCallback(async (name: string) => {
+    if (!name) return;
+    const newPreset: FilterPreset = { name, ...filterOptions };
+    const updatedPresets = [...customPresets.filter(p => p.name !== name), newPreset];
+    setCustomPresets(updatedPresets);
+    setSelectedPreset(name);
+
+    try {
+      const configResult = await window.configAPI.getConfigAndSchema(pluginId);
+      const currentConfig = configResult?.config || {};
+      const updatedSavedFilters = { ...currentConfig.savedFilters, [name]: newPreset };
+      await window.configAPI.savePluginConfig(pluginId, { ...currentConfig, savedFilters: updatedSavedFilters });
+      setProgress(`Preset '${name}' saved.`);
+    } catch (error) {
+      console.error('Failed to save preset:', error);
+      setProgress(`Error saving preset '${name}'.`);
+    }
+  }, [filterOptions, customPresets, pluginId]);
+
+  // Delete custom filter
+  const deleteCustomFilter = useCallback(async (name: string) => {
+    const updatedPresets = customPresets.filter(p => p.name !== name);
+    setCustomPresets(updatedPresets);
+    if (selectedPreset === name) {
+      setSelectedPreset(''); // Clear selection if deleted preset was active
+    }
+
+    try {
+      const configResult = await window.configAPI.getConfigAndSchema(pluginId);
+      const currentConfig = configResult?.config || {};
+      const updatedSavedFilters = { ...currentConfig.savedFilters };
+      delete updatedSavedFilters[name];
+      await window.configAPI.savePluginConfig(pluginId, { ...currentConfig, savedFilters: updatedSavedFilters });
+      setProgress(`Preset '${name}' deleted.`);
+    } catch (error) {
+      console.error('Failed to delete preset:', error);
+      setProgress(`Error deleting preset '${name}'.`);
+    }
+  }, [customPresets, selectedPreset, pluginId]);
+
+  // Persist last used filter options and path
+  useEffect(() => {
+    const saveLastUsedSettings = async () => {
+      try {
+        const configResult = await window.configAPI.getConfigAndSchema(pluginId);
+        const currentConfig = configResult?.config || {};
+        await window.configAPI.savePluginConfig(pluginId, {
+          ...currentConfig,
+          lastUsedFolderPath: rootPath,
+          lastFileRegex: filterOptions.fileRegex,
+          lastFileFilterType: filterOptions.fileFilterType,
+          lastFolderRegex: filterOptions.folderRegex,
+          lastFolderFilterType: filterOptions.folderFilterType,
+          lastMaxDepth: filterOptions.maxDepth,
+        });
+      } catch (error) {
+        console.error('Failed to save last used settings:', error);
+      }
+    };
+    // Debounce saving to avoid too frequent writes
+    const handler = setTimeout(() => {
+      saveLastUsedSettings();
+    }, 1000);
+    return () => clearTimeout(handler);
+  }, [rootPath, filterOptions, pluginId]);
 
   // Directory scanning with advanced filtering
   const scanDirectory = useCallback(async (startPath: string) => {
@@ -119,9 +244,6 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
     setProgress('Scanning directory...');
     
     try {
-      const fs = await loadNodeModule<typeof import('fs/promises')>('fs/promises');
-      const path = await loadNodeModule<typeof import('path')>('path');
-      
       const shouldIncludeFile = (fileName: string): boolean => {
         if (!filterOptions.fileRegex) return true;
         
@@ -150,39 +272,41 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
         if (depth > filterOptions.maxDepth) return null;
         
         try {
-          const items = await fs.readdir(dirPath, { withFileTypes: true });
+          const items = await window.fileSystemAPI.readDirectory(dirPath);
           const children: FileTreeNode[] = [];
           
           for (const item of items) {
-            const fullPath = path.join(dirPath, item.name);
+            const fullPath = window.utilityAPI.joinPosix(dirPath, item.name);
             
-            if (item.isDirectory()) {
+            if (item.type === 'directory') {
               if (shouldIncludeFolder(item.name)) {
                 const childNode = await scanDir(fullPath, depth + 1);
                 if (childNode && (childNode.children?.length || 0) > 0) {
                   children.push(childNode);
                 }
               }
-            } else if (item.isFile() && shouldIncludeFile(item.name)) {
-              const stats = await fs.stat(fullPath);
+            } else if (item.type === 'file' && shouldIncludeFile(item.name)) {
               children.push({
+                id: fullPath, // Use fullPath as ID for FileTree component
                 name: item.name,
-                path: fullPath,
                 type: 'file',
-                size: stats.size,
-                extension: path.extname(item.name)
+                data: { // Store additional data in 'data' property
+                  path: fullPath,
+                  size: item.size,
+                  extension: window.utilityAPI.extname(item.name)
+                }
               });
             }
           }
           
           return {
-            name: path.basename(dirPath),
-            path: dirPath,
-            type: 'directory',
+            id: dirPath, // Use dirPath as ID for FileTree component
+            name: window.utilityAPI.basename(dirPath),
+            type: 'folder', // Use 'folder' for directories
             children: children.sort((a, b) => {
               // Directories first, then files, both alphabetically
               if (a.type !== b.type) {
-                return a.type === 'directory' ? -1 : 1;
+                return a.type === 'folder' ? -1 : 1;
               }
               return a.name.localeCompare(b.name);
             })
@@ -206,30 +330,7 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
     }
   }, [filterOptions]);
 
-  // File selection handlers
-  const handleFileToggle = useCallback((filePath: string) => {
-    setSelectedFiles(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(filePath)) {
-        newSet.delete(filePath);
-      } else {
-        newSet.add(filePath);
-      }
-      return newSet;
-    });
-  }, []);
-
-  const handleFolderToggle = useCallback((folderPath: string) => {
-    setExpandedFolders(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(folderPath)) {
-        newSet.delete(folderPath);
-      } else {
-        newSet.add(folderPath);
-      }
-      return newSet;
-    });
-  }, []);
+  
 
   // Context generation
   const generateContext = useCallback(async () => {
@@ -242,9 +343,6 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
     setProgress('');
     
     try {
-      const fs = await loadNodeModule<typeof import('fs/promises')>('fs/promises');
-      const path = await loadNodeModule<typeof import('path')>('path');
-      
       const files = Array.from(selectedFiles);
       let contextOutput = '';
       let totalChars = 0;
@@ -254,9 +352,9 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
         setProgress(`Reading file ${i + 1} of ${files.length}...`);
         
         try {
-          const content = await fs.readFile(filePath, 'utf8');
-          const relativePath = path.relative(rootPath, filePath);
-          const fileName = path.basename(filePath);
+          const content = await window.fileSystemAPI.readFile(filePath, 'utf8');
+          const relativePath = window.utilityAPI.relative(rootPath, filePath);
+          const fileName = window.utilityAPI.basename(filePath);
           
           contextOutput += `---\nFile: ${fileName}\nPath: ${relativePath.replace(/\\/g, '/')}\n---\n\n`;
           contextOutput += '```\n' + content + '\n```\n\n';
@@ -282,7 +380,7 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
   // Utility functions
   const handleCopy = useCallback(async () => {
     try {
-      await navigator.clipboard.writeText(output);
+      await window.fileSystemAPI.copyToClipboard(output);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
@@ -300,11 +398,13 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
   };
 
   const handleSelectFolder = async () => {
-    // TODO: Implement folder selection dialog
-    // For now, prompt for path
-    const newPath = prompt('Enter directory path:');
-    if (newPath) {
-      scanDirectory(newPath);
+    try {
+      const selected = await window.fileSystemAPI.selectFolder();
+      if (selected && selected.length > 0) {
+        scanDirectory(selected[0]);
+      }
+    } catch (error) {
+      console.error('Error selecting folder:', error);
     }
   };
 
@@ -317,98 +417,7 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
     );
   }
 
-  // Helper function to recursively render file tree
-  const renderFileTreeNode = (node: FileTreeNode, depth: number = 0): React.ReactNode => {
-    const isDirectory = node.type === 'directory';
-    const isExpanded = expandedFolders.has(node.path);
-    
-    if (isDirectory) {
-      const hasChildren = node.children && node.children.length > 0;
-      const selectedChildFiles = node.children?.filter(child => 
-        child.type === 'file' && selectedFiles.has(child.path)
-      ) || [];
-      const totalChildFiles = node.children?.filter(child => child.type === 'file').length || 0;
-      
-      return (
-        <div key={node.path} style={{ marginLeft: `${depth * 20}px` }}>
-          <div style={{ display: 'flex', alignItems: 'center', padding: '4px 0' }}>
-            {hasChildren && (
-              <span 
-                onClick={() => handleFolderToggle(node.path)}
-                style={{ 
-                  cursor: 'pointer', 
-                  marginRight: '8px', 
-                  fontFamily: 'monospace',
-                  fontSize: '12px',
-                  width: '16px',
-                  textAlign: 'center'
-                }}
-              >
-                {isExpanded ? '−' : '+'}
-              </span>
-            )}
-            <input
-              type="checkbox"
-              checked={selectedChildFiles.length === totalChildFiles && totalChildFiles > 0}
-              ref={ref => {
-                if (ref) {
-                  ref.indeterminate = selectedChildFiles.length > 0 && selectedChildFiles.length < totalChildFiles;
-                }
-              }}
-              onChange={(e) => {
-                if (node.children) {
-                  node.children.forEach(child => {
-                    if (child.type === 'file') {
-                      if (e.target.checked) {
-                        setSelectedFiles(prev => new Set([...prev, child.path]));
-                      } else {
-                        setSelectedFiles(prev => {
-                          const newSet = new Set(prev);
-                          newSet.delete(child.path);
-                          return newSet;
-                        });
-                      }
-                    }
-                  });
-                }
-              }}
-              style={{ marginRight: '8px' }}
-            />
-            <span style={{ fontWeight: 'bold', color: '#666' }}>
-              📁 {node.name}
-            </span>
-          </div>
-          {isExpanded && hasChildren && (
-            <div>
-              {node.children!.map(child => renderFileTreeNode(child, depth + 1))}
-            </div>
-          )}
-        </div>
-      );
-    } else {
-      return (
-        <div key={node.path} style={{ marginLeft: `${depth * 20}px` }}>
-          <div style={{ display: 'flex', alignItems: 'center', padding: '2px 0' }}>
-            <span style={{ width: '16px', marginRight: '8px' }}></span>
-            <input
-              type="checkbox"
-              checked={selectedFiles.has(node.path)}
-              onChange={() => handleFileToggle(node.path)}
-              style={{ marginRight: '8px' }}
-            />
-            <span style={{ fontSize: '14px' }}>
-              📄 {node.name}
-            </span>
-            {node.size && (
-              <span style={{ marginLeft: '8px', fontSize: '12px', color: '#999' }}>
-                ({(node.size / 1024).toFixed(1)}KB)
-              </span>
-            )}
-          </div>
-        </div>
-      );
-    }
-  };
+  
 
   return (
     <div style={{ padding: '20px', height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -453,13 +462,29 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
               <label style={{ display: 'block', marginBottom: '5px' }}>Preset:</label>
               <select 
                 value={selectedPreset} 
-                onChange={(e) => setSelectedPreset(e.target.value)}
+                onChange={(e) => applyPreset(e.target.value)}
                 style={{ width: '100%', padding: '5px' }}
               >
-                {defaultPresets.map(preset => (
+                <option value="">-- Select Preset --</option>
+                {allPresets.map(preset => (
                   <option key={preset.name} value={preset.name}>{preset.name}</option>
                 ))}
               </select>
+            </div>
+            
+            <div>
+              <label style={{ display: 'block', marginBottom: '5px' }}>Save Preset As:</label>
+              <Input
+                type="text"
+                value={newPresetName}
+                onChange={(e) => setNewPresetName(e.target.value)}
+                placeholder="New preset name"
+                style={{ width: '100%' }}
+              />
+              <Button onClick={() => saveCustomFilter(newPresetName)} disabled={!newPresetName}>Save</Button>
+              {selectedPreset && customPresets.some(p => p.name === selectedPreset) && (
+                <Button onClick={() => deleteCustomFilter(selectedPreset)} style={{ marginLeft: '5px' }}>Delete</Button>
+              )}
             </div>
             
             <div>
@@ -549,9 +574,24 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
           </div>
           <div style={{ padding: '10px', height: '300px', overflowY: 'auto' }}>
             {fileTree ? (
-              <div>
-                {renderFileTreeNode(fileTree)}
-              </div>
+              <FileTree
+                data={[fileTree]}
+                onSelectionChange={(ids) => setSelectedFiles(new Set(ids))}
+                defaultExpandedIds={Array.from(expandedIds)}
+                onNodeClick={(node) => {
+                  if (node.type === 'folder') {
+                    setExpandedIds(prev => {
+                      const newSet = new Set(prev);
+                      if (newSet.has(node.id)) {
+                        newSet.delete(node.id);
+                      } else {
+                        newSet.add(node.id);
+                      }
+                      return newSet;
+                    });
+                  }
+                }}
+              />
             ) : (
               <div style={{ textAlign: 'center', color: '#666', padding: '40px 0' }}>
                 Select a folder to start scanning

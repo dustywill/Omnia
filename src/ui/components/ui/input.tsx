@@ -5,7 +5,7 @@
  * It uses relative imports and avoids any import patterns that could break in Electron.
  */
 import * as React from "react"
-import { cn } from "../../../lib/utils.js"
+import { cnSync as cn } from "../../../lib/utils.js"
 
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {}

@@ -33,6 +33,21 @@ export const loadPluginUI = async (
     if (specifier === 'json5') {
       return { default: await loadNodeModule('json5') };
     }
+    if (specifier === '@radix-ui/react-slot') {
+      return await loadNodeModule('@radix-ui/react-slot');
+    }
+    if (specifier === 'class-variance-authority') {
+      return await loadNodeModule('class-variance-authority');
+    }
+    if (specifier === 'clsx') {
+      return await loadNodeModule('clsx');
+    }
+    if (specifier === 'tailwind-merge') {
+      return await loadNodeModule('tailwind-merge');
+    }
+    if (specifier === 'lucide-react') {
+      return await loadNodeModule('lucide-react');
+    }
     if (specifier === 'react') {
       return { useState: React.useState, useEffect: React.useEffect, default: React };
     }

@@ -13,6 +13,33 @@
   margin-bottom: 0;
 }
 
+.fieldGroupContainer {
+  border: 1px solid var(--tt-color-border);
+  border-radius: var(--tt-radius-lg);
+  padding: var(--tt-space-6);
+  background-color: var(--tt-color-surface-secondary);
+  margin-bottom: var(--tt-space-6);
+}
+
+.fieldGroupContainer:last-child {
+  margin-bottom: 0;
+}
+
+.fieldGroupTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--tt-color-text-primary);
+  margin-bottom: var(--tt-space-4);
+  padding-bottom: var(--tt-space-2);
+  border-bottom: 1px solid var(--tt-color-border);
+}
+
+.fieldGroupContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tt-space-4);
+}
+
 .checkbox {
   width: 18px;
   height: 18px;

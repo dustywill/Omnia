@@ -3,15 +3,101 @@
  * This file provides utilities that work seamlessly in both environments
  */
 
-import { type ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { loadNodeModule } from "../ui/node-module-loader.js"
+
+// Cache for loaded modules
+let clsxModule: any = null;
+let twMergeModule: any = null;
+
+// Initialize dependencies
+const initializeDependencies = async () => {
+  if (!clsxModule) {
+    try {
+      clsxModule = await loadNodeModule("clsx");
+    } catch (err) {
+      console.warn("Failed to load clsx:", err);
+      // Fallback clsx implementation
+      clsxModule = {
+        clsx: (...args: any[]) => {
+          return args
+            .filter(Boolean)
+            .map((arg) => {
+              if (typeof arg === 'string') return arg;
+              if (typeof arg === 'object' && arg !== null) {
+                return Object.entries(arg)
+                  .filter(([_, value]) => Boolean(value))
+                  .map(([key]) => key)
+                  .join(' ');
+              }
+              return '';
+            })
+            .join(' ')
+            .trim();
+        }
+      };
+    }
+  }
+  
+  if (!twMergeModule) {
+    try {
+      twMergeModule = await loadNodeModule("tailwind-merge");
+    } catch (err) {
+      console.warn("Failed to load tailwind-merge:", err);
+      // Fallback twMerge implementation
+      twMergeModule = {
+        twMerge: (...classes: any[]) => {
+          const classString = classes.filter(Boolean).join(' ');
+          const classArray = classString.split(/\s+/).filter(Boolean);
+          const uniqueClasses = [...new Set(classArray)];
+          return uniqueClasses.join(' ');
+        }
+      };
+    }
+  }
+};
 
 /**
  * Combines class names with Tailwind CSS class merging
  * Compatible with both Electron and browser environments
  */
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+export async function cn(...inputs: any[]) {
+  await initializeDependencies();
+  const clsx = clsxModule?.clsx || clsxModule?.default || ((x: any) => x);
+  const twMerge = twMergeModule?.twMerge || twMergeModule?.default || ((x: any) => x);
+  return twMerge(clsx(inputs));
+}
+
+/**
+ * Synchronous version of cn for cases where async is not possible
+ * Uses fallback implementations if modules aren't loaded yet
+ */
+export function cnSync(...inputs: any[]) {
+  // Simple fallback implementation
+  const clsx = (...args: any[]) => {
+    return args
+      .filter(Boolean)
+      .map((arg) => {
+        if (typeof arg === 'string') return arg;
+        if (typeof arg === 'object' && arg !== null) {
+          return Object.entries(arg)
+            .filter(([_, value]) => Boolean(value))
+            .map(([key]) => key)
+            .join(' ');
+        }
+        return '';
+      })
+      .join(' ')
+      .trim();
+  };
+  
+  const twMerge = (...classes: any[]) => {
+    const classString = classes.filter(Boolean).join(' ');
+    const classArray = classString.split(/\s+/).filter(Boolean);
+    const uniqueClasses = [...new Set(classArray)];
+    return uniqueClasses.join(' ');
+  };
+  
+  return twMerge(clsx(inputs));
 }
 
 /**
