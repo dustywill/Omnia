@@ -1,7 +1,46 @@
-// React import not needed with automatic JSX transform
-import { Badge } from '../Badge/Badge.js';
-import { Button } from '../Button/Button.js';
-import styles from './PluginCard.module.css';
+import { Badge } from '../ui/badge.js';
+import { Button } from '../ui/button.js';
+
+// Simple component replacements for missing UI components
+const Card = ({ children, className = '', ...props }: any) => (
+  <div className={`border rounded-lg p-4 ${className}`} {...props}>{children}</div>
+);
+const CardHeader = ({ children, className = '', ...props }: any) => (
+  <div className={`pb-2 ${className}`} {...props}>{children}</div>
+);
+const CardTitle = ({ children, className = '', ...props }: any) => (
+  <h3 className={`font-semibold ${className}`} {...props}>{children}</h3>
+);
+const CardDescription = ({ children, className = '', ...props }: any) => (
+  <p className={`text-sm text-gray-600 ${className}`} {...props}>{children}</p>
+);
+const CardContent = ({ children, className = '', ...props }: any) => (
+  <div className={className} {...props}>{children}</div>
+);
+const CardFooter = ({ children, className = '', ...props }: any) => (
+  <div className={`pt-2 ${className}`} {...props}>{children}</div>
+);
+const Alert = ({ children, className = '', ...props }: any) => (
+  <div className={`border border-yellow-200 bg-yellow-50 p-3 rounded ${className}`} {...props}>{children}</div>
+);
+const AlertDescription = ({ children, className = '', ...props }: any) => (
+  <div className={`text-sm ${className}`} {...props}>{children}</div>
+);
+const Switch = ({ checked, onCheckedChange, disabled, className = '', ...props }: any) => (
+  <input 
+    type="checkbox" 
+    checked={checked} 
+    onChange={(e) => onCheckedChange?.(e.target.checked)} 
+    disabled={disabled}
+    className={`toggle ${className}`} 
+    {...props} 
+  />
+);
+const TooltipProvider = ({ children }: any) => <>{children}</>;
+const Tooltip = ({ children }: any) => <>{children}</>;
+const TooltipTrigger = ({ children }: any) => <>{children}</>;
+const TooltipContent = ({ children }: any) => <>{children}</>;
+
 
 export interface Plugin {
   id: string;
@@ -22,129 +61,120 @@ export interface PluginCardProps {
   className?: string;
 }
 
-export function PluginCard({ 
-  plugin, 
-  onToggle, 
-  onConfigure, 
-  onRemove, 
-  className = '' 
+export function PluginCard({
+  plugin,
+  onToggle,
+  onConfigure,
+  onRemove,
+  className = ''
 }: PluginCardProps) {
   const { id, name, description, version, author, status, permissions, lastUpdated } = plugin;
-  
-  const badgeVariant = {
-    active: 'success' as const,
-    inactive: 'secondary' as const,
-    error: 'danger' as const,
-    loading: 'info' as const,
-  };
-  
+
+
   const statusText = {
     active: 'Active',
     inactive: 'Inactive',
     error: 'Error',
     loading: 'Loading...',
   };
-  
+
   return (
-    <div className={`${styles.pluginCard} ${styles[status]} ${className}`}>
-      {/* Loading indicator */}
-      {status === 'loading' && <div className={styles.loadingBar} />}
-      
-      <div className="p-6">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 mb-2">
-              <h3 className="text-lg font-semibold text-theme-primary truncate">
-                {name}
-              </h3>
-              <Badge variant={badgeVariant[status]} size="sm">
-                {statusText[status]}
-              </Badge>
-            </div>
-            
-            <p className="text-sm text-theme-secondary mb-2 line-clamp-2">
-              {description}
-            </p>
-            
-            <div className="flex items-center gap-4 text-xs text-theme-secondary">
-              <span>v{version}</span>
-              {author && <span>by {author}</span>}
-              {lastUpdated && (
-                <span>Updated {lastUpdated.toLocaleDateString()}</span>
-              )}
-            </div>
-          </div>
-          
-          <div className={styles.statusIndicator}>
-            <div className={`${styles.statusDot} ${styles[`${status}Dot`]}`} />
-          </div>
+    <Card className={`flex flex-col ${className} ${status === 'loading' ? 'animate-pulse' : ''}`}>
+      <CardHeader>
+        <div className="flex items-start justify-between">
+            <CardTitle className="truncate">{name}</CardTitle>
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger>
+                        <div className={`w-3 h-3 rounded-full ${
+                            status === 'active' ? 'bg-green-500' :
+                            status === 'inactive' ? 'bg-gray-400' :
+                            status === 'error' ? 'bg-red-500' : 'bg-yellow-400'
+                        }`} />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>{statusText[status]}</p>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
         </div>
-        
-        {/* Permissions */}
+        <CardDescription className="line-clamp-2">{description}</CardDescription>
+        <div className="flex items-center gap-4 text-xs text-muted-foreground pt-2">
+            <span>v{version}</span>
+            {author && <span>by {author}</span>}
+            {lastUpdated && (
+            <span>Updated {lastUpdated.toLocaleDateString()}</span>
+            )}
+        </div>
+      </CardHeader>
+
+      <CardContent className="flex-grow">
         {permissions && permissions.length > 0 && (
           <div className="mb-4">
-            <p className="text-xs text-theme-secondary mb-2">Permissions:</p>
+            <p className="text-xs text-muted-foreground mb-2">Permissions:</p>
             <div className="flex flex-wrap gap-1">
               {permissions.slice(0, 3).map((permission, index) => (
-                <Badge key={index} variant="neutral" size="sm">
+                <Badge key={index} variant="secondary">
                   {permission}
                 </Badge>
               ))}
               {permissions.length > 3 && (
-                <Badge variant="neutral" size="sm">
+                <Badge variant="secondary">
                   +{permissions.length - 3} more
                 </Badge>
               )}
             </div>
           </div>
         )}
-        
-        {/* Error message */}
+
         {status === 'error' && (
-          <div className={styles.errorBanner}>
-            <span className="text-danger text-sm font-medium">
-              ⚠ Plugin failed to load
-            </span>
-          </div>
+          <Alert variant="destructive">
+            <AlertDescription>
+              Plugin failed to load.
+            </AlertDescription>
+          </Alert>
         )}
-        
-        {/* Actions */}
-        <div className="flex items-center gap-2 pt-4 border-t border-theme">
-          <Button
-            variant={status === 'active' ? 'secondary' : 'action'}
-            size="sm"
-            onClick={() => onToggle(id)}
-            disabled={status === 'loading'}
-            className="flex-1"
-          >
-            {status === 'active' ? 'Deactivate' : 'Activate'}
-          </Button>
-          
+      </CardContent>
+
+      <CardFooter className="flex flex-col items-start gap-4">
+        <div className="flex items-center space-x-2">
+            <Switch
+                id={`status-switch-${id}`}
+                checked={status === 'active'}
+                onCheckedChange={() => onToggle(id)}
+                disabled={status === 'loading' || status === 'error'}
+                aria-label={`Toggle ${name} plugin`}
+            />
+            <label htmlFor={`status-switch-${id}`} className="text-sm font-medium">
+                {status === 'active' ? 'Active' : 'Inactive'}
+            </label>
+        </div>
+        <div className="flex w-full items-center gap-2">
           {onConfigure && (
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => onConfigure(id)}
               disabled={status === 'loading' || status === 'error'}
+              className="flex-1"
             >
               Configure
             </Button>
           )}
-          
+
           {onRemove && (
             <Button
-              variant="danger"
+              variant="destructive"
               size="sm"
               onClick={() => onRemove(id)}
               disabled={status === 'loading'}
-              className={styles.removeButton}
+              className="flex-1"
             >
               Remove
             </Button>
           )}
         </div>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 }

@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { loadNodeModule } from '../../src/ui/node-module-loader.js';
-import { Card } from '../../src/ui/components/Card/Card.js';
-import { Button } from '../../src/ui/components/Button/Button.js';
-import { Input } from '../../src/ui/components/Input/Input.js';
-import { Badge } from '../../src/ui/components/Badge/Badge.js';
-import { Grid } from '../../src/ui/components/Grid/Grid.js';
+// Using simple div wrappers instead of Card components for now
+const Card = ({ children, ...props }: any) => <div className="border rounded-lg p-4" {...props}>{children}</div>;
+const CardHeader = ({ children, ...props }: any) => <div className="pb-2" {...props}>{children}</div>;
+const CardTitle = ({ children, ...props }: any) => <h3 className="font-semibold" {...props}>{children}</h3>;
+const CardDescription = ({ children, ...props }: any) => <p className="text-sm text-gray-600" {...props}>{children}</p>;
+const CardContent = ({ children, ...props }: any) => <div {...props}>{children}</div>;
+import { Button } from '../../src/ui/components/ui/button.js';
+import { Input } from '../../src/ui/components/ui/input.js';
+import { Badge } from '../../src/ui/components/ui/badge.js';
 // @ts-ignore
 import { createSchemas } from './config-schema.js';
 
@@ -399,10 +403,10 @@ const ScriptRunnerPlugin: React.FC<ScriptRunnerPluginProps> = ({ config: provide
 
   if (loading) {
     return (
-      <Card className="max-w-4xl mx-auto">
-        <div className="text-center py-8">
-          <p className="text-theme-secondary">Loading scripts...</p>
-        </div>
+      <Card>
+        <CardContent className="text-center py-8">
+          <p className="text-muted-foreground">Loading scripts...</p>
+        </CardContent>
       </Card>
     );
   }
@@ -411,29 +415,30 @@ const ScriptRunnerPlugin: React.FC<ScriptRunnerPluginProps> = ({ config: provide
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Header */}
       <Card>
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-2xl font-bold text-theme-primary">Script Runner</h2>
-            <p className="text-theme-secondary">
-              Execute PowerShell scripts with parameters and view real-time output.
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="info" size="sm">
-              Shell: {config.defaultShell}
-            </Badge>
-            <Badge variant="neutral" size="sm">
-              {scripts.length} scripts
-            </Badge>
-            {config.enableService && (
-              <Badge variant="success" size="sm">
-                Service Active
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Script Runner</CardTitle>
+              <CardDescription>
+                Execute PowerShell scripts with parameters and view real-time output.
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary">
+                Shell: {config.defaultShell}
               </Badge>
-            )}
+              <Badge variant="outline">
+                {scripts.length} scripts
+              </Badge>
+              {config.enableService && (
+                <Badge variant="default">
+                  Service Active
+                </Badge>
+              )}
+            </div>
           </div>
-        </div>
-
-        <div className="flex items-center gap-3">
+        </CardHeader>
+        <CardContent>
           <Button
             onClick={loadScripts}
             variant="secondary"
@@ -442,61 +447,63 @@ const ScriptRunnerPlugin: React.FC<ScriptRunnerPluginProps> = ({ config: provide
           >
             {loading ? 'Reloading...' : 'Reload Scripts'}
           </Button>
-        </div>
+        </CardContent>
       </Card>
 
       {/* Script Selection */}
       <Card>
-        <h3 className="text-lg font-semibold text-theme-primary mb-4">Select Script</h3>
-        
-        {scripts.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-theme-secondary">No scripts found.</p>
-            <p className="text-sm text-theme-secondary mt-2">
-              Check the scripts directory: {config.scriptsDirectory}
-            </p>
-          </div>
-        ) : (
-          <Grid cols={2} gap="md">
-            {scripts.map((script) => (
-              <div
-                key={script.id}
-                className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                  selectedScript?.id === script.id
-                    ? 'border-action bg-action/10'
-                    : 'border-theme hover:bg-theme-background'
-                }`}
-                onClick={() => setSelectedScript(script)}
-              >
-                <h4 className="font-medium text-theme-primary mb-1">{script.name}</h4>
-                <p className="text-sm text-theme-secondary mb-2">{script.description}</p>
-                <div className="flex items-center gap-2">
-                  <Badge variant="neutral" size="sm">{script.category}</Badge>
-                  {script.parameters.length > 0 && (
-                    <Badge variant="info" size="sm">
-                      {script.parameters.length} params
-                    </Badge>
-                  )}
+        <CardHeader>
+          <CardTitle>Select Script</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {scripts.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No scripts found.</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Check the scripts directory: {config.scriptsDirectory}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              {scripts.map((script) => (
+                <div
+                  key={script.id}
+                  className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                    selectedScript?.id === script.id
+                      ? 'border-primary bg-muted'
+                      : 'hover:bg-muted/50'
+                  }`}
+                  onClick={() => setSelectedScript(script)}
+                >
+                  <h4 className="font-medium mb-1">{script.name}</h4>
+                  <p className="text-sm text-muted-foreground mb-2">{script.description}</p>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary">{script.category}</Badge>
+                    {script.parameters.length > 0 && (
+                      <Badge variant="outline">
+                        {script.parameters.length} params
+                      </Badge>
+                    )}
+                  </div>
+                  <code className="text-xs text-muted-foreground mt-2 block truncate">
+                    {script.path}
+                  </code>
                 </div>
-                <code className="text-xs text-theme-secondary mt-2 block truncate">
-                  {script.path}
-                </code>
-              </div>
-            ))}
-          </Grid>
-        )}
+              ))}
+            </div>
+          )}
+        </CardContent>
       </Card>
 
       {/* Script Execution */}
       {selectedScript && (
         <Card>
-          <h3 className="text-lg font-semibold text-theme-primary mb-4">
-            Execute: {selectedScript.name}
-          </h3>
-          
-          <div className="space-y-4">
+          <CardHeader>
+            <CardTitle>Execute: {selectedScript.name}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-theme-primary mb-2">
+              <label className="block text-sm font-medium mb-2">
                 Parameters (space-separated):
               </label>
               <Input
@@ -507,15 +514,15 @@ const ScriptRunnerPlugin: React.FC<ScriptRunnerPluginProps> = ({ config: provide
               />
               {selectedScript.parameters.length > 0 && (
                 <div className="mt-2">
-                  <p className="text-xs text-theme-secondary mb-1">Expected parameters:</p>
+                  <p className="text-xs text-muted-foreground mb-1">Expected parameters:</p>
                   <div className="space-y-1">
                     {selectedScript.parameters.map((param: any, index: number) => (
                       <div key={index} className="text-xs">
-                        <code className="text-action">{param.name}</code>
-                        {param.required && <span className="text-danger ml-1">*</span>}
-                        <span className="text-theme-secondary ml-2">({param.type})</span>
+                        <code className="text-primary">{param.name}</code>
+                        {param.required && <span className="text-destructive ml-1">*</span>}
+                        <span className="text-muted-foreground ml-2">({param.type})</span>
                         {param.description && (
-                          <span className="text-theme-secondary ml-2">- {param.description}</span>
+                          <span className="text-muted-foreground ml-2">- {param.description}</span>
                         )}
                       </div>
                     ))}
@@ -527,7 +534,6 @@ const ScriptRunnerPlugin: React.FC<ScriptRunnerPluginProps> = ({ config: provide
             <div className="flex items-center gap-3">
               <Button
                 onClick={handleRunScript}
-                variant="primary"
                 disabled={status === 'running'}
               >
                 {status === 'running' ? 'Running...' : 'Execute Script'}
@@ -535,107 +541,114 @@ const ScriptRunnerPlugin: React.FC<ScriptRunnerPluginProps> = ({ config: provide
               
               <div className="flex items-center gap-2">
                 {status === 'running' && (
-                  <Badge variant="warning" size="sm">Running...</Badge>
+                  <Badge variant="secondary">Running...</Badge>
                 )}
                 {status === 'success' && (
-                  <Badge variant="success" size="sm">✓ Success</Badge>
+                  <Badge variant="default">✓ Success</Badge>
                 )}
                 {status === 'error' && (
-                  <Badge variant="danger" size="sm">✗ Error</Badge>
+                  <Badge variant="destructive">✗ Error</Badge>
                 )}
               </div>
             </div>
-          </div>
+          </CardContent>
         </Card>
       )}
 
       {/* Output */}
       {output && (
         <Card>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-theme-primary">Output</h3>
-            <Button
-              onClick={handleCopyOutput}
-              variant="secondary"
-              size="sm"
-            >
-              Copy Output
-            </Button>
-          </div>
-          <pre className="bg-theme-background border border-theme rounded-lg p-4 max-h-80 overflow-auto text-xs font-mono whitespace-pre-wrap">
-            {output}
-          </pre>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>Output</CardTitle>
+              <Button
+                onClick={handleCopyOutput}
+                variant="secondary"
+                size="sm"
+              >
+                Copy Output
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <pre className="bg-muted border rounded-lg p-4 max-h-80 overflow-auto text-xs font-mono whitespace-pre-wrap">
+              {output}
+            </pre>
+          </CardContent>
         </Card>
       )}
 
       {/* Execution History */}
       {config.showExecutionHistory && executionHistory.length > 0 && (
         <Card>
-          <h3 className="text-lg font-semibold text-theme-primary mb-4">Execution History</h3>
-          <div className="space-y-3">
+          <CardHeader>
+            <CardTitle>Execution History</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
             {executionHistory.slice(0, 5).map((execution, index) => (
-              <div key={index} className="p-3 border border-theme rounded-lg">
+              <div key={index} className="p-3 border rounded-lg">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium text-theme-primary">
+                  <span className="font-medium">
                     {execution.scriptName}
                   </span>
                   <div className="flex items-center gap-2">
                     <Badge
-                      variant={execution.success ? 'success' : 'danger'}
-                      size="sm"
+                      variant={execution.success ? 'default' : 'destructive'}
                     >
                       {execution.success ? 'Success' : 'Failed'}
                     </Badge>
-                    <span className="text-xs text-theme-secondary">
+                    <span className="text-xs text-muted-foreground">
                       {execution.duration}ms
                     </span>
                   </div>
                 </div>
-                <div className="text-xs text-theme-secondary">
+                <div className="text-xs text-muted-foreground">
                   {execution.timestamp ? new Date(execution.timestamp).toLocaleString() : 'Unknown time'}
                 </div>
                 {execution.parameters && execution.parameters.length > 0 && (
-                  <div className="text-xs text-theme-secondary mt-1">
+                  <div className="text-xs text-muted-foreground mt-1">
                     Params: {execution.parameters.join(', ')}
                   </div>
                 )}
               </div>
             ))}
-          </div>
+          </CardContent>
         </Card>
       )}
 
       {/* Configuration Info */}
       <Card>
-        <h3 className="text-lg font-semibold text-theme-primary mb-4">Configuration</h3>
-        <div className="grid grid-cols-2 gap-4 text-sm">
+        <CardHeader>
+          <CardTitle>Configuration</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <span className="text-theme-secondary">Scripts Directory:</span>
-            <div className="font-mono text-theme-primary">{config.scriptsDirectory}</div>
+            <span className="text-muted-foreground">Scripts Directory:</span>
+            <div className="font-mono">{config.scriptsDirectory}</div>
           </div>
           <div>
-            <span className="text-theme-secondary">Output Directory:</span>
-            <div className="font-mono text-theme-primary">{config.outputDirectory}</div>
+            <span className="text-muted-foreground">Output Directory:</span>
+            <div className="font-mono">{config.outputDirectory}</div>
           </div>
           <div>
-            <span className="text-theme-secondary">Default Shell:</span>
-            <div className="text-theme-primary">{config.defaultShell}</div>
+            <span className="text-muted-foreground">Default Shell:</span>
+            <div>{config.defaultShell}</div>
           </div>
           <div>
-            <span className="text-theme-secondary">Timeout:</span>
-            <div className="text-theme-primary">{config.timeout}s</div>
+            <span className="text-muted-foreground">Timeout:</span>
+            <div>{config.timeout}s</div>
           </div>
           <div>
-            <span className="text-theme-secondary">Max Concurrent:</span>
-            <div className="text-theme-primary">{config.maxConcurrentScripts}</div>
+            <span className="text-muted-foreground">Max Concurrent:</span>
+            <div>{config.maxConcurrentScripts}</div>
           </div>
           <div>
-            <span className="text-theme-secondary">Service:</span>
-            <div className="text-theme-primary">
+            <span className="text-muted-foreground">Service:</span>
+            <div>
               {config.enableService ? 'Enabled' : 'Disabled'}
             </div>
           </div>
-        </div>
+        </CardContent>
       </Card>
     </div>
   );

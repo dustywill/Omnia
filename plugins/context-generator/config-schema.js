@@ -15,12 +15,12 @@ export const createSchemas = async () => {
   const zodModule = await loadZod();
   const z = zodModule.z || zodModule.default || zodModule;
 
-  // Saved filter schema
+  // Saved filter schema (matching ttCommander structure)
   const SavedFilterSchema = z.object({
     fileRegex: z.string().default(''),
-    fileFilterType: z.enum(['include', 'exclude']).default('exclude'),
+    fileFilterType: z.enum(['include', 'exclude']).default('include'),
     folderRegex: z.string().default(''),
-    folderFilterType: z.enum(['include', 'exclude']).default('exclude'),
+    folderFilterType: z.enum(['include', 'exclude']).default('include'),
     maxDepth: z.number().default(-1),
   });
 

@@ -1,9 +1,50 @@
 import React from 'react';
-import { Button } from '../components/Button/Button.js';
-import { Input } from '../components/Input/Input.js';
-import { ToggleSwitch } from '../components/ToggleSwitch/ToggleSwitch.js';
+import { Button } from '../components/ui/button.js';
+import { Input } from '../components/ui/input.js';
+import { Badge } from '../components/ui/badge.js';
 import { type PluginInfo } from '../main-app-renderer.js';
-import styles from './PluginsView.module.css';
+
+// Simple component replacements for missing UI components
+const Card = ({ children, className = '', ...props }: any) => (
+  <div className={`border rounded-lg p-4 ${className}`} {...props}>{children}</div>
+);
+const CardHeader = ({ children, className = '', ...props }: any) => (
+  <div className={`pb-2 ${className}`} {...props}>{children}</div>
+);
+const CardTitle = ({ children, className = '', ...props }: any) => (
+  <h3 className={`font-semibold ${className}`} {...props}>{children}</h3>
+);
+const CardDescription = ({ children, className = '', ...props }: any) => (
+  <p className={`text-sm text-gray-600 ${className}`} {...props}>{children}</p>
+);
+const CardContent = ({ children, className = '', ...props }: any) => (
+  <div className={className} {...props}>{children}</div>
+);
+const CardFooter = ({ children, className = '', ...props }: any) => (
+  <div className={`pt-2 ${className}`} {...props}>{children}</div>
+);
+const Alert = ({ children, className = '', ...props }: any) => (
+  <div className={`border border-yellow-200 bg-yellow-50 p-3 rounded ${className}`} {...props}>{children}</div>
+);
+const AlertDescription = ({ children, className = '', ...props }: any) => (
+  <div className={`text-sm ${className}`} {...props}>{children}</div>
+);
+const Avatar = ({ children, className = '', ...props }: any) => (
+  <div className={`w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center ${className}`} {...props}>{children}</div>
+);
+const AvatarFallback = ({ children, className = '', ...props }: any) => (
+  <span className={`text-sm font-medium ${className}`} {...props}>{children}</span>
+);
+const Switch = ({ checked, onCheckedChange, disabled, className = '', ...props }: any) => (
+  <input 
+    type="checkbox" 
+    checked={checked} 
+    onChange={(e) => onCheckedChange?.(e.target.checked)} 
+    disabled={disabled}
+    className={`toggle ${className}`} 
+    {...props} 
+  />
+);
 
 export interface PluginsViewProps {
   plugins: PluginInfo[];
@@ -14,40 +55,20 @@ export interface PluginsViewProps {
   initialFilter?: 'all' | 'active' | 'inactive' | 'error';
 }
 
-const getPluginIcon = (pluginName: string, pluginType: string) => {
-  const letter = pluginName.charAt(0).toUpperCase();
-  
-  return (
-    <div className={`${styles.pluginIcon} ${styles[pluginType] || styles.simple}`}>
-      {letter}
-    </div>
-  );
-};
-
-// Plugin Settings Card with Dashboard styling and action buttons
-interface PluginManagementCardProps {
-  plugin: PluginInfo;
-  onPluginSelect: (pluginId: string) => void;
-  onPluginToggle: (pluginId: string) => void;
-  onPluginConfigure: (pluginId: string) => void;
-  onPluginRemove: (pluginId: string) => void;
-}
-
 function PluginManagementCard({ 
   plugin, 
   onPluginSelect,
   onPluginToggle,
   onPluginConfigure,
   onPluginRemove
-}: PluginManagementCardProps) {
+}: {
+  plugin: PluginInfo;
+  onPluginSelect: (pluginId: string) => void;
+  onPluginToggle: (pluginId: string) => void;
+  onPluginConfigure: (pluginId: string) => void;
+  onPluginRemove: (pluginId: string) => void;
+}) {
   const { id, name, description, version, author, status } = plugin;
-  
-  const statusText = {
-    active: 'Active',
-    inactive: 'Inactive', 
-    error: 'Error',
-    loading: 'Loading...',
-  };
 
   const handleCardClick = () => {
     if (status === 'active') {
@@ -56,101 +77,75 @@ function PluginManagementCard({
   };
   
   return (
-    <div 
-      className={`bg-white border border-gray-200 rounded-xl p-5 ${styles.pluginCard} ${status === 'loading' ? styles.loading : ''}`}
+    <Card 
+      className={`flex flex-col ${status === 'active' ? 'cursor-pointer' : ''} ${status === 'loading' ? 'animate-pulse' : ''}`}
       onClick={handleCardClick}
     >
-      {/* Header */}
-      <div className={styles.pluginHeader}>
-        {getPluginIcon(name, plugin.type)}
-        
-        <div className={styles.pluginInfo}>
-          <h3 className={styles.pluginName}>
-            {name}
-          </h3>
-          <p className={styles.pluginDescription}>
-            {description}
-          </p>
+      <CardHeader className="flex-row items-start gap-4">
+        <Avatar>
+          <AvatarFallback>{name.charAt(0).toUpperCase()}</AvatarFallback>
+        </Avatar>
+        <div className="flex-1">
+          <CardTitle>{name}</CardTitle>
+          <CardDescription className="line-clamp-2">{description}</CardDescription>
         </div>
-
-        {/* Status indicator LED */}
-        <div 
-          title={statusText[status]}
-          className={`${styles.statusLed} ${styles[status] || ''}`}
-        />
-      </div>
-      
-      {/* Plugin metadata */}
-      <div className={styles.pluginMetadata}>
-        <span>v{version}</span>
-        {author && <span>by {author}</span>}
-        <span className={`${styles.badge} ${styles[plugin.type] || styles.simple}`}>
-          {plugin.type}
-        </span>
-      </div>
-      
-      {/* Error message */}
-      {status === 'error' && (
-        <div className={styles.errorAlert}>
-          <span className={styles.icon}>⚠</span>
-          <p className={styles.message}>Plugin failed to load</p>
+        <div className={`w-3 h-3 rounded-full ${
+            status === 'active' ? 'bg-green-500' :
+            status === 'inactive' ? 'bg-gray-400' :
+            status === 'error' ? 'bg-red-500' : 'bg-yellow-400'
+        }`} />
+      </CardHeader>
+      <CardContent className="flex-grow">
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>v{version}</span>
+            {author && <span>by {author}</span>}
+            <Badge variant="outline">{plugin.type}</Badge>
         </div>
-      )}
-      
-      {/* Action buttons */}
-      <div className={`${styles.pluginActions} mt-auto pt-4 border-t border-gray-200 flex gap-3 flex-wrap items-center`}>
-        {/* Toggle Switch for Active/Inactive */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-600 font-medium">
-            {status === 'active' ? 'Active' : 'Inactive'}
-          </span>
-          <ToggleSwitch
-            checked={status === 'active'}
-            onChange={() => {
-              onPluginToggle(id);
-            }}
-            disabled={status === 'loading' || status === 'error'}
-            size="sm"
-            aria-label={`Toggle ${name} plugin ${status === 'active' ? 'off' : 'on'}`}
-          />
+        {status === 'error' && (
+            <Alert variant="destructive" className="mt-4">
+                <AlertDescription>Plugin failed to load</AlertDescription>
+            </Alert>
+        )}
+      </CardContent>
+      <CardFooter className="flex flex-col gap-4">
+        <div className="flex items-center space-x-2 w-full">
+            <Switch
+                id={`status-switch-${id}`}
+                checked={status === 'active'}
+                onCheckedChange={() => onPluginToggle(id)}
+                disabled={status === 'loading' || status === 'error'}
+            />
+            <label htmlFor={`status-switch-${id}`} className="text-sm font-medium">
+                {status === 'active' ? 'Active' : 'Inactive'}
+            </label>
         </div>
-        
-        <div className="flex gap-2 flex-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onPluginConfigure(id);
-            }}
-            disabled={status === 'loading' || status === 'error'}
-            className="flex-1 min-w-20"
-          >
-            Configure
-          </Button>
-          
-          <Button
-            variant="danger"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onPluginRemove(id);
-            }}
-            disabled={status === 'loading'}
-            className="min-w-18"
-          >
-            Remove
-          </Button>
+        <div className="flex w-full gap-2">
+            <Button
+                variant="outline"
+                size="sm"
+                onClick={(e) => { e.stopPropagation(); onPluginConfigure(id); }}
+                disabled={status === 'loading' || status === 'error'}
+                className="flex-1"
+            >
+                Configure
+            </Button>
+            <Button
+                variant="destructive"
+                size="sm"
+                onClick={(e) => { e.stopPropagation(); onPluginRemove(id); }}
+                disabled={status === 'loading'}
+                className="flex-1"
+            >
+                Remove
+            </Button>
         </div>
-      </div>
-      
-      {/* Click instruction for active plugins */}
-      {status === 'active' && (
-        <div className="text-center p-2 bg-blue-50 border border-blue-200 rounded-md text-blue-700 text-xs font-medium mt-2">
-          Click card to open tool
-        </div>
-      )}
-    </div>
+        {status === 'active' && (
+            <div className="text-center p-2 bg-blue-50 border border-blue-200 rounded-md text-blue-700 text-xs font-medium w-full">
+                Click card to open tool
+            </div>
+        )}
+      </CardFooter>
+    </Card>
   );
 }
 
@@ -173,30 +168,20 @@ export function PluginsView({
   });
 
   return (
-    <div className="h-screen overflow-y-auto">
-      {/* Header */}
-      <header className="p-4 px-8 bg-white border-b border-gray-200 mb-6">
-        <div className="flex justify-between items-start">
+    <div className="h-full overflow-y-auto bg-gray-50">
+      <header className="p-4 px-8 bg-white border-b">
+        <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800 mb-1">
-              Plugins
-            </h1>
-            <p className="text-gray-500 text-sm">
-              Manage your plugin collection
-            </p>
+            <h1 className="text-2xl font-bold text-gray-800">Plugins</h1>
+            <p className="text-gray-500 text-sm">Manage your plugin collection</p>
           </div>
-          
-          <Button variant="action" size="md">
-            Add Plugin
-          </Button>
+          <Button>Add Plugin</Button>
         </div>
       </header>
 
-      <div className="px-8 pb-8 max-w-7xl mx-auto">
-        {/* Search and Filters */}
-        <div className={styles.controlsRow}>
-          {/* Search on the left */}
-          <div className={styles.searchSection}>
+      <main className="p-8 max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <div className="w-full max-w-xs">
             <Input
               type="search"
               placeholder="Search plugins..."
@@ -204,46 +189,24 @@ export function PluginsView({
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          
-          {/* Filter buttons in the middle */}
-          <div className={styles.filterButtons}>
-            <Button
-              variant={filterStatus === 'all' ? 'action' : 'ghost'}
-              size="sm"
-              onClick={() => setFilterStatus('all')}
-            >
+          <div className="flex items-center gap-2">
+            <Button variant={filterStatus === 'all' ? 'default' : 'ghost'} size="sm" onClick={() => setFilterStatus('all')}>
               All ({plugins.length})
             </Button>
-            <Button
-              variant={filterStatus === 'active' ? 'action' : 'ghost'}
-              size="sm"
-              onClick={() => setFilterStatus('active')}
-            >
+            <Button variant={filterStatus === 'active' ? 'default' : 'ghost'} size="sm" onClick={() => setFilterStatus('active')}>
               Active ({plugins.filter(p => p.status === 'active').length})
             </Button>
-            <Button
-              variant={filterStatus === 'inactive' ? 'action' : 'ghost'}
-              size="sm"
-              onClick={() => setFilterStatus('inactive')}
-            >
+            <Button variant={filterStatus === 'inactive' ? 'default' : 'ghost'} size="sm" onClick={() => setFilterStatus('inactive')}>
               Inactive ({plugins.filter(p => p.status === 'inactive').length})
             </Button>
-            <Button
-              variant={filterStatus === 'error' ? 'action' : 'ghost'}
-              size="sm"
-              onClick={() => setFilterStatus('error')}
-            >
+            <Button variant={filterStatus === 'error' ? 'destructive' : 'ghost'} size="sm" onClick={() => setFilterStatus('error')}>
               Issues ({plugins.filter(p => p.status === 'error').length})
             </Button>
           </div>
-          
-          {/* Spacer to push filter buttons to center */}
-          <div className={styles.spacer}></div>
         </div>
 
-        {/* Plugin Grid */}
         {filteredPlugins.length > 0 ? (
-          <div className={styles.pluginGrid}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredPlugins.map((plugin) => (
               <PluginManagementCard
                 key={plugin.id}
@@ -256,20 +219,20 @@ export function PluginsView({
             ))}
           </div>
         ) : (
-          <div className={styles.emptyState}>
-            <h3 className="text-xl mb-4 text-gray-700">
+          <div className="text-center py-16 text-gray-500">
+            <h3 className="text-xl mb-2">
               {searchTerm || filterStatus !== 'all' 
                 ? 'No plugins match your criteria' 
                 : 'No Plugins Found'}
             </h3>
-            <p className="text-gray-500">
+            <p>
               {searchTerm || filterStatus !== 'all'
                 ? 'Try adjusting your search or filter criteria.'
                 : 'Add some plugins to get started with Omnia.'}
             </p>
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }

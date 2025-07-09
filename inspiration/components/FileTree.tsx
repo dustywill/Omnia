@@ -1,21 +1,37 @@
 "use client";
 
 import React, { useState, useCallback, useMemo } from "react";
-import {
-  ChevronRight,
-  Folder,
-  File,
-  FolderOpen,
-  Check,
-  Minus,
-} from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
+// Removed @/lib/utils import for Electron compatibility
 
 // Utility function for cn
 function cn(...classes: (string | undefined | null | boolean)[]): string {
   return classes.filter(Boolean).join(" ");
 }
+
+// Simple icon components to replace lucide-react
+const ChevronRight = ({ className }: { className?: string }) => (
+  <span className={cn("inline-block", className)} style={{ transform: 'rotate(0deg)', transition: 'transform 0.2s' }}>▶</span>
+);
+
+const Folder = ({ className }: { className?: string }) => (
+  <span className={className}>📁</span>
+);
+
+const FolderOpen = ({ className }: { className?: string }) => (
+  <span className={className}>📂</span>
+);
+
+const File = ({ className }: { className?: string }) => (
+  <span className={className}>📄</span>
+);
+
+const Check = ({ className }: { className?: string }) => (
+  <span className={className}>✓</span>
+);
+
+const Minus = ({ className }: { className?: string }) => (
+  <span className={className}>−</span>
+);
 
 // Types
 export type FileTreeNode = {
@@ -256,14 +272,13 @@ export function FileTree({
 
     return (
       <div key={node.id} className="select-none">
-        <motion.div
+        <div
           className={cn(
             "flex items-center py-1 px-2 cursor-pointer transition-all duration-200 relative group rounded-md mx-1",
             nodeBgClass,
             nodeHoverBgClass,
           )}
           style={{ paddingLeft: level * indent + 8 }}
-          whileTap={{ scale: 0.98, transition: { duration: 0.1 } }}
         >
           {/* Tree Lines */}
           {showLines && level > 0 && (
@@ -302,10 +317,12 @@ export function FileTree({
           )}
 
           {/* Expand Icon */}
-          <motion.div
+          <div
             className="flex items-center justify-center w-4 h-4 mr-1"
-            animate={{ rotate: hasChildren && isExpanded ? 90 : 0 }}
-            transition={{ duration: 0.2, ease: "easeInOut" }}
+            style={{ 
+              transform: hasChildren && isExpanded ? 'rotate(90deg)' : 'rotate(0deg)', 
+              transition: 'transform 0.2s ease-in-out' 
+            }}
             onClick={(e) => {
               e.stopPropagation();
               if (hasChildren) toggleExpanded(node.id);
@@ -314,7 +331,7 @@ export function FileTree({
             {hasChildren && (
               <ChevronRight className="h-3 w-3 text-muted-foreground" />
             )}
-          </motion.div>
+          </div>
 
           {/* Checkbox */}
           <div className="mr-2" onClick={(e) => e.stopPropagation()}>
@@ -325,17 +342,15 @@ export function FileTree({
           </div>
 
           {/* Node Icon */}
-          <motion.div
+          <div
             className="flex items-center justify-center w-4 h-4 mr-2"
-            whileHover={{ scale: 1.1 }}
-            transition={{ duration: 0.15 }}
             onClick={() => {
               if (hasChildren) toggleExpanded(node.id);
               onNodeClick?.(node);
             }}
           >
             {getIcon()}
-          </motion.div>
+          </div>
 
           {/* Label */}
           <span
@@ -347,42 +362,23 @@ export function FileTree({
           >
             {node.name}
           </span>
-        </motion.div>
+        </div>
 
         {/* Children */}
-        <AnimatePresence>
-          {hasChildren && isExpanded && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{
-                duration: animateExpand ? 0.3 : 0,
-                ease: "easeInOut",
-              }}
-              className="overflow-hidden"
-            >
-              <motion.div
-                initial={{ y: -10 }}
-                animate={{ y: 0 }}
-                exit={{ y: -10 }}
-                transition={{
-                  duration: animateExpand ? 0.2 : 0,
-                  delay: animateExpand ? 0.1 : 0,
-                }}
-              >
-                {node.children!.map((child, index) =>
-                  renderNode(
-                    child,
-                    level + 1,
-                    index === node.children!.length - 1,
-                    currentPath,
-                  ),
-                )}
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {hasChildren && isExpanded && (
+          <div className="overflow-hidden">
+            <div>
+              {node.children!.map((child, index) =>
+                renderNode(
+                  child,
+                  level + 1,
+                  index === node.children!.length - 1,
+                  currentPath,
+                ),
+              )}
+            </div>
+          </div>
+        )}
       </div>
     );
   };

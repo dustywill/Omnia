@@ -1,6 +1,19 @@
-import React from 'react';
 import { DashboardPluginCard } from '../components/DashboardPluginCard/DashboardPluginCard.js';
 import { type PluginInfo } from '../main-app-renderer.js';
+
+// Simple component replacements for missing card components
+const Card = ({ children, className = '', onClick, ...props }: any) => (
+  <div className={`border rounded-lg p-4 ${className}`} onClick={onClick} {...props}>{children}</div>
+);
+const CardHeader = ({ children, className = '', ...props }: any) => (
+  <div className={`pb-2 ${className}`} {...props}>{children}</div>
+);
+const CardTitle = ({ children, className = '', ...props }: any) => (
+  <h3 className={`font-semibold ${className}`} {...props}>{children}</h3>
+);
+const CardContent = ({ children, className = '', ...props }: any) => (
+  <div className={className} {...props}>{children}</div>
+);
 
 export interface DashboardViewProps {
   plugins: PluginInfo[];
@@ -8,6 +21,20 @@ export interface DashboardViewProps {
   onViewChange?: (view: 'dashboard' | 'plugins' | 'settings') => void;
   onStatusClick?: (filter: 'active' | 'inactive' | 'error') => void;
 }
+
+const StatCard = ({ title, value, onClick, colorClass, hoverColorClass }: any) => (
+    <Card 
+        className={`text-center cursor-pointer transition-all ${hoverColorClass}`}
+        onClick={onClick}
+    >
+        <CardHeader className="p-2">
+            <CardTitle className={`text-2xl font-bold ${colorClass}`}>{value}</CardTitle>
+        </CardHeader>
+        <CardContent className="p-2">
+            <p className="text-xs text-muted-foreground">{title}</p>
+        </CardContent>
+    </Card>
+);
 
 export function DashboardView({ 
   plugins, 
@@ -19,161 +46,59 @@ export function DashboardView({
   const inactivePlugins = plugins.filter(p => p.status === 'inactive');
   const errorPlugins = plugins.filter(p => p.status === 'error');
 
-  const headerStyle: React.CSSProperties = {
-    padding: '1rem 2rem',
-    backgroundColor: '#3b82f6',
-    borderBottom: '1px solid #2563eb',
-    marginBottom: '1.5rem',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start'
-  };
-
-  const contentStyle: React.CSSProperties = {
-    padding: '0 2rem 2rem 2rem',
-    maxWidth: '1200px',
-    margin: '0 auto'
-  };
-
-  const miniStatsGridStyle: React.CSSProperties = {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: '0.5rem',
-    width: '200px'
-  };
-
-  const miniStatCardStyle: React.CSSProperties = {
-    backgroundColor: '#f8fafc',
-    padding: '0.75rem',
-    borderRadius: '6px',
-    border: '1px solid #e5e7eb',
-    textAlign: 'center',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease'
-  };
-
-  const pluginGridStyle: React.CSSProperties = {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
-    gap: '1.5rem',
-    marginBottom: '2rem'
-  };
-
-  const sectionHeaderStyle: React.CSSProperties = {
-    fontSize: '1.25rem',
-    fontWeight: '600',
-    marginBottom: '1rem',
-    color: '#1f2937'
-  };
-
   return (
-    <div style={{ height: '100%', overflowY: 'auto' }}>
+    <div className="h-full overflow-y-auto bg-gray-50">
       {/* Header */}
-      <header style={headerStyle}>
-        <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#ffffff', marginBottom: '0.25rem' }}>
-            Dashboard
-          </h1>
-          <p style={{ color: '#e5e7eb', fontSize: '0.9rem' }}>
-            Overview of your plugin ecosystem
-          </p>
-        </div>
-        
-        {/* Mini Statistics Cards */}
-        <div style={miniStatsGridStyle}>
-          <div 
-            style={miniStatCardStyle}
-            onClick={() => onStatusClick?.('active')}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#f0f9ff';
-              e.currentTarget.style.borderColor = '#bae6fd';
-              e.currentTarget.style.transform = 'translateY(-1px)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#f8fafc';
-              e.currentTarget.style.borderColor = '#e5e7eb';
-              e.currentTarget.style.transform = 'translateY(0)';
-            }}
-            title="Click to view active plugins"
-          >
-            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#059669', marginBottom: '0.25rem' }}>
-              {activePlugins.length}
+      <header className="p-4 px-8 bg-primary text-primary-foreground">
+        <div className="flex justify-between items-start">
+            <div>
+                <h1 className="text-2xl font-bold">Dashboard</h1>
+                <p className="text-sm text-primary-foreground/80">
+                    Overview of your plugin ecosystem
+                </p>
             </div>
-            <div style={{ color: '#6b7280', fontSize: '0.6rem' }}>Active</div>
-          </div>
-          
-          <div 
-            style={miniStatCardStyle}
-            onClick={() => onStatusClick?.('inactive')}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#f9fafb';
-              e.currentTarget.style.borderColor = '#d1d5db';
-              e.currentTarget.style.transform = 'translateY(-1px)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#f8fafc';
-              e.currentTarget.style.borderColor = '#e5e7eb';
-              e.currentTarget.style.transform = 'translateY(0)';
-            }}
-            title="Click to view inactive plugins"
-          >
-            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#6b7280', marginBottom: '0.25rem' }}>
-              {inactivePlugins.length}
+            
+            {/* Mini Statistics Cards */}
+            <div className="grid grid-cols-2 gap-2 w-48">
+                <StatCard 
+                    title="Active" 
+                    value={activePlugins.length} 
+                    onClick={() => onStatusClick?.('active')}
+                    colorClass="text-green-500"
+                    hoverColorClass="hover:bg-green-50"
+                />
+                <StatCard 
+                    title="Inactive" 
+                    value={inactivePlugins.length} 
+                    onClick={() => onStatusClick?.('inactive')}
+                    colorClass="text-gray-500"
+                    hoverColorClass="hover:bg-gray-100"
+                />
+                <StatCard 
+                    title="Errors" 
+                    value={errorPlugins.length} 
+                    onClick={() => onStatusClick?.('error')}
+                    colorClass="text-red-500"
+                    hoverColorClass="hover:bg-red-50"
+                />
+                <StatCard 
+                    title="Total" 
+                    value={plugins.length} 
+                    onClick={() => onViewChange?.('plugins')}
+                    colorClass="text-blue-500"
+                    hoverColorClass="hover:bg-blue-50"
+                />
             </div>
-            <div style={{ color: '#6b7280', fontSize: '0.6rem' }}>Inactive</div>
-          </div>
-          
-          <div 
-            style={miniStatCardStyle}
-            onClick={() => onStatusClick?.('error')}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#fef2f2';
-              e.currentTarget.style.borderColor = '#fecaca';
-              e.currentTarget.style.transform = 'translateY(-1px)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#f8fafc';
-              e.currentTarget.style.borderColor = '#e5e7eb';
-              e.currentTarget.style.transform = 'translateY(0)';
-            }}
-            title="Click to view plugins with errors"
-          >
-            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#dc2626', marginBottom: '0.25rem' }}>
-              {errorPlugins.length}
-            </div>
-            <div style={{ color: '#6b7280', fontSize: '0.6rem' }}>Errors</div>
-          </div>
-          
-          <div 
-            style={miniStatCardStyle}
-            onClick={() => onViewChange?.('plugins')}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#eff6ff';
-              e.currentTarget.style.borderColor = '#bfdbfe';
-              e.currentTarget.style.transform = 'translateY(-1px)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#f8fafc';
-              e.currentTarget.style.borderColor = '#e5e7eb';
-              e.currentTarget.style.transform = 'translateY(0)';
-            }}
-            title="Click to view all plugins"
-          >
-            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#2563eb', marginBottom: '0.25rem' }}>
-              {plugins.length}
-            </div>
-            <div style={{ color: '#6b7280', fontSize: '0.6rem' }}>Total</div>
-          </div>
         </div>
       </header>
 
-      <div style={contentStyle}>
+      <main className="p-8 max-w-7xl mx-auto">
 
         {/* Active Plugins Section */}
         {activePlugins.length > 0 && (
           <section>
-            <h2 style={sectionHeaderStyle}>Active Plugins</h2>
-            <div style={pluginGridStyle}>
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">Active Plugins</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {activePlugins.map((plugin) => (
                 <DashboardPluginCard
                   key={plugin.id}
@@ -188,16 +113,12 @@ export function DashboardView({
 
         {/* Empty State */}
         {plugins.length === 0 && (
-          <div style={{ 
-            textAlign: 'center', 
-            padding: '4rem 2rem',
-            color: '#6b7280'
-          }}>
-            <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>No Plugins Found</h3>
+          <div className="text-center py-16 text-gray-500">
+            <h3 className="text-xl mb-2">No Plugins Found</h3>
             <p>Add some plugins to get started with Omnia.</p>
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }

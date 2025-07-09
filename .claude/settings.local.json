@@ -54,7 +54,8 @@
       "Bash(npm start)",
       "Bash(cat:*)",
       "Bash(electron dist/electron-main.js)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(npm run clear-logs:*)"
     ],
     "deny": []
   }

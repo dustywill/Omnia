@@ -1,10 +1,10 @@
 {
   // Context Generator plugin configuration (from ttCommander)
   lastUsedFolderPath: "C:\\Users\\byron\\Documents\\Projects\\Byron\\Omnia",
-  lastFileRegex: "\\.(php|inc|module|install)$",
-  lastFileFilterType: "exclude",
-  lastFolderRegex: "node_modules|vendor|\\.git|\\.hg|logs|\\.qodo",
-  lastFolderFilterType: "exclude", 
+  lastFileRegex: "",
+  lastFileFilterType: "include",
+  lastFolderRegex: "",
+  lastFolderFilterType: "include", 
   lastMaxDepth: -1,
   savedFilters: {},
   outputDirectory: "output/context-generator",

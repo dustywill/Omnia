@@ -1,16 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Button } from '../../src/ui/components/Button/Button.js';
 import { Input } from '../../src/ui/components/Input/Input.js';
-import { FileTree, FileTreeNode, SelectionState } from '../../inspiration/components/FileTree.js'; // Adjust path as needed
-
-// Enhanced types for comprehensive file tree
-
-
-// The FileTreeNode interface is now imported from FileTree.tsx, so we don't redefine it here.
-// We will ensure our data generation matches its structure.
-
-
-
+import { FileTree, FileTreeNode } from '../../inspiration/components/FileTree.js';
 
 export type FilterPreset = {
   name: string;
@@ -23,33 +14,33 @@ export type FilterPreset = {
 
 const defaultPresets: FilterPreset[] = [
   {
-    name: 'Common Files',
-    folderRegex: 'node_modules|\\.git|\\.hg|logs|dist|build|coverage',
+    name: 'Common',
+    folderRegex: 'node_modules|\\.git|\\.hg|logs|\\.qodo',
     folderFilterType: 'exclude',
-    fileRegex: '\\.(ts|tsx|js|jsx|md|json|txt|py|php|java|cpp|c|h)$',
+    fileRegex: '',
     fileFilterType: 'include',
-    maxDepth: 10
+    maxDepth: -1
   },
   {
-    name: 'JavaScript/TypeScript',
-    folderRegex: 'node_modules|\\.git|dist|build',
+    name: 'PHP',
+    folderRegex: 'node_modules|\\.git|\\.hg|logs|vendor|\\.qodo',
     folderFilterType: 'exclude',
-    fileRegex: '\\.(ts|tsx|js|jsx)$',
+    fileRegex: '\\.(php|inc|module|install)$',
     fileFilterType: 'include',
-    maxDepth: 10
-  },
-  {
-    name: 'Documentation',
-    folderRegex: 'node_modules|\\.git',
-    folderFilterType: 'exclude',
-    fileRegex: '\\.(md|txt|rst|adoc)$',
-    fileFilterType: 'include',
-    maxDepth: 10
+    maxDepth: -1
   }
 ];
 
 export type ContextGeneratorProps = {
   initialPath?: string;
+};
+
+type FilterOptions = {
+  fileRegex: string;
+  fileFilterType: 'include' | 'exclude';
+  folderRegex: string;
+  folderFilterType: 'include' | 'exclude';
+  maxDepth: number;
 };
 
 const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
@@ -84,69 +75,75 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
   const [progress, setProgress] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
   const [copied, setCopied] = useState(false);
+  
+  // Get all file IDs from the tree
+  const allFiles = useMemo(() => fileTree ? getAllFileIds([fileTree]) : new Set<string>(), [fileTree]);
 
   // Memoized and filtered file tree for search
   const filteredFileTree = useMemo(() => {
-    if (!fileTree || !searchTerm) return fileTree;
+    if (!searchTerm) return fileTree;
 
     const lowerCaseSearchTerm = searchTerm.toLowerCase();
 
-    const filterNode = (node: FileTreeNode): FileTreeNode | null => {
-      if (node.type === 'file') {
-        return node.name.toLowerCase().includes(lowerCaseSearchTerm) ? node : null;
-      } else { // folder
-        const filteredChildren = node.children
-          ?.map(filterNode)
-          .filter((child): child is FileTreeNode => child !== null) || [];
-
-        if (node.name.toLowerCase().includes(lowerCaseSearchTerm) || filteredChildren.length > 0) {
-          return { ...node, children: filteredChildren };
+    const filterNodes = (nodes: FileTreeNode[]): FileTreeNode[] => {
+      const result: FileTreeNode[] = [];
+      for (const node of nodes) {
+        if (node.type === 'file') {
+          if (node.name.toLowerCase().includes(lowerCaseSearchTerm)) {
+            result.push(node);
+          }
+        } else {
+          const filteredChildren = filterNodes(node.children || []);
+          if (node.name.toLowerCase().includes(lowerCaseSearchTerm) || filteredChildren.length > 0) {
+            result.push({ ...node, children: filteredChildren });
+          }
         }
-        return null;
       }
+      return result;
     };
 
-    return filterNode(fileTree);
+    return filterNodes(fileTree);
   }, [fileTree, searchTerm]);
   
   // UI state
   const [showFilters, setShowFilters] = useState(false);
   const [newPresetName, setNewPresetName] = useState('');
 
-  // Initialize with current directory and load configuration
-  useEffect(() => {
-    const initializePlugin = async () => {
-      setLoading(true);
-      try {
-        const configResult = await window.configAPI.getConfigAndSchema(pluginId);
-        if (configResult && configResult.config) {
-          const loadedConfig = configResult.config;
-          setFilterOptions({
-            fileRegex: loadedConfig.lastFileRegex || '',
-            fileFilterType: loadedConfig.lastFileFilterType || 'include',
-            folderRegex: loadedConfig.lastFolderRegex || '',
-            folderFilterType: loadedConfig.lastFolderFilterType || 'include',
-            maxDepth: loadedConfig.lastMaxDepth !== undefined ? loadedConfig.lastMaxDepth : -1
-          });
-          setRootPath(loadedConfig.lastUsedFolderPath || '');
-          setCustomPresets(Object.values(loadedConfig.savedFilters || {}));
-        }
+  // Directory scanning with advanced filtering
+  const scanDirectory = useCallback(async (startPath: string) => {
+    if (!startPath || !window.fileSystemAPI) return;
+    
+    setScanning(true);
+    setProgress('Scanning directory...');
+    
+    try {
+      const tree = await window.fileSystemAPI.scanDirectory(startPath, {
+        recursive: true,
+        maxDepth: filterOptions.maxDepth,
+        fileRegex: filterOptions.fileRegex,
+        fileFilterType: filterOptions.fileFilterType,
+        folderRegex: filterOptions.folderRegex,
+        folderFilterType: filterOptions.folderFilterType,
+      });
+      
+      const transformToNode = (item: any): FileTreeNode => ({
+        id: item.path,
+        name: item.name,
+        type: item.type,
+        children: item.children ? item.children.map(transformToNode) : [],
+      });
 
-        const initPath = initialPath || (window.fileSystemAPI ? await window.fileSystemAPI.getRootPath() : '.');
-        setRootPath(prevPath => prevPath || initPath); // Only set if not loaded from config
-        scanDirectory(initPath);
-      } catch (error) {
-        console.error('Failed to load plugin configuration:', error);
-        // Fallback to defaults if config loading fails
-        const initPath = initialPath || (window.fileSystemAPI ? await window.fileSystemAPI.getRootPath() : '.');
-        setRootPath(initPath);
-        scanDirectory(initPath);
-      } finally {
-        setLoading(false);
-      }
-    };
-    initializePlugin();
-  }, [initialPath, scanDirectory, pluginId]);
+      setFileTree(tree.children.map(transformToNode));
+      setRootPath(startPath);
+      
+    } catch (error) {
+      console.error('Failed to scan directory:', error);
+      setProgress('Error scanning directory');
+    } finally {
+      setScanning(false);
+      setProgress('');
+    }
+  }, [filterOptions]);
 
   // Apply preset when selected
   const applyPreset = useCallback((presetName: string) => {
@@ -163,6 +160,48 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
     }
   }, [customPresets]);
 
+  // Initialize with current directory and load configuration
+  useEffect(() => {
+    const initializePlugin = async () => {
+      setLoading(true);
+      try {
+        if (window.configAPI) {
+          const configResult = await window.configAPI.getConfigAndSchema(pluginId);
+          if (configResult && configResult.config) {
+            const loadedConfig = configResult.config;
+            setFilterOptions({
+              fileRegex: loadedConfig.lastFileRegex || '',
+              fileFilterType: loadedConfig.lastFileFilterType || 'include',
+              folderRegex: loadedConfig.lastFolderRegex || '',
+              folderFilterType: loadedConfig.lastFolderFilterType || 'include',
+              maxDepth: loadedConfig.lastMaxDepth !== undefined ? loadedConfig.lastMaxDepth : -1
+            });
+            setRootPath(loadedConfig.lastUsedFolderPath || '');
+            setCustomPresets(Object.values(loadedConfig.savedFilters || {}));
+          }
+        }
+
+        const initPath = initialPath || (window.fileSystemAPI ? await window.fileSystemAPI.getRootPath() : '.');
+        const finalPath = rootPath || initPath;
+        setRootPath(finalPath);
+        if (finalPath) {
+          scanDirectory(finalPath);
+        }
+      } catch (error) {
+        console.error('Failed to load plugin configuration:', error);
+        const initPath = initialPath || (window.fileSystemAPI ? await window.fileSystemAPI.getRootPath() : '.');
+        setRootPath(initPath);
+        if (initPath) {
+          scanDirectory(initPath);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    initializePlugin();
+  }, [initialPath, scanDirectory, pluginId]);
+
+  // Apply preset when selected
   useEffect(() => {
     if (selectedPreset) {
       applyPreset(selectedPreset);
@@ -171,7 +210,7 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
 
   // Save custom filter
   const saveCustomFilter = useCallback(async (name: string) => {
-    if (!name) return;
+    if (!name || !window.configAPI) return;
     const newPreset: FilterPreset = { name, ...filterOptions };
     const updatedPresets = [...customPresets.filter(p => p.name !== name), newPreset];
     setCustomPresets(updatedPresets);
@@ -191,6 +230,7 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
 
   // Delete custom filter
   const deleteCustomFilter = useCallback(async (name: string) => {
+    if (!window.configAPI) return;
     const updatedPresets = customPresets.filter(p => p.name !== name);
     setCustomPresets(updatedPresets);
     if (selectedPreset === name) {
@@ -213,6 +253,7 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
   // Persist last used filter options and path
   useEffect(() => {
     const saveLastUsedSettings = async () => {
+      if (!window.configAPI) return;
       try {
         const configResult = await window.configAPI.getConfigAndSchema(pluginId);
         const currentConfig = configResult?.config || {};
@@ -236,106 +277,10 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
     return () => clearTimeout(handler);
   }, [rootPath, filterOptions, pluginId]);
 
-  // Directory scanning with advanced filtering
-  const scanDirectory = useCallback(async (startPath: string) => {
-    if (!startPath) return;
-    
-    setScanning(true);
-    setProgress('Scanning directory...');
-    
-    try {
-      const shouldIncludeFile = (fileName: string): boolean => {
-        if (!filterOptions.fileRegex) return true;
-        
-        try {
-          const regex = new RegExp(filterOptions.fileRegex, 'i');
-          const matches = regex.test(fileName);
-          return filterOptions.fileFilterType === 'include' ? matches : !matches;
-        } catch {
-          return true;
-        }
-      };
-      
-      const shouldIncludeFolder = (folderName: string): boolean => {
-        if (!filterOptions.folderRegex) return true;
-        
-        try {
-          const regex = new RegExp(filterOptions.folderRegex, 'i');
-          const matches = regex.test(folderName);
-          return filterOptions.folderFilterType === 'include' ? matches : !matches;
-        } catch {
-          return true;
-        }
-      };
-      
-      const scanDir = async (dirPath: string, depth = 0): Promise<FileTreeNode | null> => {
-        if (depth > filterOptions.maxDepth) return null;
-        
-        try {
-          const items = await window.fileSystemAPI.readDirectory(dirPath);
-          const children: FileTreeNode[] = [];
-          
-          for (const item of items) {
-            const fullPath = window.utilityAPI.joinPosix(dirPath, item.name);
-            
-            if (item.type === 'directory') {
-              if (shouldIncludeFolder(item.name)) {
-                const childNode = await scanDir(fullPath, depth + 1);
-                if (childNode && (childNode.children?.length || 0) > 0) {
-                  children.push(childNode);
-                }
-              }
-            } else if (item.type === 'file' && shouldIncludeFile(item.name)) {
-              children.push({
-                id: fullPath, // Use fullPath as ID for FileTree component
-                name: item.name,
-                type: 'file',
-                data: { // Store additional data in 'data' property
-                  path: fullPath,
-                  size: item.size,
-                  extension: window.utilityAPI.extname(item.name)
-                }
-              });
-            }
-          }
-          
-          return {
-            id: dirPath, // Use dirPath as ID for FileTree component
-            name: window.utilityAPI.basename(dirPath),
-            type: 'folder', // Use 'folder' for directories
-            children: children.sort((a, b) => {
-              // Directories first, then files, both alphabetically
-              if (a.type !== b.type) {
-                return a.type === 'folder' ? -1 : 1;
-              }
-              return a.name.localeCompare(b.name);
-            })
-          };
-        } catch (error) {
-          console.warn(`Failed to scan directory ${dirPath}:`, error);
-          return null;
-        }
-      };
-      
-      const tree = await scanDir(startPath);
-      setFileTree(tree);
-      setRootPath(startPath);
-      
-    } catch (error) {
-      console.error('Failed to scan directory:', error);
-      setProgress('Error scanning directory');
-    } finally {
-      setScanning(false);
-      setProgress('');
-    }
-  }, [filterOptions]);
-
-  
-
   // Context generation
   const generateContext = useCallback(async () => {
-    if (selectedFiles.size === 0) {
-      setOutput('No files selected. Please select files to generate context.');
+    if (selectedFiles.size === 0 || !window.fileSystemAPI || !window.utilityAPI) {
+      setOutput('No files selected or APIs not available.');
       return;
     }
 
@@ -347,21 +292,19 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
       let contextOutput = '';
       let totalChars = 0;
       
-      for (let i = 0; i < files.length; i++) {
-        const filePath = files[i];
-        setProgress(`Reading file ${i + 1} of ${files.length}...`);
-        
-        try {
-          const content = await window.fileSystemAPI.readFile(filePath, 'utf8');
-          const relativePath = window.utilityAPI.relative(rootPath, filePath);
-          const fileName = window.utilityAPI.basename(filePath);
+      const contents = await window.fileSystemAPI.readFiles(files);
+
+      for (const fileContent of contents) {
+        if (fileContent.status === 'fulfilled') {
+          const { path, content } = fileContent.value;
+          const relativePath = window.utilityAPI.relative(rootPath, path);
+          const fileName = window.utilityAPI.basename(path);
           
           contextOutput += `---\nFile: ${fileName}\nPath: ${relativePath.replace(/\\/g, '/')}\n---\n\n`;
           contextOutput += '```\n' + content + '\n```\n\n';
           totalChars += content.length;
-          
-        } catch (error) {
-          contextOutput += `---\nError reading ${filePath}: ${error}\n---\n\n`;
+        } else {
+          contextOutput += `---\nError reading ${fileContent.reason.path}: ${fileContent.reason.error}\n---\n\n`;
         }
       }
       
@@ -380,9 +323,22 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
   // Utility functions
   const handleCopy = useCallback(async () => {
     try {
-      await window.fileSystemAPI.copyToClipboard(output);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      // Use navigator.clipboard as fallback if available
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(output);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } else {
+        // Fallback to manual copy
+        const textArea = document.createElement('textarea');
+        textArea.value = output;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
     } catch (error) {
       console.error('Failed to copy to clipboard:', error);
     }
@@ -398,10 +354,12 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
   };
 
   const handleSelectFolder = async () => {
+    if (!window.fileSystemAPI) return;
     try {
-      const selected = await window.fileSystemAPI.selectFolder();
-      if (selected && selected.length > 0) {
-        scanDirectory(selected[0]);
+      // Use prompt as fallback since selectFolder may not be available
+      const folderPath = prompt('Enter the folder path to scan:');
+      if (folderPath) {
+        scanDirectory(folderPath);
       }
     } catch (error) {
       console.error('Error selecting folder:', error);
@@ -416,8 +374,6 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
       </div>
     );
   }
-
-  
 
   return (
     <div style={{ padding: '20px', height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -538,9 +494,8 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
               <Input
                 type="number"
                 value={filterOptions.maxDepth}
-                onChange={(e) => setFilterOptions(prev => ({ ...prev, maxDepth: parseInt(e.target.value) || 10 }))}
-                min="1"
-                max="20"
+                onChange={(e) => setFilterOptions(prev => ({ ...prev, maxDepth: parseInt(e.target.value) || -1 }))}
+                min="-1"
                 style={{ width: '100%' }}
               />
             </div>
@@ -572,11 +527,11 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
             <strong>File Tree</strong>
             {scanning && <span style={{ marginLeft: '10px', color: '#666' }}>Scanning...</span>}
           </div>
-          <div style={{ padding: '10px', height: '300px', overflowY: 'auto' }}>
-            {fileTree ? (
+          <div style={{ height: '300px', overflowY: 'auto' }}>
+            {filteredFileTree.length > 0 ? (
               <FileTree
-                data={[fileTree]}
-                onSelectionChange={(ids) => setSelectedFiles(new Set(ids))}
+                data={filteredFileTree}
+                onSelectionChange={(ids) => setSelectedFiles(new Set(ids.filter(id => allFiles.has(id))))}
                 defaultExpandedIds={Array.from(expandedIds)}
                 onNodeClick={(node) => {
                   if (node.type === 'folder') {
@@ -594,7 +549,7 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
               />
             ) : (
               <div style={{ textAlign: 'center', color: '#666', padding: '40px 0' }}>
-                Select a folder to start scanning
+                {scanning ? 'Scanning...' : 'No files found matching your criteria.'}
               </div>
             )}
           </div>
@@ -648,5 +603,19 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
     </div>
   );
 };
+
+function getAllFileIds(nodes: FileTreeNode[]): Set<string> {
+    const fileIds = new Set<string>();
+    function traverse(node: FileTreeNode) {
+        if (node.type === 'file') {
+            fileIds.add(node.id);
+        }
+        if (node.children) {
+            node.children.forEach(traverse);
+        }
+    }
+    nodes.forEach(traverse);
+    return fileIds;
+}
 
 export default ContextGenerator;

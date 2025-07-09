@@ -30,7 +30,7 @@
     
     "context-generator": {
       id: "context-generator",
-      enabled: true,
+      enabled: false,
       configPath: "plugins/context-generator.json5", 
       type: "configured",
       version: "1.0.0"
