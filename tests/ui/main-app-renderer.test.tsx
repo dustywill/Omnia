@@ -1,4 +1,5 @@
 import { screen, act, fireEvent } from '@testing-library/react';
+import { jest } from '@jest/globals';
 import { initMainAppRenderer } from '../../src/ui/main-app-renderer.js';
 import path from 'path';
 

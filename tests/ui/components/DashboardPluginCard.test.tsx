@@ -1,4 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
+import { jest } from '@jest/globals';
 import { DashboardPluginCard } from '../../../src/ui/components/DashboardPluginCard/DashboardPluginCard.js';
 import type { PluginInfo } from '../../../src/ui/components/AppNavigation/AppNavigation.js';
 
