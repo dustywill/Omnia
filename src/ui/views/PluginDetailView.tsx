@@ -140,7 +140,8 @@ const PluginComponent: React.FC<{
         }
         
         // Store both component and module for config fallback
-        setPluginComponent(Component);
+        // use functional update form to store the component function itself
+        setPluginComponent(() => Component);
         setLoading(false);
         
       } catch (err) {
