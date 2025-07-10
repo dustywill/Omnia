@@ -61,6 +61,10 @@ const electronAPI = {
   // Logging operations
   logMessage: (level, component, message) => safeInvoke("log-message", level, component, message),
   readLogFile: () => safeInvoke("read-log-file"),
+  
+  // Script execution operations
+  executeScript: (options) => safeInvoke("execute-script", options),
+  validateScriptPath: (scriptPath, scriptsDirectory) => safeInvoke("validate-script-path", scriptPath, scriptsDirectory),
 };
 
 // Don't sanitize the API objects themselves - just expose them directly

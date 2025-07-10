@@ -1,247 +1,300 @@
 # NEXT STEPS - Omnia Development Roadmap
 
-**Current Status:** Major UI/UX improvements completed, system stable
-**Priority:** Continue building upon solid foundation
-**Date:** July 6, 2025
+**Current Status:** Core services foundation complete, plugin migration needed  
+**Priority:** Complete core services implementation and leverage for advanced features  
+**Date:** January 9, 2025  
+**Last Updated:** January 9, 2025
 
-## IMMEDIATE NEXT STEPS (Low Priority)
+## 📊 **CURRENT COMPLETION STATUS**
 
-### 1. Minor UI Text Updates
-- **Task:** Rename "Plugin Management" to "Plugin Settings" in navigation
-- **Files:** `src/ui/components/AppNavigation/AppNavigation.tsx`
-- **Effort:** 5 minutes
-- **Impact:** Better naming consistency
+- **Phase 1 (Core Service Extraction)**: ✅ **100% COMPLETE**
+- **Phase 2 (Service Integration)**: ❌ **20% COMPLETE** (Registry done, plugins not migrated)
+- **Phase 3 (Configuration Standardization)**: ❌ **0% COMPLETE**
+- **Phase 4 (Advanced Services)**: ❌ **0% COMPLETE**
 
-### 2. Individual Plugin Settings
-- **Task:** Add individual plugin settings under Plugin Settings section
-- **Files:** Create new view or enhance existing PluginsView
-- **Effort:** 1-2 hours
-- **Impact:** Enhanced plugin configuration capabilities
+## 🎯 **CORE SERVICES FOUNDATION**
 
-## RECOMMENDED DEVELOPMENT PATHS
+### ✅ **COMPLETED CORE SERVICES** (Phase 1)
+- **FileSystemService** (`src/core/services/file-system.ts`) - ✅ **FULLY IMPLEMENTED**
+  - Comprehensive file operations with security validation
+  - Path traversal prevention and sandboxing
+  - Batch operations with progress tracking
+  - Directory scanning and watching capabilities
+  - Permission-based access control
+
+- **HttpClientService** (`src/core/services/http-client.ts`) - ✅ **FULLY ENHANCED**
+  - Authentication support (Bearer, Basic, Custom)
+  - Retry logic with exponential backoff
+  - Progress callbacks and cancellation
+  - Request/response interceptors
+  - Caching and concurrent fetching
+
+- **ProgressTrackingService** (`src/core/services/progress-tracking.ts`) - ✅ **FULLY IMPLEMENTED**
+  - Event-driven progress updates
+  - Phase-based tracking with dependencies
+  - Hierarchical progress (sub-tasks)
+  - Cancellation support
+  - Real-time updates and persistence
+
+- **ScriptExecutionService** (`src/core/services/script-execution.ts`) - ✅ **FULLY IMPLEMENTED**
+  - Multi-shell support (PowerShell, CMD, Bash)
+  - Parameter validation and injection
+  - Security controls and script validation
+  - Output streaming and capture
+  - Resource limits and monitoring
+
+- **Core Services Registry** (`src/core/core-services-registry.ts`) - ✅ **IMPLEMENTED**
+  - All services registered with permission-based access
+  - Dependency injection framework
+  - Service definitions with method signatures
+
+### 🔧 **Available Core Services APIs:**
+- `useFileSystemService()` - File operations, directory watching, security validation
+- `useHttpClientService()` - HTTP requests with auth, retry logic, progress callbacks
+- `useProgressTrackingService()` - Unified progress reporting across all operations
+- `useScriptExecutionService()` - PowerShell and shell script execution
+
+### ❌ **CRITICAL GAP: PLUGIN MIGRATION NOT COMPLETED**
+**The core services are fully implemented but plugins still use custom implementations:**
+- **Script Runner**: ❌ Still uses custom script execution instead of ScriptExecutionService
+- **As-Built Documenter**: ❌ Still uses custom HTTP client instead of HttpClientService
+- **Context Generator**: ❌ Still uses custom file operations instead of FileSystemService
+
+**Impact**: Original goal of 60%+ code duplication elimination not achieved
+
+## 🔥 **IMMEDIATE NEXT STEPS** (High Priority)
+
+### 1. **CRITICAL: Plugin Migration** (Phase 2)
+**Goal**: Migrate plugins to use core services to eliminate code duplication
+
+#### 1.1 Migrate Script Runner Plugin
+- **Task**: Replace custom script execution with ScriptExecutionService
+- **Files**: `plugins/script-runner/index.tsx`
+- **Dependencies**: ScriptExecutionService, ProgressTrackingService
+- **Effort**: 2-3 hours
+- **Impact**: Eliminate custom script execution code, use secure service
+- **Success Criteria**: Script Runner uses ScriptExecutionService for all executions
+
+#### 1.2 Migrate As-Built Documenter Plugin  
+- **Task**: Replace custom HTTP client with HttpClientService
+- **Files**: `plugins/as-built-documenter/index.tsx`
+- **Dependencies**: HttpClientService, FileSystemService, ProgressTrackingService
+- **Effort**: 3-4 hours
+- **Impact**: Eliminate custom HTTP client and file operations
+- **Success Criteria**: As-Built Documenter uses core services for all operations
+
+#### 1.3 Migrate Context Generator Plugin
+- **Task**: Replace custom file operations with FileSystemService
+- **Files**: `plugins/context-generator/index.tsx`
+- **Dependencies**: FileSystemService, ProgressTrackingService
+- **Effort**: 2-3 hours
+- **Impact**: Eliminate custom file system operations
+- **Success Criteria**: Context Generator uses FileSystemService for all file operations
+
+### 2. **Plugin Management UI Enhancement**
+- **Task**: Implement WORK_PLUGIN_MANAGEMENT_UI.md plan
+- **Files**: `src/ui/views/PluginsView.tsx`, plugin management components
+- **Effort**: 1 week
+- **Impact**: Safe plugin management with proper disable/enable semantics
+
+### 3. **Individual Plugin Settings**
+- **Task**: Add individual plugin settings under Plugin Settings section
+- **Files**: Create new view or enhance existing PluginsView
+- **Effort**: 1-2 hours
+- **Impact**: Enhanced plugin configuration capabilities
+
+## 📋 **REMAINING IMPLEMENTATION PHASES**
+
+### Phase 3: Configuration Standardization (Medium Priority)
+#### 3.1 Create Configuration Utilities
+- **Task**: Implement reusable Zod schema patterns
+- **Files**: `src/core/services/configuration.ts`
+- **Dependencies**: Settings Manager, existing Zod schemas
+- **Effort**: 1-2 weeks
+- **Impact**: Standardized configuration patterns across all plugins
+
+#### 3.2 Standardize Plugin Configurations
+- **Task**: Update all plugins to use standardized configuration patterns
+- **Files**: All plugin configurations
+- **Dependencies**: Configuration utilities from 3.1
+- **Effort**: 1 week
+- **Impact**: Consistent configuration handling across system
+
+### Phase 4: Advanced Services (Lower Priority)
+#### 4.1 Missing Advanced Services
+- **DataSourceService** - Multi-source data aggregation
+- **AuthenticationService** - Token management, credential storage
+- **MonitoringService** - Performance metrics, health checks
+- **AuditService** - Action logging, compliance tracking
+
+#### 4.2 Implementation Requirements
+- **Effort**: 2-3 weeks per service
+- **Dependencies**: Core services foundation (completed)
+- **Impact**: Complete service ecosystem for advanced features
+
+## 🛠 **DEVELOPMENT PATHS** (After Plugin Migration)
 
 ### Path 1: Advanced Plugin Development
-**Goal:** Leverage the stable plugin system for new capabilities
+**Goal**: Leverage completed core services for enhanced plugin capabilities
 
 #### Phase 1: Enhanced Plugin Examples
-- Create more sophisticated plugin examples
-- Demonstrate service registry capabilities
-- Show advanced IPC usage patterns
-- **Files:** `plugins/` directory
-- **Effort:** 2-3 hours per plugin
-- **Skills:** TypeScript, React, Plugin API
+- Create sophisticated plugin examples using core services
+- Demonstrate FileSystemService and ScriptExecutionService usage
+- Show service integration patterns
+- **Effort**: 1-2 hours per plugin (reduced due to core services)
 
 #### Phase 2: Plugin Developer Tools
-- Build plugin debugging interface
-- Create plugin template generator
+- Build plugin debugging interface using service APIs
+- Create plugin template generator with FileSystemService
 - Add plugin hot-reload capabilities
-- **Files:** New developer tools section
-- **Effort:** 4-6 hours
-- **Skills:** Development tooling, File I/O
+- **Effort**: 2-4 hours
 
 ### Path 2: System Enhancement
-**Goal:** Build upon the logging and debugging infrastructure
+**Goal**: Build upon completed core services for advanced system features
 
 #### Phase 1: Advanced Logging Features
-- Add log filtering and search capabilities
-- Create log export functionality
+- Add log filtering and search using enhanced Logger service
+- Create log export functionality with FileSystemService
 - Implement log level configuration
-- **Files:** `src/ui/views/LogsView.tsx`, logging system
-- **Effort:** 3-4 hours
-- **Skills:** String processing, File I/O, UI development
+- **Effort**: 2-3 hours
 
-#### Phase 2: Performance Monitoring
-- Add performance metrics collection
-- Create performance dashboard
-- Implement system health indicators
-- **Files:** New monitoring system
-- **Effort:** 6-8 hours
-- **Skills:** Performance APIs, Data visualization
+#### Phase 2: Performance Monitoring Dashboard
+- Build performance dashboard using service metrics
+- Create system health indicators
+- Add performance metrics visualization
+- **Effort**: 3-4 hours (after MonitoringService implemented)
 
 ### Path 3: User Experience Refinement
-**Goal:** Further polish the user interface and experience
+**Goal**: Polish user interface leveraging core services
 
 #### Phase 1: Advanced UI Components
-- Create more sophisticated components
-- Add animation and transition effects
+- Create components with ProgressTrackingService integration
+- Add animation and transition effects for service operations
 - Implement responsive design improvements
-- **Files:** `src/ui/components/`
-- **Effort:** 2-3 hours per component
-- **Skills:** CSS, Animations, Responsive design
+- **Effort**: 2-3 hours per component
 
 #### Phase 2: Theme System
-- Implement dark/light theme support
+- Implement dark/light theme support with configuration persistence
 - Add theme customization options
-- Create theme persistence
-- **Files:** Theme system components
-- **Effort:** 4-6 hours
-- **Skills:** CSS variables, Theme management
+- Create theme persistence using standardized patterns
+- **Effort**: 3-4 hours
 
-## TECHNICAL OPPORTUNITIES
+## 🎯 **SUCCESS CRITERIA**
+
+### Phase 2 (Plugin Migration) - CRITICAL
+- [ ] Script Runner migrated to use ScriptExecutionService
+- [ ] As-Built Documenter migrated to use HttpClientService + FileSystemService
+- [ ] Context Generator migrated to use FileSystemService
+- [ ] 60%+ reduction in duplicated code across plugins achieved
+- [ ] All plugins using standardized progress tracking
+- [ ] No functionality regressions during migration
+
+### Phase 3 (Configuration Standardization)
+- [ ] Configuration utilities implemented and documented
+- [ ] All plugins using standardized configuration patterns
+- [ ] Unified configuration UI components
+- [ ] Consistent validation and error handling across plugins
+
+### Phase 4 (Advanced Services)
+- [ ] DataSourceService implemented for complex data scenarios
+- [ ] AuthenticationService providing secure credential management
+- [ ] MonitoringService providing performance metrics
+- [ ] AuditService providing compliance tracking
+
+## 📚 **TECHNICAL OPPORTUNITIES** (Enabled by Core Services)
 
 ### 1. Plugin System Enhancements
-**Current State:** Three-tier plugin architecture working well
-**Opportunities:**
-- Plugin dependency management
-- Plugin versioning system
-- Plugin marketplace integration
-- Cross-plugin communication patterns
+- Plugin dependency management using Service Registry
+- Plugin versioning system with configuration services
+- Cross-plugin communication using established patterns
+- Plugin marketplace integration (after AuthenticationService)
 
-### 2. Configuration System Evolution
-**Current State:** Zod-based validation working effectively
-**Opportunities:**
-- Configuration migrations
-- Configuration backup/restore
-- Configuration validation UI
-- Runtime configuration updates
+### 2. System Integration Expansion
+- File system watching using FileSystemService capabilities
+- System integration APIs using ScriptExecutionService
+- Network operations with enhanced HttpClientService
+- Database operations through future DataSourceService
 
-### 3. IPC System Expansion
-**Current State:** Basic fs-stat operations implemented
-**Opportunities:**
-- File system watching
-- System integration APIs
-- Network operations
-- Database operations
+### 3. Build System Optimization
+- Incremental builds with FileSystemService watching
+- Hot module replacement using Plugin Manager enhancements
+- Build caching with performance tracking
+- Asset optimization with service integration
 
-### 4. Build System Optimization
-**Current State:** Full build process working correctly
-**Opportunities:**
-- Incremental builds
-- Hot module replacement
-- Build caching
-- Asset optimization
+## 🔄 **MIGRATION STRATEGY**
 
-## DEBUGGING AND MAINTENANCE
+### Incremental Migration Approach
+1. **Start with Script Runner** - Most straightforward migration
+2. **Migrate As-Built Documenter** - More complex but high impact
+3. **Migrate Context Generator** - Complete the core plugin migration
+4. **Remove Duplicated Code** - Clean up after successful migration
+5. **Update Documentation** - Reflect new service usage patterns
 
-### Current Debugging Capabilities
-- ✅ Comprehensive client-side logging
-- ✅ Unified log file system
-- ✅ Real-time log viewer
-- ✅ Plugin error tracking
-- ✅ IPC operation monitoring
+### Backward Compatibility
+- Maintain existing plugin APIs during transition
+- Test thoroughly after each migration
+- Provide rollback plan if issues arise
+- Document migration patterns for future reference
 
-### Maintenance Tasks
-- **Regular:** Monitor log files for errors
-- **Weekly:** Review plugin performance
-- **Monthly:** Update dependencies
-- **Quarterly:** Performance analysis
+## 🛡️ **RISK MITIGATION**
 
-## DECISION FRAMEWORK
+### Technical Risks
+- **Risk**: Breaking existing plugins during migration
+- **Mitigation**: Incremental migration with thorough testing
 
-### When to Choose Path 1 (Plugin Development)
-- Want to create new functionality
-- Need to demonstrate plugin capabilities
-- Building domain-specific tools
-- Expanding application features
+- **Risk**: Service performance bottlenecks
+- **Mitigation**: Performance testing and optimization
 
-### When to Choose Path 2 (System Enhancement)
-- Focus on developer experience
-- Need better monitoring/debugging
-- Building enterprise features
-- Improving system reliability
+- **Risk**: Complex service dependencies
+- **Mitigation**: Clear service interfaces, proper testing
 
-### When to Choose Path 3 (UX Refinement)
-- User feedback indicates UI needs
-- Want to improve visual appeal
-- Building consumer-facing features
-- Enhancing accessibility
+### Implementation Risks
+- **Risk**: Large scope leading to incomplete implementation
+- **Mitigation**: Focus on Phase 2 (plugin migration) first
 
-## RESOURCE REQUIREMENTS
+- **Risk**: Plugin migration complexity
+- **Mitigation**: Start with simplest plugin (Script Runner)
 
-### Time Investment
-- **Minor tasks:** 30 minutes - 2 hours
-- **Component development:** 2-4 hours
-- **System features:** 4-8 hours
-- **Major features:** 8-16 hours
+## 📈 **EXPECTED BENEFITS**
 
-### Skill Requirements
-- **Essential:** TypeScript, React, CSS
-- **Helpful:** Node.js, Electron, Build tools
-- **Advanced:** Plugin architectures, IPC, Performance optimization
+### Immediate Benefits (After Plugin Migration)
+- **60%+ reduction** in duplicated functionality
+- **Improved maintainability** through centralized service management
+- **Enhanced security** with unified validation and access control
+- **Better testing** through service isolation and mocking
 
-### Tools Available
-- **IDE:** Full TypeScript support
-- **Build:** Complete build system
-- **Testing:** Jest + Playwright
-- **Debugging:** Comprehensive logging system
+### Long-term Benefits (After Full Implementation)
+- **Faster plugin development** with rich service ecosystem
+- **Reduced debugging** through centralized logging and monitoring
+- **Easier integration** with standardized service interfaces
+- **Enhanced system reliability** with comprehensive service foundation
 
-## SUCCESS METRICS
+## 🎯 **CURRENT STATUS SUMMARY**
 
-### Development Velocity
-- **Target:** 2-3 completed tasks per session
-- **Measure:** Features implemented per hour
-- **Quality:** Zero critical bugs introduced
+### ✅ **COMPLETED WORK**
+- **All 4 core services fully implemented** with comprehensive APIs
+- **Service registry integration** with permission-based access
+- **Comprehensive test coverage** for all services
+- **Factory functions and defaults** for easy service usage
+- **Security validation** throughout all services
 
-### System Health
-- **Target:** <5% error rate in logs
-- **Measure:** Plugin load success rate
-- **Quality:** User experience smoothness
+### ❌ **CRITICAL REMAINING WORK**
+1. **Plugin Migration (Phase 2)** - Most Important
+   - This is the key blocker preventing the achievement of project goals
+   - Core services exist but aren't being used
+   - 60%+ code duplication still exists
 
-### Code Quality
-- **Target:** 100% TypeScript strict mode
-- **Measure:** Test coverage maintenance
-- **Quality:** Documentation completeness
+2. **Configuration Standardization (Phase 3)**
+   - Create reusable configuration utilities
+   - Standardize plugin configuration patterns
 
-## CONTINUATION STRATEGY
+3. **Advanced Services (Phase 4)**
+   - Implement missing services for complete ecosystem
 
-### Session Planning
-1. **Start:** Review current status and choose development path
-2. **Plan:** Break down chosen path into actionable tasks
-3. **Execute:** Implement tasks with proper testing
-4. **Validate:** Ensure no regressions introduced
-5. **Document:** Update context and status
+### 🔥 **IMMEDIATE NEXT ACTIONS**
+1. **Start with Script Runner migration** - Use ScriptExecutionService
+2. **Update As-Built Documenter** - Replace custom HTTP client
+3. **Update Context Generator** - Replace custom file operations
+4. **Achieve 60%+ code reduction** through service adoption
 
-### Context Preservation
-- Update PROJECT_STATUS.md with completed tasks
-- Document any new architectural decisions
-- Record lessons learned and best practices
-- Maintain technical documentation
-
-### Knowledge Transfer
-- Keep context files updated
-- Document new patterns and conventions
-- Share insights about plugin development
-- Maintain development workflow documentation
-
-## EMERGENCY PROCEDURES
-
-### If System Becomes Unstable
-1. **Immediate:** Revert to last known good state
-2. **Analyze:** Check logs for error patterns
-3. **Isolate:** Identify specific component causing issues
-4. **Fix:** Apply targeted fixes with testing
-5. **Verify:** Ensure full system stability
-
-### If Build Fails
-1. **Check:** TypeScript compilation errors
-2. **Verify:** Asset copying process
-3. **Validate:** CSS module processing
-4. **Test:** Plugin compilation
-5. **Resolve:** Address specific build issues
-
-### If Runtime Errors Occur
-1. **Collect:** Error information from logs
-2. **Reproduce:** Create minimal test case
-3. **Debug:** Use logging system for analysis
-4. **Fix:** Apply targeted solution
-5. **Test:** Verify fix doesn't break other features
-
-## LONG-TERM VISION
-
-### 6-Month Goals
-- Comprehensive plugin ecosystem
-- Advanced debugging and monitoring
-- Professional-grade user experience
-- Robust system architecture
-
-### 1-Year Goals
-- Plugin marketplace integration
-- Advanced system integrations
-- Enterprise-grade features
-- Community plugin development
-
-### Success Criteria
-- **Stability:** System runs without critical errors
-- **Performance:** Fast startup and responsive UI
-- **Extensibility:** Easy plugin development
-- **Maintainability:** Clean, well-documented code
+**Note**: The core services foundation is excellent and complete. The critical remaining work is primarily plugin migration to use these services. Once this is done, the system will achieve its original goals and be ready for advanced feature development.

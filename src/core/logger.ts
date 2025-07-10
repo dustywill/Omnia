@@ -1,5 +1,4 @@
-import fs from 'fs/promises';
-import path from 'path';
+import { loadNodeModule } from '../ui/node-module-loader.js';
 
 export type LogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG';
 
@@ -12,6 +11,8 @@ export interface Logger {
 
 const ensureLogDirectory = async (logPath: string): Promise<void> => {
   try {
+    const fs = await loadNodeModule<typeof import('fs/promises')>('fs/promises');
+    const path = await loadNodeModule<typeof import('path')>('path');
     const dir = path.dirname(logPath);
     await fs.mkdir(dir, { recursive: true });
   } catch (error) {
@@ -27,6 +28,7 @@ const writeEntry = async (
 ): Promise<void> => {
   try {
     await ensureLogDirectory(logPath);
+    const fs = await loadNodeModule<typeof import('fs/promises')>('fs/promises');
     const timestamp = new Date().toISOString();
     const entry = `[${timestamp}] [${plugin}] [${level}] ${message}\n`;
     await fs.appendFile(logPath, entry, 'utf8');

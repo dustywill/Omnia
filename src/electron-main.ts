@@ -142,7 +142,9 @@ const getElectron = async () => {
         electron = require("electron");
       } else {
         // Fall back to dynamic import for ESM
-        electron = await import("electron");
+        const electronModule = await import("electron");
+        // Handle both CommonJS and ESM electron imports
+        electron = electronModule.default || electronModule;
       }
     } catch (err) {
       console.warn(`Failed to load electron:`, err);
@@ -406,6 +408,87 @@ const setupIpcHandlers = (ipcMain?: IpcMain, logger?: Logger) => {
       }
     },
   );
+
+  // Script execution handler
+  ipcMain.handle("execute-script", async (_event: any, options: {
+    scriptPath: string;
+    parameters: string[];
+    shell: string;
+    cwd: string;
+    timeout: number;
+  }) => {
+    try {
+      const { spawn } = await import('child_process');
+      
+      logger?.info(`Executing script: ${options.scriptPath} with shell: ${options.shell}`);
+      
+      const { scriptPath, parameters, shell, cwd, timeout } = options;
+      
+      const args = shell === 'powershell' || shell === 'pwsh' 
+        ? ['-File', scriptPath, ...parameters]
+        : ['/c', scriptPath, ...parameters];
+      
+      const command = shell === 'cmd' ? 'cmd' : shell;
+      
+      return new Promise((resolve) => {
+        let output = '';
+        let errorOutput = '';
+        
+        const child = spawn(command, args, {
+          cwd,
+          timeout
+        });
+        
+        child.stdout?.on('data', (data) => {
+          output += data.toString();
+        });
+        
+        child.stderr?.on('data', (data) => {
+          errorOutput += data.toString();
+        });
+        
+        child.on('close', (code) => {
+          logger?.info(`Script execution completed with code: ${code}`);
+          resolve({
+            success: code === 0,
+            output,
+            error: errorOutput || undefined,
+            exitCode: code || 0
+          });
+        });
+        
+        child.on('error', (error) => {
+          logger?.error(`Script execution error: ${error.message}`);
+          resolve({
+            success: false,
+            output: '',
+            error: error.message,
+            exitCode: -1
+          });
+        });
+      });
+    } catch (error) {
+      logger?.error(`Failed to execute script: ${error}`);
+      return {
+        success: false,
+        output: '',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        exitCode: -1
+      };
+    }
+  });
+
+  // Script path validation handler
+  ipcMain.handle("validate-script-path", async (_event: any, scriptPath: string, scriptsDirectory: string) => {
+    try {
+      const normalizedPath = path.normalize(scriptPath);
+      const normalizedScriptsDir = path.normalize(scriptsDirectory);
+      return normalizedPath.startsWith(normalizedScriptsDir);
+    } catch (error) {
+      logger?.error(`Failed to validate script path: ${error}`);
+      return false;
+    }
+  });
 };
 
 export const createWindow = async (

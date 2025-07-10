@@ -1,0 +1,262 @@
+/* FileTree Component Styles */
+.fileTree {
+  --border-color: #e5e7eb;
+  --border-hover-color: #d1d5db;
+  --bg-color: #ffffff;
+  --node-hover-bg: #f8fafc;
+  --node-selected-bg: #e0f2fe;
+  --text-color: #374151;
+  --text-muted-color: #6b7280;
+  --folder-color: #f59e0b;
+  --file-color: #3b82f6;
+  --checkbox-primary: #007bff;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.container {
+  width: 100%;
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease-out;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.nodeWrapper {
+  user-select: none;
+}
+
+.nodeContent {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  border-radius: 6px;
+  margin: 0 4px;
+}
+
+.nodeContent:hover {
+  background-color: var(--node-hover-bg);
+  border-color: var(--border-hover-color);
+}
+
+.nodeContent.selected {
+  background-color: var(--node-selected-bg);
+}
+
+.connectionLines {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.verticalLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: 1px solid rgba(156, 163, 175, 0.4);
+}
+
+.horizontalLine {
+  position: absolute;
+  top: 50%;
+  border-top: 1px solid rgba(156, 163, 175, 0.4);
+  transform: translateY(-1px);
+}
+
+.lastNodeLine {
+  position: absolute;
+  top: 0;
+  height: 50%;
+  border-left: 1px solid rgba(156, 163, 175, 0.4);
+}
+
+.expandButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+  transition: transform 0.2s ease-in-out;
+}
+
+.expandButton.expanded {
+  transform: rotate(90deg);
+}
+
+.chevronIcon {
+  width: 12px;
+  height: 12px;
+  color: var(--text-muted-color);
+}
+
+.checkbox {
+  margin-right: 8px;
+}
+
+.checkboxButton {
+  width: 16px;
+  height: 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 3px;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.checkboxButton:hover {
+  border-color: var(--checkbox-primary);
+}
+
+.checkboxButton.checked,
+.checkboxButton.indeterminate {
+  border-color: var(--checkbox-primary);
+  background-color: var(--checkbox-primary);
+  color: white;
+}
+
+.checkboxButton:focus-visible {
+  outline: 2px solid var(--checkbox-primary);
+  outline-offset: 2px;
+}
+
+.checkIcon {
+  width: 12px;
+  height: 12px;
+}
+
+.iconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  transition: transform 0.15s ease;
+}
+
+.iconContainer:hover {
+  transform: scale(1.1);
+}
+
+.folderIcon {
+  width: 16px;
+  height: 16px;
+  color: var(--folder-color);
+}
+
+.fileIcon {
+  width: 16px;
+  height: 16px;
+  color: var(--file-color);
+}
+
+.nodeText {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-color);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.childrenContainer {
+  overflow: hidden;
+  transition: all 0.3s ease-in-out;
+}
+
+.childrenContainer.expanded {
+  max-height: 1000px;
+  opacity: 1;
+}
+
+.childrenContainer.collapsed {
+  max-height: 0;
+  opacity: 0;
+}
+
+.childrenContent {
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Animation classes */
+.fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slideIn {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .nodeContent {
+    padding: 6px 4px;
+  }
+  
+  .nodeText {
+    font-size: 13px;
+  }
+  
+  .iconContainer {
+    width: 14px;
+    height: 14px;
+    margin-right: 6px;
+  }
+  
+  .folderIcon,
+  .fileIcon {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .fileTree {
+    --border-color: #374151;
+    --border-hover-color: #4b5563;
+    --bg-color: #111827;
+    --node-hover-bg: #1f2937;
+    --node-selected-bg: #1e40af;
+    --text-color: #f9fafb;
+    --text-muted-color: #9ca3af;
+    --folder-color: #fbbf24;
+    --file-color: #60a5fa;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+  }
+}

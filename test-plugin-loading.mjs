@@ -1,87 +1,54 @@
-/**
- * Test script to verify plugin loading without permission errors
- */
-
-import { promises as fs } from 'fs';
+import { EnhancedPluginManager } from './dist/core/enhanced-plugin-manager.js';
+import { SettingsManager } from './dist/core/settings-manager.js';
+import { ServiceRegistry } from './dist/core/service-registry.js';
 import path from 'path';
 
-console.log('🔍 Testing Plugin Loading...\n');
+// Mock JSDOM for node environment
+const { JSDOM } = await import('jsdom');
+const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>');
+global.document = dom.window.document;
+global.window = dom.window;
+global.Element = dom.window.Element;
+global.HTMLElement = dom.window.HTMLElement;
+global.HTMLInputElement = dom.window.HTMLInputElement;
+Object.defineProperty(global, 'navigator', { value: { userAgent: 'node.js' }, writable: true });
 
-// Test 1: Verify plugin files exist
-console.log('1️⃣ Checking plugin files...');
+// Initialize core components
+const settingsManager = new SettingsManager({ 
+  configDirectory: path.join(process.cwd(), 'config'),
+  configFileName: 'app.json5'
+});
+
+const serviceRegistry = new ServiceRegistry();
+
+const pluginManager = new EnhancedPluginManager({
+  pluginsDirectory: path.join(process.cwd(), 'plugins'),
+  configDirectory: path.join(process.cwd(), 'config'),
+  settingsManager,
+  serviceRegistry
+});
+
+await pluginManager.init();
+
+console.log('[TEST] Loading script-runner plugin...');
 try {
-  const manifestPath = './dist/plugins/as-built-documenter/plugin.json5';
-  const indexPath = './dist/plugins/as-built-documenter/index.js';
+  const pluginModule = await pluginManager.loadPluginModule('script-runner');
+  console.log('[TEST] Plugin module loaded successfully');
+  console.log('[TEST] Module keys:', Object.keys(pluginModule));
+  console.log('[TEST] Module default type:', typeof pluginModule.default);
+  console.log('[TEST] Module named exports:', Object.keys(pluginModule).filter(k => k !== 'default'));
   
-  const manifestExists = await fs.access(manifestPath).then(() => true).catch(() => false);
-  const indexExists = await fs.access(indexPath).then(() => true).catch(() => false);
+  // Test the component extraction logic
+  const Component = pluginModule.default || pluginModule;
+  console.log('[TEST] Component type:', typeof Component);
+  console.log('[TEST] Component name:', Component.name);
   
-  console.log(`✅ Plugin manifest exists: ${manifestExists}`);
-  console.log(`✅ Plugin index.js exists: ${indexExists}`);
-  
-  if (manifestExists) {
-    const manifestContent = await fs.readFile(manifestPath, 'utf-8');
-    console.log('📄 Plugin manifest permissions:');
-    const permissionsMatch = manifestContent.match(/"permissions":\s*\[([\s\S]*?)\]/);
-    if (permissionsMatch) {
-      console.log(permissionsMatch[0]);
-    }
-  }
-} catch (error) {
-  console.log('❌ Error checking plugin files:', error.message);
-}
-
-console.log('\n' + '='.repeat(50) + '\n');
-
-// Test 2: Verify plugin component loads
-console.log('2️⃣ Testing plugin component import...');
-try {
-  const { default: AsBuiltDocumenter } = await import('./dist/plugins/as-built-documenter/index.js');
-  console.log('✅ Plugin component imported successfully');
-  console.log('📦 Component type:', typeof AsBuiltDocumenter);
-  console.log('📦 Component name:', AsBuiltDocumenter.name || 'Anonymous');
-  
-  // Check if it's a React component
-  if (typeof AsBuiltDocumenter === 'function') {
-    console.log('✅ Plugin appears to be a valid React component');
+  if (typeof Component === 'function') {
+    console.log('[TEST] Component is a function - should work as React component');
   } else {
-    console.log('⚠️ Plugin is not a function - unexpected type');
+    console.log('[TEST] Component is not a function - this is the problem!');
   }
-} catch (error) {
-  console.log('❌ Error importing plugin component:', error.message);
-  console.log('📍 Error stack:', error.stack);
-}
-
-console.log('\n' + '='.repeat(50) + '\n');
-
-// Test 3: Test services loading
-console.log('3️⃣ Testing services import...');
-try {
-  const services = await import('./dist/core/services/index.js');
-  console.log('✅ Services module imported successfully');
-  console.log('📦 Available exports:', Object.keys(services).join(', '));
-  
-  // Test creating services
-  const { createHttpClient, createTemplateEngine, createDocumentGenerator } = services;
-  
-  const httpClient = createHttpClient();
-  console.log('✅ HTTP Client created successfully');
-  
-  const templateEngine = createTemplateEngine();
-  console.log('✅ Template Engine created successfully');
-  
-  const documentGenerator = createDocumentGenerator(httpClient, templateEngine);
-  console.log('✅ Document Generator created successfully');
   
 } catch (error) {
-  console.log('❌ Error testing services:', error.message);
-  console.log('📍 Error stack:', error.stack);
+  console.error('[TEST] Error loading plugin:', error);
 }
-
-console.log('\n🎉 Plugin Loading Test Complete!');
-console.log('\n📊 Summary:');
-console.log('- Plugin files: Built and deployed ✅');
-console.log('- Plugin permissions: Fixed (removed network:https) ✅');
-console.log('- Plugin component: Loadable ✅');
-console.log('- Core services: Functional ✅');
-console.log('\n🚀 The plugin should now load without permission errors!');

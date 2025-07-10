@@ -1,16 +1,29 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Button } from '../../src/ui/components/Button/Button.js';
 import { Input } from '../../src/ui/components/Input/Input.js';
-import { FileTree, FileTreeNode, SelectionState } from '../../inspiration/components/FileTree.js'; // Adjust path as needed
+import { FileTree } from '../../src/ui/components/FileTree/FileTree.js';
+import { useService } from '../../src/hooks/index.js';
 
 // Enhanced types for comprehensive file tree
+export interface FileTreeNode {
+  id: string;
+  name: string;
+  type: 'file' | 'folder';
+  data?: any;
+  children?: FileTreeNode[];
+}
 
 
-// The FileTreeNode interface is now imported from FileTree.tsx, so we don't redefine it here.
-// We will ensure our data generation matches its structure.
 
 
 
+export type FilterOptions = {
+  fileRegex: string;
+  fileFilterType: 'include' | 'exclude';
+  folderRegex: string;
+  folderFilterType: 'include' | 'exclude';
+  maxDepth: number;
+};
 
 export type FilterPreset = {
   name: string;
@@ -50,9 +63,10 @@ const defaultPresets: FilterPreset[] = [
 
 export type ContextGeneratorProps = {
   initialPath?: string;
+  context?: any; // Plugin context from Omnia system
 };
 
-const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
+const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath, context }) => {
   // State management
   const [rootPath, setRootPath] = useState<string>('');
   const [fileTree, setFileTree] = useState<FileTreeNode | null>(null);
@@ -85,29 +99,20 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [copied, setCopied] = useState(false);
 
-  // Memoized and filtered file tree for search
-  const filteredFileTree = useMemo(() => {
-    if (!fileTree || !searchTerm) return fileTree;
+  // Initialize service hook for core services
+  const serviceHook = useService({
+    pluginId: 'context-generator',
+    permissions: ['filesystem:read', 'filesystem:write'],
+    serviceRegistry: context?.serviceRegistry,
+    eventBus: context?.eventBus
+  });
 
-    const lowerCaseSearchTerm = searchTerm.toLowerCase();
-
-    const filterNode = (node: FileTreeNode): FileTreeNode | null => {
-      if (node.type === 'file') {
-        return node.name.toLowerCase().includes(lowerCaseSearchTerm) ? node : null;
-      } else { // folder
-        const filteredChildren = node.children
-          ?.map(filterNode)
-          .filter((child): child is FileTreeNode => child !== null) || [];
-
-        if (node.name.toLowerCase().includes(lowerCaseSearchTerm) || filteredChildren.length > 0) {
-          return { ...node, children: filteredChildren };
-        }
-        return null;
-      }
-    };
-
-    return filterNode(fileTree);
-  }, [fileTree, searchTerm]);
+  // Note: FileTree component now handles filtering internally
+  // This was the previous filtering logic that's no longer needed
+  // const filteredFileTree = useMemo(() => {
+  //   if (!fileTree || !searchTerm) return fileTree;
+  //   ...\
+  // }, [fileTree, searchTerm]);
   
   // UI state
   const [showFilters, setShowFilters] = useState(false);
@@ -118,7 +123,7 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
     const initializePlugin = async () => {
       setLoading(true);
       try {
-        const configResult = await window.configAPI.getConfigAndSchema(pluginId);
+        const configResult = await (window as any).configAPI.getConfigAndSchema(pluginId);
         if (configResult && configResult.config) {
           const loadedConfig = configResult.config;
           setFilterOptions({
@@ -132,13 +137,13 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
           setCustomPresets(Object.values(loadedConfig.savedFilters || {}));
         }
 
-        const initPath = initialPath || (window.fileSystemAPI ? await window.fileSystemAPI.getRootPath() : '.');
+        const initPath = initialPath || (serviceHook ? await serviceHook.callService('filesystem', '1.0.0', 'getCurrentDirectory', []) : '.') || '.';
         setRootPath(prevPath => prevPath || initPath); // Only set if not loaded from config
         scanDirectory(initPath);
       } catch (error) {
         console.error('Failed to load plugin configuration:', error);
         // Fallback to defaults if config loading fails
-        const initPath = initialPath || (window.fileSystemAPI ? await window.fileSystemAPI.getRootPath() : '.');
+        const initPath = initialPath || (serviceHook ? await serviceHook.callService('filesystem', '1.0.0', 'getCurrentDirectory', []) : '.') || '.';
         setRootPath(initPath);
         scanDirectory(initPath);
       } finally {
@@ -146,7 +151,7 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
       }
     };
     initializePlugin();
-  }, [initialPath, scanDirectory, pluginId]);
+  }, [initialPath, pluginId]);
 
   // Apply preset when selected
   const applyPreset = useCallback((presetName: string) => {
@@ -178,10 +183,10 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
     setSelectedPreset(name);
 
     try {
-      const configResult = await window.configAPI.getConfigAndSchema(pluginId);
+      const configResult = await (window as any).configAPI.getConfigAndSchema(pluginId);
       const currentConfig = configResult?.config || {};
       const updatedSavedFilters = { ...currentConfig.savedFilters, [name]: newPreset };
-      await window.configAPI.savePluginConfig(pluginId, { ...currentConfig, savedFilters: updatedSavedFilters });
+      await (window as any).configAPI.savePluginConfig(pluginId, { ...currentConfig, savedFilters: updatedSavedFilters });
       setProgress(`Preset '${name}' saved.`);
     } catch (error) {
       console.error('Failed to save preset:', error);
@@ -198,11 +203,11 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
     }
 
     try {
-      const configResult = await window.configAPI.getConfigAndSchema(pluginId);
+      const configResult = await (window as any).configAPI.getConfigAndSchema(pluginId);
       const currentConfig = configResult?.config || {};
       const updatedSavedFilters = { ...currentConfig.savedFilters };
       delete updatedSavedFilters[name];
-      await window.configAPI.savePluginConfig(pluginId, { ...currentConfig, savedFilters: updatedSavedFilters });
+      await (window as any).configAPI.savePluginConfig(pluginId, { ...currentConfig, savedFilters: updatedSavedFilters });
       setProgress(`Preset '${name}' deleted.`);
     } catch (error) {
       console.error('Failed to delete preset:', error);
@@ -214,9 +219,9 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
   useEffect(() => {
     const saveLastUsedSettings = async () => {
       try {
-        const configResult = await window.configAPI.getConfigAndSchema(pluginId);
+        const configResult = await (window as any).configAPI.getConfigAndSchema(pluginId);
         const currentConfig = configResult?.config || {};
-        await window.configAPI.savePluginConfig(pluginId, {
+        await (window as any).configAPI.savePluginConfig(pluginId, {
           ...currentConfig,
           lastUsedFolderPath: rootPath,
           lastFileRegex: filterOptions.fileRegex,
@@ -272,11 +277,11 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
         if (depth > filterOptions.maxDepth) return null;
         
         try {
-          const items = await window.fileSystemAPI.readDirectory(dirPath);
+          const items = (await serviceHook?.callService('filesystem', '1.0.0', 'readDirectory', [dirPath])) || [];
           const children: FileTreeNode[] = [];
           
           for (const item of items) {
-            const fullPath = window.utilityAPI.joinPosix(dirPath, item.name);
+            const fullPath = (await serviceHook?.callService('filesystem', '1.0.0', 'joinPath', [dirPath, item.name])) || `${dirPath}/${item.name}`;
             
             if (item.type === 'directory') {
               if (shouldIncludeFolder(item.name)) {
@@ -293,7 +298,7 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
                 data: { // Store additional data in 'data' property
                   path: fullPath,
                   size: item.size,
-                  extension: window.utilityAPI.extname(item.name)
+                  extension: (await serviceHook?.callService('filesystem', '1.0.0', 'getExtension', [item.name])) || item.name.split('.').pop() || ''
                 }
               });
             }
@@ -301,7 +306,7 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
           
           return {
             id: dirPath, // Use dirPath as ID for FileTree component
-            name: window.utilityAPI.basename(dirPath),
+            name: (await serviceHook?.callService('filesystem', '1.0.0', 'getBasename', [dirPath])) || dirPath.split('/').pop() || dirPath,
             type: 'folder', // Use 'folder' for directories
             children: children.sort((a, b) => {
               // Directories first, then files, both alphabetically
@@ -352,9 +357,9 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
         setProgress(`Reading file ${i + 1} of ${files.length}...`);
         
         try {
-          const content = await window.fileSystemAPI.readFile(filePath, 'utf8');
-          const relativePath = window.utilityAPI.relative(rootPath, filePath);
-          const fileName = window.utilityAPI.basename(filePath);
+          const content = (await serviceHook?.callService('filesystem', '1.0.0', 'readFile', [filePath, 'utf8'])) || '';
+          const relativePath = (await serviceHook?.callService('filesystem', '1.0.0', 'getRelativePath', [rootPath, filePath])) || filePath;
+          const fileName = (await serviceHook?.callService('filesystem', '1.0.0', 'getBasename', [filePath])) || filePath.split('/').pop() || filePath;
           
           contextOutput += `---\nFile: ${fileName}\nPath: ${relativePath.replace(/\\/g, '/')}\n---\n\n`;
           contextOutput += '```\n' + content + '\n```\n\n';
@@ -380,7 +385,7 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
   // Utility functions
   const handleCopy = useCallback(async () => {
     try {
-      await window.fileSystemAPI.copyToClipboard(output);
+      await serviceHook?.callService('filesystem', '1.0.0', 'copyToClipboard', [output]);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
@@ -399,7 +404,7 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
 
   const handleSelectFolder = async () => {
     try {
-      const selected = await window.fileSystemAPI.selectFolder();
+      const selected = await serviceHook?.callService('filesystem', '1.0.0', 'selectDirectory', []);
       if (selected && selected.length > 0) {
         scanDirectory(selected[0]);
       }
@@ -576,7 +581,7 @@ const ContextGenerator: React.FC<ContextGeneratorProps> = ({ initialPath }) => {
             {fileTree ? (
               <FileTree
                 data={[fileTree]}
-                onSelectionChange={(ids) => setSelectedFiles(new Set(ids))}
+                onSelectionChange={(selectedIds) => setSelectedFiles(new Set(selectedIds))}
                 defaultExpandedIds={Array.from(expandedIds)}
                 onNodeClick={(node) => {
                   if (node.type === 'folder') {

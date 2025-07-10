@@ -49,13 +49,44 @@ export const loadPluginUI = async (
       return await loadNodeModule('lucide-react');
     }
     if (specifier === 'react') {
-      return { useState: React.useState, useEffect: React.useEffect, default: React };
+      return {
+        default: React,
+        ...React,
+        useState: React.useState,
+        useEffect: React.useEffect,
+        useCallback: React.useCallback,
+        useMemo: React.useMemo,
+        useRef: React.useRef,
+        useContext: React.useContext,
+        createElement: React.createElement,
+        Fragment: React.Fragment
+      };
+    }
+    if (specifier === 'react/jsx-runtime') {
+      return { 
+        jsx: (type: any, props: any, key?: any) => {
+          const { children, ...otherProps } = props || {};
+          return React.createElement(type, key ? { ...otherProps, key } : otherProps, children);
+        },
+        jsxs: (type: any, props: any, key?: any) => {
+          const { children, ...otherProps } = props || {};
+          return React.createElement(type, key ? { ...otherProps, key } : otherProps, children);
+        },
+        Fragment: React.Fragment
+      };
+    }
+    if (specifier === 'react-dom') {
+      return { createRoot, default: { createRoot } };
+    }
+    if (specifier === 'react-dom/client') {
+      return { createRoot };
     }
     if (specifier === 'fs/promises') {
       return await loadNodeModule('fs/promises');
     }
     
     // Fallback to original import
+    console.log(`[loadPluginUI] Unhandled import: ${specifier}, falling back to original import`);
     return originalImport ? originalImport(specifier) : import(specifier);
   };
   

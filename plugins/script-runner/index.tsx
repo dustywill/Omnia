@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { loadNodeModule } from '../../src/ui/node-module-loader.js';
 import { Card } from '../../src/ui/components/Card/Card.js';
 import { Button } from '../../src/ui/components/Button/Button.js';
 import { Input } from '../../src/ui/components/Input/Input.js';
 import { Badge } from '../../src/ui/components/Badge/Badge.js';
 import { Grid } from '../../src/ui/components/Grid/Grid.js';
+import { SchemaForm } from '../../src/ui/components/SchemaForm/SchemaForm.js';
+import { configPersistence } from '../../src/core/config-persistence.js';
+import { useService } from '../../src/hooks/index.js';
 // @ts-ignore
 import { createSchemas } from './config-schema.js';
 
@@ -43,16 +46,46 @@ export type Script = {
   }>;
 };
 
+export type ConfiguredScript = {
+  id: string;
+  name: string;
+  description: string;
+  scriptPath: string;
+  group: string;
+  parameters: Record<string, any>;
+  customParameters: Array<{
+    name: string;
+    description: string;
+    required: boolean;
+    type: 'string' | 'number' | 'boolean';
+    defaultValue?: any;
+  }>;
+  shell?: 'powershell' | 'pwsh' | 'cmd';
+  timeout?: number;
+  enabled: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 export type ExecutionResult = {
+  id: string;
   success: boolean;
   output: string;
   error?: string;
   exitCode: number;
   duration: number;
-  scriptName?: string;
-  scriptPath?: string;
-  parameters?: string[];
-  timestamp?: string;
+  scriptPath: string;
+  parameters: Record<string, any>;
+  shell: string;
+  cwd: string;
+  startTime: Date;
+  endTime: Date;
+  outputLength: number;
+  resourceUsage?: {
+    maxMemory: number;
+    cpuTime: number;
+    diskIO: number;
+  };
 };
 
 // Default configuration
@@ -79,129 +112,93 @@ export const configSchema = async () => {
   return ScriptRunnerConfigSchema;
 };
 
-// Service implementation for script execution
-export class ScriptExecutionService {
+// Script execution using core services
+export class ScriptServiceHelper {
   private config: ScriptRunnerConfig;
+  public serviceCall: any;
 
-  constructor(config: ScriptRunnerConfig) {
+  constructor(config: ScriptRunnerConfig, serviceCall: any) {
     this.config = config;
+    this.serviceCall = serviceCall;
   }
 
   async executeScript(scriptPath: string, parameters: string[] = []): Promise<ExecutionResult> {
-    const startTime = Date.now();
-    
     try {
-      // Validate script path
-      if (!(await this.validateScriptPath(scriptPath))) {
-        throw new Error('Invalid script path or not allowed');
-      }
-
-      const { spawn } = await loadNodeModule<typeof import('child_process')>('child_process');
+      // Convert array parameters to object format expected by core service
+      const parameterObject: Record<string, any> = {};
       
-      const shell = this.config.defaultShell;
-      const args = shell === 'powershell' || shell === 'pwsh' 
-        ? ['-File', scriptPath, ...parameters]
-        : ['/c', scriptPath, ...parameters];
-      
-      const command = shell === 'cmd' ? 'cmd' : shell;
-      
-      return new Promise((resolve) => {
-        let output = '';
-        let errorOutput = '';
-        
-        const child = spawn(command, args, {
-          cwd: this.config.scriptsDirectory,
-          timeout: this.config.timeout * 1000
-        });
-        
-        child.stdout?.on('data', (data) => {
-          output += data.toString();
-        });
-        
-        child.stderr?.on('data', (data) => {
-          errorOutput += data.toString();
-        });
-        
-        child.on('close', (code) => {
-          const duration = Date.now() - startTime;
-          const result: ExecutionResult = {
-            success: code === 0,
-            output: output.length > this.config.maxOutputLength 
-              ? output.substring(0, this.config.maxOutputLength) + '\n... (output truncated)'
-              : output,
-            error: errorOutput || undefined,
-            exitCode: code || 0,
-            duration
-          };
-          
-          // Auto-save output if enabled
-          if (this.config.autoSaveOutput) {
-            this.saveExecutionResult(scriptPath, result).catch(console.error);
-          }
-          
-          resolve(result);
-        });
-        
-        child.on('error', (error) => {
-          const duration = Date.now() - startTime;
-          resolve({
-            success: false,
-            output: '',
-            error: error.message,
-            exitCode: -1,
-            duration
-          });
-        });
+      // Simple parameter handling - if parameters are provided as array, use them positionally
+      parameters.forEach((param, index) => {
+        parameterObject[`param${index + 1}`] = param;
       });
+
+      // Call the core ScriptExecutionService through service registry
+      const result = await this.serviceCall(
+        'script-execution',
+        '1.0.0',
+        'executeScript',
+        [
+          scriptPath,
+          {
+            shell: this.config.defaultShell,
+            cwd: this.config.scriptsDirectory,
+            timeout: this.config.timeout,
+            parameters: parameterObject
+          }
+        ]
+      );
+      
+      return result as ExecutionResult;
     } catch (error) {
-      const duration = Date.now() - startTime;
+      // Return error result in expected format
       return {
+        id: `error_${Date.now()}`,
         success: false,
         output: '',
         error: error instanceof Error ? error.message : 'Unknown error',
         exitCode: -1,
-        duration
+        duration: 0,
+        scriptPath,
+        parameters: {},
+        shell: this.config.defaultShell,
+        cwd: this.config.scriptsDirectory || '',
+        startTime: new Date(),
+        endTime: new Date(),
+        outputLength: 0
       };
     }
   }
 
-  // Helper function to access Electron API
-  private getElectronAPI(): any {
-    if (typeof window !== 'undefined' && (window as any).electronAPI) {
-      return (window as any).electronAPI;
-    }
-    return null;
-  }
-
+  // Use FileSystemService through core services to scan for scripts
   async getAvailableScripts(): Promise<Script[]> {
     try {
-      const electronAPI = this.getElectronAPI();
+      // Use the core FileSystemService through service registry
+      const directoryExists = await this.serviceCall(
+        'filesystem',
+        '1.0.0',
+        'exists',
+        [this.config.scriptsDirectory]
+      );
       
-      if (!electronAPI) {
-        console.warn('[ScriptRunner] Electron API not available, using fallback scripts');
+      if (!directoryExists) {
+        console.warn('[ScriptRunner] Scripts directory does not exist:', this.config.scriptsDirectory);
         return this.getFallbackScripts();
       }
       
-      const path = await loadNodeModule<typeof import('path')>('path');
+      const files = await this.serviceCall(
+        'filesystem',
+        '1.0.0',
+        'readDirectory',
+        [this.config.scriptsDirectory]
+      );
       
-      // Try to create scripts directory if it doesn't exist
-      try {
-        await electronAPI.mkdir(this.config.scriptsDirectory, { recursive: true });
-      } catch (mkdirError) {
-        // Directory might already exist, continue
-      }
-      
-      const files = await electronAPI.readdir(this.config.scriptsDirectory, { withFileTypes: true });
       const scripts: Script[] = [];
       
       for (const file of files) {
         try {
-          // Use the isFile property from the enhanced readdir response
-          const isFile = file.isFile;
-            
-          if (isFile && this.config.allowedExtensions.some((ext: string) => file.name.endsWith(ext))) {
-            const scriptPath = await electronAPI.join(this.config.scriptsDirectory, file.name);
-            const id = path.basename(file.name, path.extname(file.name));
+          if (file.type === 'file' && this.config.allowedExtensions.some((ext: string) => file.name.endsWith(ext))) {
+            const scriptPath = this.config.scriptsDirectory + '/' + file.name;
+            const id = file.name.split('.')[0]; // Remove extension for ID
             
             scripts.push({
               id,
@@ -233,12 +230,26 @@ export class ScriptExecutionService {
   async validateScriptPath(scriptPath: string): Promise<boolean> {
     if (this.config.restrictToScriptsDirectory) {
       try {
-        const path = await loadNodeModule<typeof import('path')>('path');
-        const normalizedPath = path.normalize(scriptPath);
-        const scriptsDir = path.normalize(this.config.scriptsDirectory);
-        return normalizedPath.startsWith(scriptsDir);
+        // Use FileSystemService to validate the path
+        const pathExists = await this.serviceCall(
+          'filesystem',
+          '1.0.0',
+          'exists',
+          [scriptPath]
+        );
+        
+        if (!pathExists) {
+          return false;
+        }
+        
+        // Check if path is within scripts directory
+        const normalizedScriptPath = scriptPath.replace(/\\/g, '/');
+        const normalizedScriptsDir = this.config.scriptsDirectory.replace(/\\/g, '/');
+        const isWithinScriptsDir = normalizedScriptPath.startsWith(normalizedScriptsDir);
+        
+        return isWithinScriptsDir && this.config.allowedExtensions.some((ext: string) => scriptPath.endsWith(ext));
       } catch (error) {
-        console.warn('[ScriptRunner] Failed to validate script path, allowing:', error);
+        console.warn('[ScriptRunner] Failed to validate script path:', error);
         return this.config.allowedExtensions.some((ext: string) => scriptPath.endsWith(ext));
       }
     }
@@ -250,40 +261,6 @@ export class ScriptExecutionService {
     return id.split(/[-_]/).map(word => 
       word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
     ).join(' ');
-  }
-
-  private async saveExecutionResult(scriptPath: string, result: ExecutionResult): Promise<void> {
-    try {
-      const electronAPI = this.getElectronAPI();
-      
-      if (!electronAPI) {
-        console.warn('[ScriptRunner] Electron API not available, skipping save execution result');
-        return;
-      }
-      
-      const path = await loadNodeModule<typeof import('path')>('path');
-      
-      await electronAPI.mkdir(this.config.outputDirectory, { recursive: true });
-      
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const scriptName = path.basename(scriptPath, path.extname(scriptPath));
-      const outputFile = await electronAPI.join(this.config.outputDirectory, `${scriptName}_${timestamp}.log`);
-      
-      const logContent = [
-        `Script: ${scriptPath}`,
-        `Executed: ${new Date().toISOString()}`,
-        `Duration: ${result.duration}ms`,
-        `Exit Code: ${result.exitCode}`,
-        `Success: ${result.success}`,
-        `\n--- OUTPUT ---`,
-        result.output,
-        result.error ? `\n--- ERROR ---\n${result.error}` : ''
-      ].join('\n');
-      
-      await electronAPI.writeFile(outputFile, logContent);
-    } catch (error) {
-      console.error('Failed to save execution result:', error);
-    }
   }
 
   getFallbackScripts(): Script[] {
@@ -322,25 +299,73 @@ export class ScriptExecutionService {
 // Main configured plugin component
 interface ScriptRunnerPluginProps {
   config?: ScriptRunnerConfig;
+  serviceRegistry?: any;
+  settingsManager?: any;
 }
 
-const ScriptRunnerPlugin: React.FC<ScriptRunnerPluginProps> = ({ config: providedConfig }) => {
+const ScriptRunnerPlugin: React.FC<ScriptRunnerPluginProps> = (props) => {
   // Use provided config or fall back to default
-  const config = providedConfig || defaultConfig;
+  const config = props?.config || defaultConfig;
+  
+  // Use service registry to access core ScriptExecutionService
+  const serviceHook = useService({
+    pluginId: 'script-runner',
+    permissions: ['system:exec', 'filesystem:read', 'filesystem:write'],
+    serviceRegistry: props?.serviceRegistry || { 
+      getAvailableServices: () => [], 
+      callService: async () => { 
+        throw new Error('Service registry not available'); 
+      } 
+    },
+    eventBus: { 
+      subscribe: () => {}, 
+      unsubscribe: () => {}, 
+      publish: () => {} 
+    }
+  });
+  
+  // All useState hooks called at the top level, in the same order every time
   const [scripts, setScripts] = useState<Script[]>([]);
   const [selectedScript, setSelectedScript] = useState<Script | null>(null);
   const [status, setStatus] = useState<ScriptStatus>('idle');
   const [output, setOutput] = useState<string>('');
   const [params, setParams] = useState<string>('');
   const [loading, setLoading] = useState(true);
-  const [executionHistory, setExecutionHistory] = useState<ExecutionResult[]>([]);
-  const [serviceInstance] = useState(() => new ScriptExecutionService(config));
+  const [serviceInstance] = useState(() => new ScriptServiceHelper(config, serviceHook?.callService || (async () => { throw new Error('Service not available'); })));
+  const [activeTab, setActiveTab] = useState<'overview' | 'configured' | 'unconfigured' | 'scriptEditor' | 'execute'>('overview');
+  const [configuredScripts, setConfiguredScripts] = useState<Record<string, ConfiguredScript>>({});
+  const [configsLoaded, setConfigsLoaded] = useState(false);
+  const [selectedConfiguredScript, setSelectedConfiguredScript] = useState<ConfiguredScript | null>(null);
+  const [scriptEditorContent, setScriptEditorContentRaw] = useState<string>('');
+  const [selectedScriptForEdit, setSelectedScriptForEdit] = useState<string>('');
+  const [isLoadingScript, setIsLoadingScript] = useState(false);
+  const [isSavingScript, setIsSavingScript] = useState(false);
+  const [isConfigureModalOpen, setIsConfigureModalOpen] = useState(false);
+  const [scriptToConfig, setScriptToConfig] = useState<Script | null>(null);
+  const [configSchemas, setConfigSchemas] = useState<any>(null);
+  const [schemasLoaded, setSchemasLoaded] = useState(false);
+  const [CodeMirrorComponent, setCodeMirrorComponent] = useState<any>(null);
 
-  useEffect(() => {
-    loadScripts();
-  }, [config.scriptsDirectory]);
+  // Helper function to ensure content is always a string
+  const setScriptEditorContent = (content: any) => {
+    setScriptEditorContentRaw(typeof content === 'string' ? content : '');
+  };
 
-  const loadScripts = async () => {
+  // Load configured scripts from persistence
+  const loadConfiguredScripts = useCallback(async () => {
+    try {
+      const savedConfigs = await configPersistence.loadAllConfigs('script-runner', 'plugin-config');
+      if (savedConfigs && Object.keys(savedConfigs).length > 0) {
+        setConfiguredScripts(savedConfigs);
+      }
+    } catch (error) {
+      console.error('Failed to load configured scripts:', error);
+    } finally {
+      setConfigsLoaded(true);
+    }
+  }, []);
+
+  const loadScripts = useCallback(async () => {
     try {
       setLoading(true);
       const discoveredScripts = await serviceInstance.getAvailableScripts();
@@ -351,7 +376,51 @@ const ScriptRunnerPlugin: React.FC<ScriptRunnerPluginProps> = ({ config: provide
     } finally {
       setLoading(false);
     }
-  };
+  }, [serviceInstance]);
+
+  // All useEffect hooks called at the top level, in the same order every time
+  useEffect(() => {
+    loadScripts();
+    loadConfiguredScripts();
+  }, [config.scriptsDirectory, loadScripts, loadConfiguredScripts]);
+
+  useEffect(() => {
+    const loadCodeMirror = async () => {
+      try {
+        const CodeMirror = await loadNodeModule('@uiw/react-codemirror');
+        setCodeMirrorComponent(CodeMirror);
+      } catch (err) {
+        console.warn('CodeMirror not available, using textarea fallback');
+        const TextareaFallback = (props: any) => (
+          <textarea
+            value={typeof props.value === 'string' ? props.value : ''}
+            onChange={(e) => props.onChange?.(e.target.value)}
+            style={{ width: '100%', height: props.height || '400px', fontFamily: 'monospace', padding: '12px' }}
+            aria-label={props['aria-label']}
+            placeholder={props.placeholder || ''}
+          />
+        );
+        setCodeMirrorComponent(TextareaFallback);
+      }
+    };
+
+    const loadSchemas = async () => {
+      try {
+        console.log('Loading script runner schemas...');
+        const schemas = await createSchemas();
+        console.log('Script runner schemas loaded:', schemas);
+        setConfigSchemas(schemas);
+        setSchemasLoaded(true);
+      } catch (err) {
+        console.error('Could not load script runner schemas:', err);
+        setSchemasLoaded(false);
+      }
+    };
+
+    loadCodeMirror();
+    loadSchemas();
+  }, []);
+
 
   const runScript = async (script: Script, parameters: string[]) => {
     setStatus('running');
@@ -363,16 +432,7 @@ const ScriptRunnerPlugin: React.FC<ScriptRunnerPluginProps> = ({ config: provide
       setOutput(result.output);
       setStatus(result.success ? 'success' : 'error');
       
-      // Add to execution history if enabled
-      if (config.showExecutionHistory) {
-        setExecutionHistory(prev => [{
-          ...result,
-          scriptName: script.name,
-          scriptPath: script.path,
-          parameters,
-          timestamp: new Date().toISOString()
-        }, ...prev.slice(0, 9)]);
-      }
+      // Script execution completed
       
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -397,6 +457,262 @@ const ScriptRunnerPlugin: React.FC<ScriptRunnerPluginProps> = ({ config: provide
     }
   };
 
+  // Enhanced functionality handlers
+  const handleConfigureScript = (script: Script) => {
+    if (!schemasLoaded || !configSchemas) {
+      console.warn('Schemas not loaded yet, cannot configure script');
+      alert('Configuration system is still loading. Please try again in a moment.');
+      return;
+    }
+    setScriptToConfig(script);
+    setIsConfigureModalOpen(true);
+  };
+
+  const handleSaveScriptConfig = async (configData: any) => {
+    if (!scriptToConfig) return;
+
+    try {
+      console.log('Saving script configuration:', configData);
+      
+      // Create configured script object
+      const configuredScript: ConfiguredScript = {
+        id: configData.id,
+        name: configData.name,
+        description: configData.description,
+        scriptPath: configData.scriptPath,
+        group: configData.group,
+        parameters: configData.defaultShellParameters || {},
+        customParameters: configData.parameters || [],
+        shell: 'powershell', // Default shell
+        timeout: 300, // Default timeout
+        enabled: configData.enabled,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      // Add to configured scripts state
+      const updatedConfigs = {
+        ...configuredScripts,
+        [configuredScript.id]: configuredScript
+      };
+      setConfiguredScripts(updatedConfigs);
+
+      // Save to configuration persistence
+      await configPersistence.saveAllConfigs('script-runner', 'plugin-config', updatedConfigs);
+      console.log('Script configuration saved successfully:', configuredScript);
+      
+      setIsConfigureModalOpen(false);
+      setScriptToConfig(null);
+      
+      // Switch to configured scripts tab to show the result
+      setActiveTab('configured');
+      
+    } catch (error) {
+      console.error('Error saving script configuration:', error);
+      alert('Failed to save script configuration. Please try again.');
+    }
+  };
+
+  const handleEditConfiguredScript = (script: ConfiguredScript) => {
+    console.log('Edit configured script:', script.name);
+    setScriptToConfig({
+      id: script.id,
+      name: script.name,
+      description: script.description,
+      path: script.scriptPath,
+      category: script.group,
+      parameters: script.customParameters
+    });
+    setIsConfigureModalOpen(true);
+  };
+
+  const handleDeleteConfiguredScript = async (scriptId: string) => {
+    if (!confirm('Are you sure you want to delete this script configuration?')) {
+      return;
+    }
+    
+    try {
+      const updatedConfigs = { ...configuredScripts };
+      delete updatedConfigs[scriptId];
+      setConfiguredScripts(updatedConfigs);
+      
+      await configPersistence.saveAllConfigs('script-runner', 'plugin-config', updatedConfigs);
+      console.log('Script configuration deleted successfully');
+    } catch (error) {
+      console.error('Failed to delete script configuration:', error);
+      alert('Failed to delete script configuration. Please try again.');
+    }
+  };
+
+  const handleLoadScriptForEdit = async (scriptPath: string) => {
+    setSelectedScriptForEdit(scriptPath);
+    setIsLoadingScript(true);
+    
+    try {
+      // If script path is empty or just whitespace, clear the content
+      if (!scriptPath || !scriptPath.trim()) {
+        setScriptEditorContent('');
+        setIsLoadingScript(false);
+        return;
+      }
+      
+      // Try to read the actual script file using FileSystemService
+      try {
+        const content = await serviceInstance.serviceCall(
+          'filesystem',
+          '1.0.0',
+          'readFile',
+          [scriptPath, { encoding: 'utf8' }]
+        );
+        setScriptEditorContent(typeof content === 'string' ? content : '');
+      } catch (fileError) {
+        console.warn('Could not read script file, checking persistence:', fileError);
+          
+          // Try to load from persistence
+          try {
+            const persistedScript = await configPersistence.loadConfig(
+              { pluginId: 'script-runner', configType: 'script-editor' },
+              scriptPath
+            );
+            
+            if (persistedScript?.content) {
+              setScriptEditorContent(persistedScript.content);
+            } else {
+              // Fall back to template content
+              const templateContent = getTemplateContent(scriptPath);
+              setScriptEditorContent(templateContent);
+            }
+          } catch (persistenceError) {
+            console.warn('Could not load from persistence, using template:', persistenceError);
+            const templateContent = getTemplateContent(scriptPath);
+            setScriptEditorContent(templateContent);
+          }
+        }
+    } catch (error) {
+      console.error('Error loading script content:', error);
+      setScriptEditorContent('# Error loading script content');
+    } finally {
+      setIsLoadingScript(false);
+    }
+  };
+
+  const getTemplateContent = (scriptPath: string): string => {
+    if (scriptPath.includes('hello')) {
+      return `# Hello World Script
+Write-Host "Hello, World!"
+Write-Host "Current Date: $(Get-Date)"
+Write-Host "User: $env:USERNAME"`;
+    } else if (scriptPath.includes('sysinfo')) {
+      return `# System Information Script
+Write-Host "=== System Information ==="
+Write-Host "Computer Name: $env:COMPUTERNAME"
+Write-Host "OS Version: $(Get-WmiObject -Class Win32_OperatingSystem | Select-Object -ExpandProperty Caption)"
+Write-Host "Total Memory: $((Get-WmiObject -Class Win32_ComputerSystem).TotalPhysicalMemory / 1GB) GB"
+Write-Host "Processor: $(Get-WmiObject -Class Win32_Processor | Select-Object -ExpandProperty Name)"`;
+    } else {
+      return `# PowerShell Script
+# Add your script content here
+Write-Host "Script execution started"
+
+# Your code here
+
+Write-Host "Script execution completed"`;
+    }
+  };
+
+  const handleSaveScript = async () => {
+    if (!selectedScriptForEdit && !(typeof scriptEditorContent === 'string' && scriptEditorContent.trim())) return;
+    
+    setIsSavingScript(true);
+    try {
+      let scriptPath = selectedScriptForEdit;
+      
+      // If no script is selected, prompt for a new filename
+      if (!scriptPath) {
+        const filename = prompt('Enter a filename for the new script (without extension):');
+        if (!filename) {
+          setIsSavingScript(false);
+          return;
+        }
+        scriptPath = `${config.scriptsDirectory}/${filename}.ps1`;
+      }
+      
+      console.log('Saving script:', scriptPath);
+      console.log('Script content:', scriptEditorContent);
+      
+      // Always save to persistence first
+      await configPersistence.saveConfig(
+        { pluginId: 'script-runner', configType: 'script-editor', autoSave: true },
+        scriptPath,
+        { content: scriptEditorContent, lastModified: new Date().toISOString() }
+      );
+      
+      try {
+        // Ensure the scripts directory exists using FileSystemService
+        await serviceInstance.serviceCall(
+          'filesystem',
+          '1.0.0',
+          'createDirectory',
+          [config.scriptsDirectory]
+        );
+        
+        // Save to the actual file system using FileSystemService
+        await serviceInstance.serviceCall(
+          'filesystem',
+          '1.0.0',
+          'writeFile',
+          [scriptPath, scriptEditorContent, { encoding: 'utf8' }]
+        );
+        console.log('Script saved successfully to file system and persistence');
+        alert('Script saved successfully!');
+        
+        // If it was a new script, set it as the selected script
+        if (!selectedScriptForEdit) {
+          setSelectedScriptForEdit(scriptPath);
+          // Reload scripts to show the new script
+          loadScripts();
+        }
+      } catch (fsError) {
+        console.warn('FileSystemService not available, saved to persistence only:', fsError);
+        alert('Script saved to persistence (file system service not available)');
+      }
+    } catch (error) {
+      console.error('Error saving script:', error);
+      alert('Error saving script: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    } finally {
+      setIsSavingScript(false);
+    }
+  };
+
+  // Render navigation tabs
+  const renderTabs = () => (
+    <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', borderBottom: '1px solid #e0e0e0' }}>
+      {[
+        { key: 'overview', label: 'Overview' },
+        { key: 'configured', label: 'Configured Scripts' },
+        { key: 'unconfigured', label: 'Unconfigured Scripts' },
+        { key: 'scriptEditor', label: 'Script Editor' },
+        { key: 'execute', label: 'Execute' }
+      ].map(({ key, label }) => (
+        <button
+          key={key}
+          onClick={() => setActiveTab(key as any)}
+          style={{
+            padding: '10px 16px',
+            border: 'none',
+            borderBottom: activeTab === key ? '2px solid #007bff' : '2px solid transparent',
+            background: activeTab === key ? '#f8f9fa' : 'transparent',
+            color: activeTab === key ? '#007bff' : '#666',
+            cursor: 'pointer',
+            fontWeight: activeTab === key ? 'bold' : 'normal'
+          }}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+
   if (loading) {
     return (
       <Card className="max-w-4xl mx-auto">
@@ -408,235 +724,577 @@ const ScriptRunnerPlugin: React.FC<ScriptRunnerPluginProps> = ({ config: provide
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      {/* Header */}
-      <Card>
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-2xl font-bold text-theme-primary">Script Runner</h2>
-            <p className="text-theme-secondary">
-              Execute PowerShell scripts with parameters and view real-time output.
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="info" size="sm">
-              Shell: {config.defaultShell}
-            </Badge>
-            <Badge variant="neutral" size="sm">
-              {scripts.length} scripts
-            </Badge>
-            {config.enableService && (
-              <Badge variant="success" size="sm">
-                Service Active
-              </Badge>
-            )}
-          </div>
-        </div>
+    <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
+      <h2 style={{ marginBottom: '20px', color: '#333' }}>Script Runner</h2>
+      
+      {renderTabs()}
+      
+      <div style={{ minHeight: '500px' }}>
+        {activeTab === 'overview' && (
+          <Card>
+            <h3>Script Runner Overview</h3>
+            <div style={{ lineHeight: '1.6' }}>
+              <p><strong>Enhanced Script Runner with Configuration Management</strong></p>
+              <ul>
+                <li><strong>Configured Scripts</strong> - Scripts with saved configurations and parameters</li>
+                <li><strong>Unconfigured Scripts</strong> - Discovered scripts that can be configured</li>
+                <li><strong>Script Editor</strong> - Edit script content directly in the interface</li>
+                <li><strong>Enhanced Execution</strong> - Run scripts with saved or custom parameters</li>
+              </ul>
+              
+              <div style={{ marginTop: '20px', padding: '16px', backgroundColor: '#f8f9fa', borderRadius: '4px' }}>
+                <h4>Current Status</h4>
+                <p><strong>Shell:</strong> {config.defaultShell}</p>
+                <p><strong>Scripts Directory:</strong> {config.scriptsDirectory}</p>
+                <p><strong>Discovered Scripts:</strong> {scripts.length}</p>
+                <p><strong>Configured Scripts:</strong> {Object.keys(configuredScripts).length}</p>
+                <p><strong>Service:</strong> {config.enableService ? 'Active' : 'Inactive'}</p>
+                <p><strong>Persistence:</strong> {configsLoaded ? 'Loaded' : 'Loading...'}</p>
+              </div>
+            </div>
+          </Card>
+        )}
 
-        <div className="flex items-center gap-3">
-          <Button
-            onClick={loadScripts}
-            variant="secondary"
-            size="sm"
-            disabled={loading}
-          >
-            {loading ? 'Reloading...' : 'Reload Scripts'}
-          </Button>
-        </div>
-      </Card>
-
-      {/* Script Selection */}
-      <Card>
-        <h3 className="text-lg font-semibold text-theme-primary mb-4">Select Script</h3>
         
-        {scripts.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-theme-secondary">No scripts found.</p>
-            <p className="text-sm text-theme-secondary mt-2">
-              Check the scripts directory: {config.scriptsDirectory}
-            </p>
-          </div>
-        ) : (
-          <Grid cols={2} gap="md">
-            {scripts.map((script) => (
-              <div
-                key={script.id}
-                className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                  selectedScript?.id === script.id
-                    ? 'border-action bg-action/10'
-                    : 'border-theme hover:bg-theme-background'
-                }`}
-                onClick={() => setSelectedScript(script)}
+        {activeTab === 'configured' && (
+          <Card>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div>
+                <h3 style={{ margin: '0 0 8px 0' }}>Configured Scripts</h3>
+                <p style={{ margin: 0 }}>Scripts with saved configurations and parameters:</p>
+              </div>
+              <Button variant="primary" size="sm">
+                Refresh
+              </Button>
+            </div>
+            
+            {Object.keys(configuredScripts).length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px' }}>
+                <p>No configured scripts yet.</p>
+                <p>Go to Unconfigured Scripts to set up your first script.</p>
+              </div>
+            ) : (
+              Object.values(configuredScripts).map((script) => (
+                <div key={script.id} style={{ 
+                  padding: '16px', 
+                  border: '1px solid #e0e0e0', 
+                  borderRadius: '4px', 
+                  marginBottom: '12px',
+                  backgroundColor: script.enabled ? 'white' : '#f5f5f5'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <strong>{script.name}</strong>
+                        <Badge variant={script.enabled ? 'success' : 'neutral'} size="sm">
+                          {script.enabled ? 'Enabled' : 'Disabled'}
+                        </Badge>
+                        <Badge variant="info" size="sm">{script.group}</Badge>
+                      </div>
+                      <p style={{ margin: '8px 0', color: '#666' }}>{script.description}</p>
+                      <code style={{ fontSize: '12px', color: '#007bff' }}>{script.scriptPath}</code>
+                    </div>
+                    <div style={{ marginLeft: '16px', display: 'flex', gap: '8px' }}>
+                      <Button 
+                        variant="primary" 
+                        size="sm"
+                        onClick={() => {
+                          setSelectedConfiguredScript(script);
+                          setActiveTab('execute');
+                        }}
+                      >
+                        Run
+                      </Button>
+                      <Button 
+                        variant="secondary" 
+                        size="sm"
+                        onClick={() => handleEditConfiguredScript(script)}
+                      >
+                        Edit
+                      </Button>
+                      <Button 
+                        variant="danger" 
+                        size="sm"
+                        onClick={() => handleDeleteConfiguredScript(script.id)}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </Card>
+        )}
+
+        {activeTab === 'unconfigured' && (
+          <Card>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div>
+                <h3 style={{ margin: '0 0 8px 0' }}>Unconfigured Scripts</h3>
+                <p style={{ margin: 0 }}>Discovered scripts that can be configured:</p>
+              </div>
+              <Button 
+                onClick={loadScripts}
+                variant="secondary"
+                size="sm"
+                disabled={loading}
               >
-                <h4 className="font-medium text-theme-primary mb-1">{script.name}</h4>
-                <p className="text-sm text-theme-secondary mb-2">{script.description}</p>
-                <div className="flex items-center gap-2">
-                  <Badge variant="neutral" size="sm">{script.category}</Badge>
-                  {script.parameters.length > 0 && (
-                    <Badge variant="info" size="sm">
-                      {script.parameters.length} params
-                    </Badge>
+                {loading ? 'Reloading...' : 'Reload Scripts'}
+              </Button>
+            </div>
+            
+            {scripts.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px' }}>
+                <p>No scripts found.</p>
+                <p>Check the scripts directory: {config.scriptsDirectory}</p>
+              </div>
+            ) : (
+              <Grid cols={2} gap="md">
+                {scripts.map((script) => (
+                  <div
+                    key={script.id}
+                    style={{
+                      padding: '16px',
+                      border: '1px solid #e0e0e0',
+                      borderRadius: '4px',
+                      backgroundColor: 'white'
+                    }}
+                  >
+                    <h4 style={{ margin: '0 0 8px 0' }}>{script.name}</h4>
+                    <p style={{ margin: '0 0 12px 0', color: '#666', fontSize: '14px' }}>{script.description}</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                      <Badge variant="neutral" size="sm">{script.category}</Badge>
+                      {script.parameters.length > 0 && (
+                        <Badge variant="info" size="sm">
+                          {script.parameters.length} params
+                        </Badge>
+                      )}
+                    </div>
+                    <code style={{ fontSize: '12px', color: '#007bff', display: 'block', marginBottom: '12px' }}>
+                      {script.path}
+                    </code>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <Button 
+                        variant="primary" 
+                        size="sm"
+                        onClick={() => handleConfigureScript(script)}
+                      >
+                        Configure
+                      </Button>
+                      <Button 
+                        variant="secondary" 
+                        size="sm"
+                        onClick={() => {
+                          handleLoadScriptForEdit(script.path);
+                          setActiveTab('scriptEditor');
+                        }}
+                      >
+                        View/Edit
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </Grid>
+            )}
+          </Card>
+        )}
+
+        {activeTab === 'scriptEditor' && (
+          <Card>
+            <h3>Script Editor</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              {/* Left Panel - Script Selection and Editor */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Select Script</label>
+                  <select
+                    value={selectedScriptForEdit}
+                    onChange={(e) => {
+                      const scriptPath = e.target.value;
+                      handleLoadScriptForEdit(scriptPath);
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px'
+                    }}
+                  >
+                    <option value="">Select a script...</option>
+                    {scripts.map((script) => (
+                      <option key={script.id} value={script.path}>
+                        {script.name} ({script.path})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Script Content</label>
+                  {isLoadingScript ? (
+                    <div style={{
+                      width: '100%',
+                      height: '400px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: '#f9f9f9'
+                    }}>
+                      Loading script content...
+                    </div>
+                  ) : (
+                    <div style={{ border: '1px solid #ddd', borderRadius: '4px' }}>
+                      {CodeMirrorComponent && typeof CodeMirrorComponent === 'function' ? (
+                        <CodeMirrorComponent
+                          value={typeof scriptEditorContent === 'string' ? scriptEditorContent : ''}
+                          onChange={(value: string) => setScriptEditorContent(value)}
+                          height="400px"
+                          aria-label="Script content editor"
+                          placeholder={selectedScriptForEdit ? "Loading script content..." : "Select a script to edit its content..."}
+                        />
+                      ) : (
+                        <textarea
+                          value={typeof scriptEditorContent === 'string' ? scriptEditorContent : ''}
+                          onChange={(e) => setScriptEditorContent(e.target.value)}
+                          style={{ width: '100%', height: '400px', fontFamily: 'monospace', padding: '12px' }}
+                          aria-label="Script content editor"
+                          placeholder={selectedScriptForEdit ? "Loading script content..." : "Select a script to edit its content..."}
+                        />
+                      )}
+                    </div>
                   )}
                 </div>
-                <code className="text-xs text-theme-secondary mt-2 block truncate">
-                  {script.path}
-                </code>
-              </div>
-            ))}
-          </Grid>
-        )}
-      </Card>
+                
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <Button
+                    onClick={handleSaveScript}
+                    disabled={isSavingScript || (!selectedScriptForEdit && !(typeof scriptEditorContent === 'string' && scriptEditorContent.trim()))}
+                    variant="primary"
+                  >
+                    {isSavingScript ? 'Saving...' : (selectedScriptForEdit ? 'Save Script' : 'Save as New Script')}
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setSelectedScriptForEdit('');
+                      setScriptEditorContent('');
+                    }}
+                    variant="secondary"
+                  >
+                    Clear
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setScriptEditorContent(`# PowerShell Script
+# Add your script content here
+Write-Host "Script execution started"
 
-      {/* Script Execution */}
-      {selectedScript && (
-        <Card>
-          <h3 className="text-lg font-semibold text-theme-primary mb-4">
-            Execute: {selectedScript.name}
-          </h3>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-theme-primary mb-2">
-                Parameters (space-separated):
-              </label>
-              <Input
-                value={params}
-                onChange={(e) => setParams(e.target.value)}
-                placeholder="param1 param2 param3"
-                disabled={status === 'running'}
-              />
-              {selectedScript.parameters.length > 0 && (
-                <div className="mt-2">
-                  <p className="text-xs text-theme-secondary mb-1">Expected parameters:</p>
-                  <div className="space-y-1">
-                    {selectedScript.parameters.map((param: any, index: number) => (
-                      <div key={index} className="text-xs">
-                        <code className="text-action">{param.name}</code>
-                        {param.required && <span className="text-danger ml-1">*</span>}
-                        <span className="text-theme-secondary ml-2">({param.type})</span>
-                        {param.description && (
-                          <span className="text-theme-secondary ml-2">- {param.description}</span>
-                        )}
+# Your code here
+
+Write-Host "Script execution completed"`);
+                    }}
+                    variant="secondary"
+                  >
+                    New Script Template
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Right Panel - Script Information */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                  <h4 style={{ margin: '0 0 12px 0' }}>PowerShell Guidelines</h4>
+                  <div style={{ fontSize: '14px', lineHeight: '1.6' }}>
+                    <ul>
+                      <li>Use <code>Write-Host</code> for output messages</li>
+                      <li>Use <code>param()</code> block for parameters</li>
+                      <li>Add error handling with try/catch</li>
+                      <li>Use <code>$env:VARIABLE</code> for environment variables</li>
+                      <li>Test scripts before saving</li>
+                    </ul>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 style={{ margin: '0 0 12px 0' }}>Script Templates</h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <Button
+                      onClick={() => setScriptEditorContent(`# PowerShell Script Template
+param(
+    [string]$Parameter1 = "default",
+    [switch]$Verbose
+)
+
+try {
+    Write-Host "Script execution started"
+    
+    # Your code here
+    
+    Write-Host "Script execution completed successfully"
+}
+catch {
+    Write-Error "Script failed: $($_.Exception.Message)"
+    exit 1
+}`)}
+                      variant="secondary"
+                      size="sm"
+                    >
+                      Basic Template
+                    </Button>
+                    
+                    <Button
+                      onClick={() => setScriptEditorContent(`# System Information Script
+Write-Host "=== System Information ==="
+Write-Host "Computer Name: $env:COMPUTERNAME"
+Write-Host "User: $env:USERNAME"
+Write-Host "Date: $(Get-Date)"
+Write-Host "PowerShell Version: $($PSVersionTable.PSVersion)"
+Write-Host "OS: $(Get-WmiObject -Class Win32_OperatingSystem | Select-Object -ExpandProperty Caption)"`)}
+                      variant="secondary"
+                      size="sm"
+                    >
+                      System Info Template
+                    </Button>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 style={{ margin: '0 0 12px 0' }}>Script Information</h4>
+                  {selectedScriptForEdit ? (
+                    <div style={{ 
+                      backgroundColor: '#f8f9fa', 
+                      padding: '12px', 
+                      borderRadius: '4px',
+                      fontSize: '12px',
+                      fontFamily: 'monospace'
+                    }}>
+                      <div><strong>Path:</strong> {selectedScriptForEdit}</div>
+                      <div><strong>Lines:</strong> {typeof scriptEditorContent === 'string' ? scriptEditorContent.split('\n').length : 0}</div>
+                      <div><strong>Characters:</strong> {typeof scriptEditorContent === 'string' ? scriptEditorContent.length : 0}</div>
+                    </div>
+                  ) : (
+                    <div style={{ 
+                      backgroundColor: '#e3f2fd', 
+                      padding: '12px', 
+                      borderRadius: '4px',
+                      fontSize: '14px',
+                      lineHeight: '1.4'
+                    }}>
+                      <div style={{ marginBottom: '8px' }}>
+                        <strong>💡 No script selected</strong>
+                      </div>
+                      <div style={{ color: '#666' }}>
+                        • Select a script from the dropdown above to edit existing scripts<br/>
+                        • Or click "New Script Template" to start creating a new script<br/>
+                        • You can type directly in the editor and save as a new script
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {activeTab === 'execute' && (
+          <Card>
+            <h3>Execute Scripts</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              {/* Left Panel - Script Selection */}
+              <div>
+                <h4>Select Script to Execute</h4>
+                
+                {/* Configured Scripts */}
+                {Object.keys(configuredScripts).length > 0 && (
+                  <div style={{ marginBottom: '20px' }}>
+                    <h5>Configured Scripts</h5>
+                    {Object.values(configuredScripts).filter(s => s.enabled).map((script) => (
+                      <div
+                        key={script.id}
+                        style={{
+                          padding: '12px',
+                          border: selectedConfiguredScript?.id === script.id ? '2px solid #007bff' : '1px solid #e0e0e0',
+                          borderRadius: '4px',
+                          marginBottom: '8px',
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => setSelectedConfiguredScript(script)}
+                      >
+                        <strong>{script.name}</strong>
+                        <div style={{ fontSize: '12px', color: '#666' }}>{script.description}</div>
+                        <Badge variant="info" size="sm">{script.group}</Badge>
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
-            </div>
-
-            <div className="flex items-center gap-3">
-              <Button
-                onClick={handleRunScript}
-                variant="primary"
-                disabled={status === 'running'}
-              >
-                {status === 'running' ? 'Running...' : 'Execute Script'}
-              </Button>
+                )}
+                
+                {/* Unconfigured Scripts */}
+                {scripts.length > 0 && (
+                  <div>
+                    <h5>Unconfigured Scripts</h5>
+                    {scripts.map((script) => (
+                      <div
+                        key={script.id}
+                        style={{
+                          padding: '12px',
+                          border: selectedScript?.id === script.id ? '2px solid #007bff' : '1px solid #e0e0e0',
+                          borderRadius: '4px',
+                          marginBottom: '8px',
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => setSelectedScript(script)}
+                      >
+                        <strong>{script.name}</strong>
+                        <div style={{ fontSize: '12px', color: '#666' }}>{script.description}</div>
+                        <Badge variant="neutral" size="sm">{script.category}</Badge>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
               
-              <div className="flex items-center gap-2">
-                {status === 'running' && (
-                  <Badge variant="warning" size="sm">Running...</Badge>
-                )}
-                {status === 'success' && (
-                  <Badge variant="success" size="sm">✓ Success</Badge>
-                )}
-                {status === 'error' && (
-                  <Badge variant="danger" size="sm">✗ Error</Badge>
-                )}
-              </div>
-            </div>
-          </div>
-        </Card>
-      )}
-
-      {/* Output */}
-      {output && (
-        <Card>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-theme-primary">Output</h3>
-            <Button
-              onClick={handleCopyOutput}
-              variant="secondary"
-              size="sm"
-            >
-              Copy Output
-            </Button>
-          </div>
-          <pre className="bg-theme-background border border-theme rounded-lg p-4 max-h-80 overflow-auto text-xs font-mono whitespace-pre-wrap">
-            {output}
-          </pre>
-        </Card>
-      )}
-
-      {/* Execution History */}
-      {config.showExecutionHistory && executionHistory.length > 0 && (
-        <Card>
-          <h3 className="text-lg font-semibold text-theme-primary mb-4">Execution History</h3>
-          <div className="space-y-3">
-            {executionHistory.slice(0, 5).map((execution, index) => (
-              <div key={index} className="p-3 border border-theme rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium text-theme-primary">
-                    {execution.scriptName}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <Badge
-                      variant={execution.success ? 'success' : 'danger'}
-                      size="sm"
-                    >
-                      {execution.success ? 'Success' : 'Failed'}
-                    </Badge>
-                    <span className="text-xs text-theme-secondary">
-                      {execution.duration}ms
-                    </span>
-                  </div>
-                </div>
-                <div className="text-xs text-theme-secondary">
-                  {execution.timestamp ? new Date(execution.timestamp).toLocaleString() : 'Unknown time'}
-                </div>
-                {execution.parameters && execution.parameters.length > 0 && (
-                  <div className="text-xs text-theme-secondary mt-1">
-                    Params: {execution.parameters.join(', ')}
+              {/* Right Panel - Execution Controls */}
+              <div>
+                <h4>Execution Controls</h4>
+                
+                {(selectedConfiguredScript || selectedScript) && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <div>
+                      <strong>Selected Script:</strong>
+                      <div>{selectedConfiguredScript?.name || selectedScript?.name}</div>
+                    </div>
+                    
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '8px' }}>Parameters:</label>
+                      <Input
+                        value={params}
+                        onChange={(e) => setParams(e.target.value)}
+                        placeholder="param1 param2 param3"
+                        disabled={status === 'running'}
+                      />
+                    </div>
+                    
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <Button
+                        onClick={handleRunScript}
+                        variant="primary"
+                        disabled={status === 'running'}
+                      >
+                        {status === 'running' ? 'Running...' : 'Execute Script'}
+                      </Button>
+                      
+                      {status === 'running' && <Badge variant="warning" size="sm">Running...</Badge>}
+                      {status === 'success' && <Badge variant="success" size="sm">✓ Success</Badge>}
+                      {status === 'error' && <Badge variant="danger" size="sm">✗ Error</Badge>}
+                    </div>
+                    
+                    {output && (
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                          <strong>Output:</strong>
+                          <Button onClick={handleCopyOutput} variant="secondary" size="sm">
+                            Copy
+                          </Button>
+                        </div>
+                        <pre style={{
+                          backgroundColor: '#f8f9fa',
+                          border: '1px solid #e0e0e0',
+                          borderRadius: '4px',
+                          padding: '12px',
+                          maxHeight: '200px',
+                          overflow: 'auto',
+                          fontSize: '12px',
+                          fontFamily: 'monospace',
+                          whiteSpace: 'pre-wrap'
+                        }}>
+                          {output}
+                        </pre>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
-            ))}
-          </div>
-        </Card>
-      )}
-
-      {/* Configuration Info */}
-      <Card>
-        <h3 className="text-lg font-semibold text-theme-primary mb-4">Configuration</h3>
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <span className="text-theme-secondary">Scripts Directory:</span>
-            <div className="font-mono text-theme-primary">{config.scriptsDirectory}</div>
-          </div>
-          <div>
-            <span className="text-theme-secondary">Output Directory:</span>
-            <div className="font-mono text-theme-primary">{config.outputDirectory}</div>
-          </div>
-          <div>
-            <span className="text-theme-secondary">Default Shell:</span>
-            <div className="text-theme-primary">{config.defaultShell}</div>
-          </div>
-          <div>
-            <span className="text-theme-secondary">Timeout:</span>
-            <div className="text-theme-primary">{config.timeout}s</div>
-          </div>
-          <div>
-            <span className="text-theme-secondary">Max Concurrent:</span>
-            <div className="text-theme-primary">{config.maxConcurrentScripts}</div>
-          </div>
-          <div>
-            <span className="text-theme-secondary">Service:</span>
-            <div className="text-theme-primary">
-              {config.enableService ? 'Enabled' : 'Disabled'}
             </div>
+          </Card>
+        )}
+
+      </div>
+      
+      {/* Configuration Modal */}
+      {isConfigureModalOpen && scriptToConfig && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            padding: '24px',
+            maxWidth: '600px',
+            maxHeight: '80vh',
+            overflow: 'auto',
+            width: '90%'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setIsConfigureModalOpen(false);
+                  setScriptToConfig(null);
+                }}
+              >
+                ✕
+              </Button>
+            </div>
+            
+            {schemasLoaded && configSchemas ? (
+              <SchemaForm
+                title={`Configure Script: ${scriptToConfig.name}`}
+                schema={configSchemas.ScriptConfigurationSchema}
+                initialValues={{
+                  id: `script-${Date.now()}`,
+                  name: scriptToConfig.name,
+                  description: scriptToConfig.description,
+                  group: scriptToConfig.category,
+                  scriptPath: scriptToConfig.path,
+                  defaultShellParameters: {},
+                  elevated: false,
+                  parameters: [],
+                  enabled: true
+                }}
+                onSubmit={(values, isValid) => {
+                  if (isValid) {
+                    handleSaveScriptConfig(values);
+                  }
+                }}
+                onCancel={() => {
+                  setIsConfigureModalOpen(false);
+                  setScriptToConfig(null);
+                }}
+                submitLabel="Save Configuration"
+                showCancelButton={true}
+                realTimeValidation={true}
+              />
+            ) : (
+              <div style={{ textAlign: 'center', padding: '40px' }}>
+                <h3>Loading Configuration Form...</h3>
+                <p>Please wait while the form schema is being loaded.</p>
+              </div>
+            )}
           </div>
         </div>
-      </Card>
+      )}
     </div>
   );
 };

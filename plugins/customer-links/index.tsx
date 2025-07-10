@@ -79,178 +79,158 @@ const CUSTOMER_SITES_TEMPLATE = `<!DOCTYPE html>
 </body>
 </html>`;
 
-const CSS_STYLES = `:root {
-    --tt-palette--n95: #eceeee;
-    --tt-palette--n90: #e3e7e8;
-    --tt-palette--n80: #caced3;
-    --tt-palette--n70: #aeb4bc;
-    --tt-palette--n60: #929aa5;
-    --tt-palette--n50: #76818e;
-    --tt-palette--n40: #5e6773;
-    --tt-palette--n30: #454e59;
-    --tt-palette--n20: #2e343d;
-    --tt-palette--n10: #15191e;
-    --tt-palette--b95: #e5efff;
-    --tt-palette--b90: #dbe9ff;
-    --tt-palette--b80: #b3d3fe;
-    --tt-palette--b70: #89b9fb;
-    --tt-palette--b60: #64a1f7;
-    --tt-palette--b50: #3d89f5;
-    --tt-palette--b40: #1e6de6;
-    --tt-palette--b30: #1555b2;
-    --tt-palette--b20: #0d3778;
-    --tt-palette--b10: #051d42;
-    --tt-palette--white: #fff;
-    --tt-palette--black: #000;
-    --tt-palette--light: #fffd;
-    --tt-palette--dark : #000c;
-    --tt-palette--hilight: #fff3;
-    --tt-palette--lolight: #0002;
-    --tt-palette--action : var(--tt-palette--b40);
-    --tt-palette--neutral: var(--tt-palette--n40);
-    --tt-palette--link   : var(--tt-palette--b40);
-    --tt-palette--brand-primary: #1555b2;
-    --tt-palette--brand-accent : #ffcd08;
+const SHADCN_CSS_STYLES = `/* Shadcn UI and Tailwind CSS Styles */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  --primary: 222.2 47.4% 11.2%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 222.2 84% 4.9%;
+  --radius: 0.5rem;
 }
 
 body {
-  font-family: "Nunito Sans", sans-serif;
-  background-color: var(--tt-palette--n95);
-  color: var(--tt-palette--n10);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
   margin: 0;
   padding: 20px;
-  box-sizing: border-box;
+  line-height: 1.6;
 }
 
 h1 {
-  color: var(--tt-palette--brand-primary);
+  font-size: 2rem;
+  font-weight: 700;
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 2rem;
+  color: hsl(var(--primary));
 }
 
 .customer-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  justify-content: center;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .customer-card {
-  background-color: var(--tt-palette--white);
-  border: 1px solid var(--tt-palette--n80);
-  border-radius: 8px;
-  box-shadow: 0 2px 5px var(--tt-palette--lolight);
-  padding: 0;
-  width: 300px;
-  display: flex;
-  flex-direction: column;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) + 2px);
   overflow: hidden;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  transition: all 0.2s ease;
+}
+
+.customer-card:hover {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 
 .customer-header {
-  font-size: 1.5em;
-  color: var(--tt-palette--n20);
-  margin: 0;
-  padding: 15px 20px;
-  border-bottom: 2px solid var(--tt-palette--brand-accent);
-  position: relative;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .customer-header.collapsible-trigger {
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.2s ease;
 }
 
 .customer-header.collapsible-trigger:hover {
-  background-color: var(--tt-palette--n90);
+  background: hsl(var(--accent));
 }
 
-.customer-header.collapsible-trigger.active {
-  background-color: var(--tt-palette--b90);
-  color: var(--tt-palette--b20);
-}
-
-.customer-header.collapsible-trigger::after {
-  content: "\\25B6";
-  font-size: 0.8em;
-  position: absolute;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%) rotate(0deg);
-  transition: transform 0.3s ease;
-  color: var(--tt-palette--action);
-}
-
-.customer-header.collapsible-trigger.active::after {
-  transform: translateY(-50%) rotate(90deg);
-}
-
-.site-list {
-  list-style: none;
-  padding: 15px 20px;
+.customer-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
   margin: 0;
-  display: flex;
-  flex-direction: column;
-  background-color: var(--tt-palette--n95);
+}
+
+.site-count {
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+  background: hsl(var(--secondary));
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius);
+}
+
+.sites-container {
+  padding: 1rem;
 }
 
 .site-item {
-  overflow: hidden;
+  margin-bottom: 0.75rem;
 }
 
-.site-item.extra-site {
-  transition: max-height 0.4s ease-out, opacity 0.4s ease-out, margin-top 0.4s ease-out;
-  margin-top: 10px;
-}
-
-.site-item.extra-site.collapsed {
-  max-height: 0;
-  opacity: 0;
-  margin-top: 0;
+.site-item:last-child {
   margin-bottom: 0;
 }
 
-.site-item.extra-site.collapsed .site-link {
-  visibility: hidden;
+.site-item.extra-site {
+  transition: all 0.3s ease;
+  opacity: 1;
+  max-height: 200px;
 }
 
-.site-item.extra-site:not(.collapsed) .site-link {
-  visibility: visible;
+.site-item.extra-site.collapsed {
+  opacity: 0;
+  max-height: 0;
+  margin-bottom: 0;
+  overflow: hidden;
 }
 
 .site-link {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  text-align: center;
-  padding: 10px;
-  border: 1px solid var(--tt-palette--n80);
-  border-radius: 6px;
-  background-color: var(--tt-palette--white);
-  color: var(--tt-palette--link);
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: hsl(var(--secondary));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
   text-decoration: none;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  color: hsl(var(--foreground));
+  transition: all 0.2s ease;
 }
 
-.site-link:hover,
-.site-link:focus {
-  background-color: var(--tt-palette--b90);
-  color: var(--tt-palette--b10);
-  box-shadow: 0 1px 3px var(--tt-palette--hilight);
-  outline: none;
+.site-link:hover {
+  background: hsl(var(--accent));
+  border-color: hsl(var(--ring));
 }
 
 .site-logo-container {
-  width: 100px;
-  height: 80px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 8px;
-  background-color: var(--tt-palette--white);
-  border-radius: 4px;
+  background: hsl(var(--background));
+  border-radius: var(--radius);
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .site-logo {
@@ -259,67 +239,30 @@ h1 {
   object-fit: contain;
 }
 
-.site-logo-placeholder {
-  font-size: 0.9em;
-  color: var(--tt-palette--n50);
-}
-
 .site-label {
-  font-size: 0.9em;
-  font-weight: bold;
-  margin-top: 5px;
+  font-weight: 500;
+  color: hsl(var(--foreground));
 }
 
-[data-tooltip] {
-  position: relative;
-  cursor: pointer;
+/* Collapsible trigger styling */
+.customer-header.collapsible-trigger::after {
+  content: "▼";
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+  transition: transform 0.2s ease;
 }
 
-[data-tooltip]::before,
-[data-tooltip]::after {
-  visibility: hidden;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
+.customer-header.collapsible-trigger[aria-expanded="true"]::after {
+  transform: rotate(180deg);
 }
-
-[data-tooltip]::before {
-  content: "";
-  border-width: 5px;
-  border-style: solid;
-  border-color: transparent transparent var(--tt-palette--n20) transparent;
-  bottom: 100%;
-  margin-bottom: 0px;
-}
-
-[data-tooltip]::after {
-  content: attr(data-tooltip);
-  background-color: var(--tt-palette--n20);
-  color: var(--tt-palette--n95);
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-size: 0.85em;
-  white-space: nowrap;
-  bottom: 100%;
-  margin-bottom: 5px;
-}
-
-[data-tooltip]:hover::before,
-[data-tooltip]:hover::after {
-  visibility: visible;
-  opacity: 1;
-}`;
+`;
 
 const JAVASCRIPT_CODE = `document.addEventListener('DOMContentLoaded', function () {
     const collapsibleTriggers = document.querySelectorAll('.customer-header.collapsible-trigger');
 
     collapsibleTriggers.forEach(header => {
-        const siteList = header.nextElementSibling;
-        if (!siteList || !siteList.classList.contains('site-list') || !siteList.querySelector('.extra-site')) {
+        const sitesContainer = header.nextElementSibling;
+        if (!sitesContainer || !sitesContainer.classList.contains('sites-container') || !sitesContainer.querySelector('.extra-site')) {
             header.classList.remove('collapsible-trigger');
             return;
         }
@@ -329,11 +272,10 @@ const JAVASCRIPT_CODE = `document.addEventListener('DOMContentLoaded', function 
         header.setAttribute('aria-expanded', 'false');
 
         header.addEventListener('click', function () {
-            this.classList.toggle('active');
-            const expanded = this.classList.contains('active');
-            this.setAttribute('aria-expanded', expanded.toString());
+            const expanded = this.getAttribute('aria-expanded') === 'true';
+            this.setAttribute('aria-expanded', (!expanded).toString());
 
-            const extras = siteList.querySelectorAll('.extra-site');
+            const extras = sitesContainer.querySelectorAll('.extra-site');
             extras.forEach(item => item.classList.toggle('collapsed'));
         });
 
@@ -379,36 +321,61 @@ export const generateCustomerSitesHtml = (
   customerGroups: CustomerGroup[],
   config: CustomerLinksConfig
 ): string => {
-  // Generate customer cards HTML
+  // Generate customer cards HTML using Shadcn-like styling
   const customerCards = customerGroups.map(group => {
     const hasMultipleSites = group.sites.length > 1;
-    const headerClass = hasMultipleSites ? 'customer-header collapsible-trigger' : 'customer-header';
     
-    const sitesHtml = group.sites.map((site, index) => {
-      const isFirstSite = index === 0;
-      const siteClass = isFirstSite ? 'site-item first-site' : 'site-item extra-site collapsed';
+    if (hasMultipleSites) {
+      // Multiple sites - use accordion-like structure
+      const sitesHtml = group.sites.map((site, index) => {
+        const isFirstSite = index === 0;
+        const siteClass = isFirstSite ? 'site-item first-site' : 'site-item extra-site collapsed';
+        const fullUrl = `http://${site.IPAddress}${site.Link}`;
+        const logoUrl = `http://${site.IPAddress}/images/${site.LogoFile}`;
+        
+        return `        <div class="${siteClass}">
+          <a href="${fullUrl}" class="site-link" target="_blank" rel="noopener noreferrer" title="${site.Location}">
+            <div class="site-logo-container"><img src="${logoUrl}" alt="${site.Label} Logo" class="site-logo"></div>
+            <span class="site-label">${site.Label}</span>
+          </a>
+        </div>`;
+      }).join('\n');
+      
+      return `      <div class="customer-card">
+        <div class="customer-header collapsible-trigger" role="button" tabindex="0" aria-expanded="false">
+          <h2 class="customer-title">${group.CustomerName}</h2>
+          <span class="site-count">${group.sites.length} sites</span>
+        </div>
+        <div class="sites-container">
+${sitesHtml}
+        </div>
+      </div>`;
+    } else {
+      // Single site - show directly
+      const site = group.sites[0];
       const fullUrl = `http://${site.IPAddress}${site.Link}`;
       const logoUrl = `http://${site.IPAddress}/images/${site.LogoFile}`;
       
-      return `      <li class="${siteClass}">
-        <a href="${fullUrl}" class="site-link" target="_blank" rel="noopener noreferrer" data-tooltip="${site.Location}">
-          <div class="site-logo-container"><img src="${logoUrl}" alt="${site.Label} Logo" class="site-logo"></div>
-          <span class="site-label">${site.Label}</span>
-        </a>
-      </li>`;
-    }).join('\n');
-    
-    return `      <div class="customer-card">
-        <h2 class="${headerClass}">${group.CustomerName}</h2>
-        <ul class="site-list">
-${sitesHtml}</ul>
+      return `      <div class="customer-card">
+        <div class="customer-header">
+          <h2 class="customer-title">${group.CustomerName}</h2>
+        </div>
+        <div class="sites-container">
+          <div class="site-item first-site">
+            <a href="${fullUrl}" class="site-link" target="_blank" rel="noopener noreferrer" title="${site.Location}">
+              <div class="site-logo-container"><img src="${logoUrl}" alt="${site.Label} Logo" class="site-logo"></div>
+              <span class="site-label">${site.Label}</span>
+            </a>
+          </div>
+        </div>
       </div>`;
+    }
   }).join('\n');
   
   // Replace template placeholders
   return CUSTOMER_SITES_TEMPLATE
     .replace(/{{TITLE}}/g, config.title)
-    .replace('{{CSS_STYLES}}', CSS_STYLES + (config.customCss ? '\n' + config.customCss : ''))
+    .replace('{{CSS_STYLES}}', SHADCN_CSS_STYLES + (config.customCss ? '\n' + config.customCss : ''))
     .replace('{{CUSTOMER_CARDS}}', customerCards)
     .replace('{{JAVASCRIPT}}', JAVASCRIPT_CODE);
 };
@@ -418,11 +385,12 @@ interface CustomerLinksPluginProps {
   config?: CustomerLinksConfig;
 }
 
-const CustomerLinksPlugin: React.FC<CustomerLinksPluginProps> = ({ config: providedConfig }) => {
+const CustomerLinksPlugin: React.FC<CustomerLinksPluginProps> = (props) => {
+  // Handle null props or missing config gracefully
+  const providedConfig = props?.config;
   // Use provided config or fall back to default
   const config = providedConfig || defaultConfig;
   
-  const [activeTab, setActiveTab] = useState<'preview' | 'editor' | 'generator'>('preview');
   const [customerGroups, setCustomerGroups] = useState<CustomerGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -430,6 +398,7 @@ const CustomerLinksPlugin: React.FC<CustomerLinksPluginProps> = ({ config: provi
   const [editingData, setEditingData] = useState<CustomerGroup[]>([]);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [customerSitesSchema, setCustomerSitesSchema] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<'preview' | 'editor' | 'generator'>('preview');
 
   useEffect(() => {
     loadData();
@@ -539,216 +508,211 @@ const CustomerLinksPlugin: React.FC<CustomerLinksPluginProps> = ({ config: provi
     setEditingData(values);
   };
 
-
   if (loading) {
     return (
-      <div style={{ padding: '20px', textAlign: 'center' }}>
-        <h3>Customer Links Manager</h3>
-        <p>Loading customer sites data...</p>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
+        <Card>
+          <div style={{ textAlign: 'center', padding: '32px' }}>
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '16px' }}>Customer Links Manager</h2>
+            <p style={{ color: '#64748b' }}>Loading customer sites data...</p>
+          </div>
+        </Card>
       </div>
     );
   }
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
-      <h2>Customer Links Manager</h2>
+      <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '24px', color: '#1e293b' }}>Customer Links Manager</h2>
       
-      {/* Tab Navigation */}
-      <div style={{ marginBottom: '20px', borderBottom: '1px solid #e0e0e0' }}>
-        <nav style={{ display: 'flex', gap: '1px' }}>
-          {[
-            { key: 'preview', label: 'Preview Sites' },
-            { key: 'editor', label: 'Edit Data' },
-            { key: 'generator', label: 'Generate HTML' }
-          ].map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key as any)}
-              style={{
-                padding: '10px 20px',
-                border: 'none',
-                borderBottom: activeTab === tab.key ? '2px solid #007cba' : '2px solid transparent',
-                backgroundColor: activeTab === tab.key ? '#f0f8ff' : 'transparent',
-                color: activeTab === tab.key ? '#007cba' : '#666',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: activeTab === tab.key ? 'bold' : 'normal'
-              }}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </nav>
-      </div>
-
       {error && (
-        <div style={{ 
-          color: '#dc2626', 
-          backgroundColor: '#fef2f2', 
-          padding: '10px', 
-          borderRadius: '4px', 
-          marginBottom: '20px',
-          border: '1px solid #fecaca'
-        }}>
+        <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', padding: '12px 16px', borderRadius: '4px', marginBottom: '16px' }}>
           {error}
         </div>
       )}
 
-      {/* Tab Content */}
-      {activeTab === 'preview' && (
-        <div>
-          <div style={{ marginBottom: '20px' }}>
-            <h3>Customer Sites Preview</h3>
-            <p>This shows how your customer sites will appear. {customerGroups.length} customer groups loaded.</p>
+      {/* Simple tab navigation */}
+      <div style={{ marginBottom: '24px' }}>
+        <div style={{ borderBottom: '1px solid #e2e8f0', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', gap: '0px' }}>
+            <button
+              style={{
+                padding: '12px 24px',
+                border: 'none',
+                borderBottom: activeTab === 'preview' ? '2px solid #3b82f6' : '2px solid transparent',
+                backgroundColor: activeTab === 'preview' ? '#f8fafc' : 'transparent',
+                color: activeTab === 'preview' ? '#1e293b' : '#64748b',
+                cursor: 'pointer',
+                fontWeight: activeTab === 'preview' ? 'bold' : 'normal'
+              }}
+              onClick={() => setActiveTab('preview')}
+            >
+              Preview Sites
+            </button>
+            <button
+              style={{
+                padding: '12px 24px',
+                border: 'none',
+                borderBottom: activeTab === 'editor' ? '2px solid #3b82f6' : '2px solid transparent',
+                backgroundColor: activeTab === 'editor' ? '#f8fafc' : 'transparent',
+                color: activeTab === 'editor' ? '#1e293b' : '#64748b',
+                cursor: 'pointer',
+                fontWeight: activeTab === 'editor' ? 'bold' : 'normal'
+              }}
+              onClick={() => setActiveTab('editor')}
+            >
+              Edit Data
+            </button>
+            <button
+              style={{
+                padding: '12px 24px',
+                border: 'none',
+                borderBottom: activeTab === 'generator' ? '2px solid #3b82f6' : '2px solid transparent',
+                backgroundColor: activeTab === 'generator' ? '#f8fafc' : 'transparent',
+                color: activeTab === 'generator' ? '#1e293b' : '#64748b',
+                cursor: 'pointer',
+                fontWeight: activeTab === 'generator' ? 'bold' : 'normal'
+              }}
+              onClick={() => setActiveTab('generator')}
+            >
+              Generate HTML
+            </button>
           </div>
-          
-          <div style={{ 
-            display: 'flex', 
-            flexWrap: 'wrap', 
-            gap: '20px', 
-            justifyContent: 'center' 
-          }}>
-            {customerGroups.map((group, index) => (
-              <div key={index} style={{ width: '300px' }}>
-                <Card padding="none">
-                  <div style={{ 
-                    padding: '15px 20px', 
-                    borderBottom: '2px solid #ffcd08',
-                    backgroundColor: '#fff',
-                    fontWeight: 'bold',
-                    fontSize: '1.2em'
-                  }}>
-                    {group.CustomerName}
+        </div>
+        
+        {/* Tab content */}
+        {activeTab === 'preview' && (
+          <div>
+            <div style={{ marginBottom: '24px' }}>
+              <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '8px' }}>Customer Sites Preview</h3>
+              <p style={{ color: '#64748b' }}>This shows how your customer sites will appear. {customerGroups.length} customer groups loaded.</p>
+            </div>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
+              {customerGroups.map((group, index) => (
+                <Card key={index}>
+                  <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0' }}>
+                    <h4 style={{ fontSize: '1rem', fontWeight: '600', color: '#1e293b', borderBottom: '2px solid #fbbf24', paddingBottom: '8px', marginBottom: '0' }}>
+                      {group.CustomerName}
+                    </h4>
                   </div>
-                  <div style={{ padding: '15px 20px', backgroundColor: '#f8f9fa' }}>
-                  {group.sites.slice(0, 3).map((site, siteIndex) => (
-                    <div key={siteIndex} style={{ 
-                      marginBottom: '10px',
-                      padding: '8px',
-                      backgroundColor: '#fff',
-                      borderRadius: '4px',
-                      border: '1px solid #e0e0e0'
-                    }}>
-                      <div style={{ fontWeight: 'bold', fontSize: '0.9em' }}>{site.Label}</div>
-                      <div style={{ fontSize: '0.8em', color: '#666' }}>{site.IPAddress}</div>
-                    </div>
-                  ))}
-                  {group.sites.length > 3 && (
-                    <div style={{ fontSize: '0.8em', color: '#666', textAlign: 'center' }}>
-                      +{group.sites.length - 3} more sites
-                    </div>
-                  )}
-                </div>
+                  <div style={{ padding: '16px' }}>
+                    {group.sites.length === 1 ? (
+                      // Single site - show directly
+                      <div style={{ padding: '12px', backgroundColor: '#f8fafc', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ fontWeight: '500', fontSize: '0.875rem' }}>{group.sites[0].Label}</div>
+                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{group.sites[0].IPAddress}</div>
+                      </div>
+                    ) : (
+                      // Multiple sites - show count and first site
+                      <div>
+                        <div style={{ marginBottom: '12px', fontSize: '0.875rem', fontWeight: '500' }}>
+                          {group.sites.length} sites
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          {group.sites.map((site, siteIndex) => (
+                            <div key={siteIndex} style={{ padding: '8px', backgroundColor: '#f8fafc', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
+                              <div style={{ fontWeight: '500', fontSize: '0.875rem' }}>{site.Label}</div>
+                              <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{site.IPAddress}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </Card>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {activeTab === 'editor' && (
-        <div>
-          <div style={{ marginBottom: '20px' }}>
-            <h3>Edit Customer Sites Data</h3>
-            <p>Edit the customer sites data using the form or JSON editor. Changes are validated automatically.</p>
-          </div>
-          
-          {customerSitesSchema ? (
-            <SchemaForm
-              title="Customer Sites Configuration"
-              description="Manage your customer sites data with automatic validation."
-              schema={customerSitesSchema}
-              initialValues={editingData}
-              onSubmit={handleSchemaFormSubmit}
-              onChange={handleSchemaFormChange}
-              loading={saveStatus === 'saving'}
-              mode="hybrid"
-              defaultMode="json"
-              submitLabel={saveStatus === 'saving' ? 'Saving...' : 'Save Customer Sites'}
-              showResetButton={true}
-              compact={false}
-            />
-          ) : (
-            <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
-              Loading schema...
+        {activeTab === 'editor' && (
+          <div>
+            <div style={{ marginBottom: '24px' }}>
+              <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '8px' }}>Edit Customer Sites Data</h3>
+              <p style={{ color: '#64748b' }}>Edit the customer sites data using the form or JSON editor. Changes are validated automatically.</p>
             </div>
-          )}
-          
-          {saveStatus === 'saved' && (
-            <div style={{ 
-              marginTop: '1rem',
-              padding: '0.75rem',
-              backgroundColor: '#f0f9f0',
-              color: '#059669',
-              border: '1px solid #a7f3d0',
-              borderRadius: '6px',
-              fontSize: '0.875rem',
-              fontWeight: '500'
-            }}>
-              ✓ Customer sites data saved successfully
-            </div>
-          )}
-          
-          {saveStatus === 'error' && (
-            <div style={{ 
-              marginTop: '1rem',
-              padding: '0.75rem',
-              backgroundColor: '#fef2f2',
-              color: '#dc2626',
-              border: '1px solid #fecaca',
-              borderRadius: '6px',
-              fontSize: '0.875rem',
-              fontWeight: '500'
-            }}>
-              ✗ Failed to save customer sites data
-            </div>
-          )}
-        </div>
-      )}
-
-      {activeTab === 'generator' && (
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-            <div>
-              <h3>Generate Static HTML Page</h3>
-              <p>Generate a complete, static HTML page with all customer sites.</p>
-            </div>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <Button onClick={handleGenerateHtml} variant="action">
-                Generate HTML
-              </Button>
-              {generatedHtml && (
-                <Button onClick={handleCopyHtml} variant="secondary">
-                  Copy HTML
-                </Button>
-              )}
-            </div>
-          </div>
-          
-          {generatedHtml && (
-            <div>
-              <h4>Generated HTML ({generatedHtml.length.toLocaleString()} characters)</h4>
-              <textarea
-                value={generatedHtml}
-                readOnly
-                style={{
-                  width: '100%',
-                  height: '400px',
-                  fontFamily: 'monospace',
-                  fontSize: '11px',
-                  padding: '15px',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px',
-                  backgroundColor: '#f8f9fa'
-                }}
+            
+            {customerSitesSchema ? (
+              <SchemaForm
+                title="Customer Sites Configuration"
+                description="Manage your customer sites data with automatic validation."
+                schema={customerSitesSchema}
+                initialValues={editingData}
+                onSubmit={handleSchemaFormSubmit}
+                onChange={handleSchemaFormChange}
+                loading={saveStatus === 'saving'}
+                mode="hybrid"
+                defaultMode="json"
+                submitLabel={saveStatus === 'saving' ? 'Saving...' : 'Save Customer Sites'}
+                showResetButton={true}
+                compact={false}
               />
-              <div style={{ marginTop: '10px', fontSize: '0.9em', color: '#666' }}>
-                HTML saved to: {config.outputDirectory}/customer-sites.html
+            ) : (
+              <div style={{ padding: '32px', textAlign: 'center', color: '#64748b' }}>
+                Loading schema...
+              </div>
+            )}
+            
+            {saveStatus === 'saved' && (
+              <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', color: '#15803d', padding: '12px 16px', borderRadius: '4px', marginTop: '16px' }}>
+                ✓ Customer sites data saved successfully
+              </div>
+            )}
+            
+            {saveStatus === 'error' && (
+              <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', padding: '12px 16px', borderRadius: '4px', marginTop: '16px' }}>
+                ✗ Failed to save customer sites data
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'generator' && (
+          <div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
+              <div>
+                <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '8px' }}>Generate Static HTML Page</h3>
+                <p style={{ color: '#64748b' }}>Generate a complete, static HTML page with all customer sites.</p>
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <Button onClick={handleGenerateHtml}>
+                  Generate HTML
+                </Button>
+                {generatedHtml && (
+                  <Button onClick={handleCopyHtml}>
+                    Copy HTML
+                  </Button>
+                )}
               </div>
             </div>
-          )}
-        </div>
-      )}
+            
+            {generatedHtml && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <h4 style={{ fontSize: '1rem', fontWeight: '600' }}>Generated HTML ({generatedHtml.length.toLocaleString()} characters)</h4>
+                <textarea
+                  value={generatedHtml}
+                  readOnly
+                  style={{
+                    width: '100%',
+                    height: '384px',
+                    fontFamily: 'monospace',
+                    fontSize: '0.75rem',
+                    padding: '16px',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '6px',
+                    backgroundColor: '#f8fafc',
+                    resize: 'none'
+                  }}
+                />
+                <div style={{ fontSize: '0.875rem', color: '#64748b' }}>
+                  HTML saved to: {config.outputDirectory}/customer-sites.html
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

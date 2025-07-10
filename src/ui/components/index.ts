@@ -70,3 +70,7 @@ export type { JsonEditorProps } from './JsonEditor/JsonEditor.js';
 // Notification System
 export { NotificationSystem, useNotifications } from './NotificationSystem/NotificationSystem.js';
 export type { NotificationSystemProps, Notification, NotificationType } from './NotificationSystem/NotificationSystem.js';
+
+// File Tree Component
+export { FileTree } from './FileTree/FileTree.js';
+export type { FileTreeProps, FileTreeNode } from './FileTree/FileTree.js';

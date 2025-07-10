@@ -5,7 +5,7 @@
  * to create complete as-built documentation.
  */
 
-import { HttpClientService, DataSourceEndpoint, FetchResult } from './http-client.js';
+import { HttpClientService, DataSourceEndpoint, FetchResult, HttpProgressCallback } from './http-client.js';
 import { TemplateEngineService, Template, TemplateCompilationResult } from './template-engine.js';
 
 export interface ProjectConfig {
@@ -249,7 +249,7 @@ export class DocumentGenerationService {
   async fetchSampleData(
     projectConfig: ProjectConfig,
     limitSources?: number,
-    progressCallback?: (progress: number, status: string) => void
+    progressCallback?: HttpProgressCallback
   ): Promise<Record<string, any>> {
     const enabledSources = projectConfig.dataSources.filter(source => source.enabled);
     const sourcesToFetch = limitSources 
@@ -370,7 +370,7 @@ export class DocumentGenerationService {
    */
   private async fetchAllDataSources(
     projectConfig: ProjectConfig,
-    progressCallback?: (progress: number, status: string) => void
+    progressCallback?: HttpProgressCallback
   ): Promise<Record<string, FetchResult>> {
     const enabledSources = projectConfig.dataSources.filter(source => source.enabled);
     

@@ -240,16 +240,15 @@ export class SettingsManager {
     let content: string;
     try {
       if (this.JSON5 && typeof this.JSON5.stringify === 'function') {
-        const result = this.JSON5.stringify(validatedConfig, null, 2);
-        // Ensure the result is resolved if it's a promise
-        content = await Promise.resolve(result);
+        // JSON5.stringify is synchronous and returns a string
+        content = this.JSON5.stringify(validatedConfig, null, 2);
       } else {
         // Fallback to regular JSON if JSON5 is not available
         content = JSON.stringify(validatedConfig, null, 2);
       }
     } catch (error) {
       console.error('Error stringifying config:', error, validatedConfig);
-      // Last resort fallback
+      // Fallback to regular JSON if JSON5 fails
       try {
         content = JSON.stringify(validatedConfig, null, 2);
       } catch (jsonError) {
@@ -258,22 +257,10 @@ export class SettingsManager {
       }
     }
     
-    // Ensure content is definitely a string and not a promise
-    if (content && typeof (content as any).then === 'function') {
-      console.error('Content is a promise, awaiting it');
-      content = await (content as any);
-    }
-    
-    // Final type check
+    // Ensure content is a string (should always be true now)
     if (typeof content !== 'string') {
-      console.error('Content is still not a string:', typeof content, content);
+      console.error('Content is not a string:', typeof content, content);
       content = String(content);
-    }
-    
-    // Additional validation before writing
-    if (content === '[object Promise]' || content === '[object Object]') {
-      console.error('Content contains invalid serialization, using fallback');
-      content = JSON.stringify(validatedConfig, null, 2);
     }
     
     await this.fs.writeFile(configPath, content, 'utf8');

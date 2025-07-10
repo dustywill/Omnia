@@ -6,34 +6,6 @@
   author: "Omnia Team",
   type: "hybrid",
   main: "index.js",
-  services: [
-    {
-      name: "script-execution",
-      description: "Execute scripts with parameters and return output",
-      methods: {
-        executeScript: {
-          description: "Execute a script with parameters",
-          parameters: {
-            scriptPath: "string",
-            parameters: "string[]"
-          },
-          returnType: "ExecutionResult"
-        },
-        getAvailableScripts: {
-          description: "Get list of available scripts",
-          parameters: {},
-          returnType: "Script[]"
-        },
-        validateScriptPath: {
-          description: "Validate if script path is allowed",
-          parameters: {
-            scriptPath: "string"
-          },
-          returnType: "boolean"
-        }
-      }
-    }
-  ],
   engine: {
     ttCommanderVersion: ">=0.1.0"
   },

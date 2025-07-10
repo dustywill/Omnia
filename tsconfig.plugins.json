@@ -3,8 +3,9 @@
   "compilerOptions": {
     "rootDir": ".",
     "outDir": "dist",
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "allowSyntheticDefaultImports": true
   },
   "include": ["plugins/**/*", "src/types/**/*"],
-  "exclude": ["plugins/context-generator/**/*", "inspiration/**/*"]
+  "exclude": ["inspiration/**/*"]
 }

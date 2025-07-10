@@ -1,7 +1,4 @@
-import fs from 'fs/promises';
-import JSON5 from 'json5';
-import path from 'path';
-import { pathToFileURL } from 'url';
+import { loadNodeModule } from '../ui/node-module-loader.js';
 import { type AppConfig, readConfig, writeConfig } from './config.js';
 import type { EventBus } from './event-bus.js';
 
@@ -30,6 +27,8 @@ export const createPluginManager = (opts: PluginManagerOptions) => {
   let config: AppConfig = {};
 
   const readManifest = async (file: string): Promise<PluginManifest> => {
+    const fs = await loadNodeModule<typeof import('fs/promises')>('fs/promises');
+    const JSON5 = await loadNodeModule<typeof import('json5')>('json5');
     const text = await fs.readFile(file, 'utf8');
     return JSON5.parse(text) as PluginManifest;
   };
@@ -41,6 +40,8 @@ export const createPluginManager = (opts: PluginManagerOptions) => {
       config = {};
     }
 
+    const fs = await loadNodeModule<typeof import('fs/promises')>('fs/promises');
+    const path = await loadNodeModule<typeof import('path')>('path');
     const entries = await fs.readdir(opts.pluginsPath, { withFileTypes: true });
     for (const entry of entries) {
       if (!entry.isDirectory()) continue;
@@ -52,6 +53,7 @@ export const createPluginManager = (opts: PluginManagerOptions) => {
           (config.plugins as any)[manifest.id] = manifest.configDefaults ?? {};
         }
         const modPath = path.join(opts.pluginsPath, entry.name, manifest.main);
+        const { pathToFileURL } = await loadNodeModule<typeof import('url')>('url');
         const mod = (await import(pathToFileURL(modPath).href)) as LoadedPlugin['module'];
         loaded[manifest.id] = { manifest, module: mod };
       } catch {

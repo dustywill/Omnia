@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Script Runner Navigation</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="module">
+        console.log('Testing Script Runner plugin navigation...');
+        
+        // Test if the Script Runner plugin loads without errors
+        async function testScriptRunnerNav() {
+            try {
+                const plugin = await import('./dist/plugins/script-runner/index.js');
+                console.log('Script Runner plugin loaded successfully:', plugin);
+                console.log('Plugin exports:', Object.keys(plugin));
+                
+                const Component = plugin.default;
+                if (Component) {
+                    console.log('Component found:', Component);
+                    
+                    // Try to render it
+                    const root = ReactDOM.createRoot(document.getElementById('root'));
+                    root.render(React.createElement(Component));
+                    
+                    console.log('Script Runner Component rendered successfully - No React Error #130!');
+                    
+                    // Check if the component has the expected structure
+                    setTimeout(() => {
+                        const renderedContent = document.getElementById('root').innerHTML;
+                        if (renderedContent.includes('Script Runner')) {
+                            console.log('✅ Script Runner plugin is working correctly');
+                        } else {
+                            console.log('❌ Script Runner plugin content not found');
+                        }
+                    }, 100);
+                    
+                } else {
+                    console.error('No default export found');
+                }
+            } catch (error) {
+                console.error('Error loading Script Runner plugin:', error);
+                console.error('React Error #130 may still be present');
+            }
+        }
+        
+        testScriptRunnerNav();
+    </script>
+</body>
+</html>

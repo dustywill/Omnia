@@ -38,13 +38,37 @@ Omnia is an evolution of the ttCommander application, built as a modern plugin-b
 
 ### Documentation
 
-- [Plugin Developer Guide](./docs/PLUGIN_DEVELOPER_GUIDE.md) - Comprehensive plugin development guide
-- [Architecture Guide](./docs/ARCHITECTURE.md) - System architecture and plugin system overview
-- [Settings API Reference](./docs/SETTINGS_API.md) - Configuration system documentation
-- [Implementation Plan](./docs/IMPLEMENTATION_PLAN.md) - Development roadmap and priorities
-- [Asset Loading](./docs/ASSET_LOADING.md) - This document explains how assets (CSS, images, etc.) are handled
-- [Component Library](./docs/COMPONENT_LIBRARY.md) - component library, built with a hybrid Tailwind CSS + CSS Modules approach
-- [Styling Strategy](STYLING_STRATEGY.md) - hybrid Tailwind CSS + CSS Modules styling approach
+📚 **[Complete Documentation](./docs/README.md)** - Start here for comprehensive guides
+
+Quick References:
+- [Architecture Overview](./docs/architecture/ARCHITECTURE.md) - System architecture and plugin system
+- [Plugin Developer Guide](./docs/architecture/PLUGIN_DEVELOPER_GUIDE.md) - Comprehensive plugin development guide
+- [Settings API Reference](./docs/architecture/SETTINGS_API.md) - Configuration system documentation
+- [Component Library](./docs/ui/COMPONENT_LIBRARY.md) - UI component library with hybrid Tailwind CSS + CSS Modules
+- [Styling Strategy](./docs/ui/STYLING_STRATEGY.md) - Hybrid Tailwind CSS + CSS Modules styling approach
+- [Asset Loading](./docs/ui/ASSET_LOADING.md) - How assets (CSS, images, etc.) are handled
+- [Development Guide](./docs/development/GUIDE.md) - Developer setup and workflow
+- [Testing Guide](./docs/testing/UI_TESTING.md) - Testing strategies and approaches
+- [Agent System](./docs/agents/README.md) - Multi-agent development system
+
+**Note**: Historical documentation and work logs have been archived in `archive/` folder for reference.
+
+## CRITICAL CURRENT WORK: Plugin Migration
+
+**STATUS**: Core services are fully implemented but plugins still use custom implementations.
+
+**NEXT STEPS**: [NEXT_STEPS.md](./NEXT_STEPS.md) - Complete plugin migration plan
+
+**PLUGIN MIGRATION PRIORITY**:
+1. **Script Runner** - Replace custom script execution with ScriptExecutionService
+2. **As-Built Documenter** - Replace custom HTTP client with HttpClientService  
+3. **Context Generator** - Replace custom file operations with FileSystemService
+
+**MIGRATION GUIDES**:
+- [Plugin Migration Patterns](./docs/development/PLUGIN_MIGRATION_PATTERNS.md)
+- [Core Services Usage](./docs/development/CORE_SERVICES_USAGE.md)
+
+**GOAL**: Achieve 60%+ code duplication reduction by migrating plugins to core services.
 
 ## Architecture Overview
 
@@ -118,12 +142,36 @@ The application follows a plugin-based architecture with these key components:
 
 **Environment Compatibility**: Code runs in both Node.js (with JSDOM) and browser/Electron environments. The startup code in `src/index.ts` handles environment detection and setup.
 
+## Agent System Integration
+
+    When solving complex problems, always follow the multi-agent approach defined in the AGENTS/ folder:
+
+1. **PLANNER Phase**:
+
+   - Read GUIDE.md and LEARNINGS.md first
+   - Perform root cause analysis
+   - Create WORK.md file
+   - Reference existing documentation
+
+2. **COORDINATOR Phase**:
+
+   - Parse PLANNER output into executable steps
+   - Manage dependencies and execution order
+   - Handle resource conflicts
+
+3. **Execution Phases**:
+   - Follow the systematic approach from agent definitions
+   - Update documentation with learnings
+   - Capture patterns for future use
+
+Default to this approach for any non-trivial problem.
+
 ## Build Process
 
 The build compiles both main application code and plugin UIs to JavaScript with full asset processing:
 
 1. **Clean**: Remove previous build artifacts (`npm run clean`)
-2. **TypeScript Compilation**: 
+2. **TypeScript Compilation**:
    - Compile main app with `tsconfig.build.json`
    - Compile plugin UIs with `tsconfig.plugins.json`
 3. **Asset Processing**: Copy CSS files and other assets to dist/ (`scripts/copy-assets.js`)
@@ -137,11 +185,23 @@ The build compiles both main application code and plugin UIs to JavaScript with 
 **IMPORTANT FOR ELECTRON COMPATIBILITY**: When adding new components with CSS modules, you MUST update the build scripts:
 
 1. **Add to copy-assets.js**: Every new component directory must be added to the `componentDirs` array in `scripts/copy-assets.js`
+
    ```javascript
    const componentDirs = [
-     'AppHeader', 'AppNavigation', 'AppSettings', 'Card', 'PluginCard',
-     'PluginSettings', 'SchemaForm', 'SettingsForm', 'SettingsPage', 'Sidebar', 
-     'JsonEditor', 'StatusBar', 'ToggleSwitch', 'NotificationSystem' // <- Add new components here
+     "AppHeader",
+     "AppNavigation",
+     "AppSettings",
+     "Card",
+     "PluginCard",
+     "PluginSettings",
+     "SchemaForm",
+     "SettingsForm",
+     "SettingsPage",
+     "Sidebar",
+     "JsonEditor",
+     "StatusBar",
+     "ToggleSwitch",
+     "NotificationSystem", // <- Add new components here
    ];
    ```
 

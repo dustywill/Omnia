@@ -43,6 +43,41 @@ import { PluginConfig } from '../../../lib/schemas/plugin.js';
 ```
 - **Documentation**: `docs/architecture/PLUGIN_DEVELOPER_GUIDE.md`, `docs/TROUBLESHOOTING.md`
 
+### Plugin Import Error Handling Pattern (2024-07-09)
+- **Problem**: Plugins with import errors silently fail and return empty objects, causing "No React component found" errors
+- **Root Cause**: ES module system returns empty objects `{}` instead of throwing errors for failed imports
+- **Solution**: Implement explicit error handling and module validation in plugin loading
+- **Pattern**: Always validate loaded modules are not empty and have expected exports
+- **Anti-Pattern**: Don't assume successful dynamic import means the module loaded correctly
+- **Code Example**:
+```typescript
+// ✅ CORRECT: Validate module after import
+try {
+  const loadedModule = await import(moduleUrl);
+  
+  // Validate module structure
+  const moduleKeys = Object.keys(loadedModule);
+  if (moduleKeys.length === 0) {
+    throw new Error(`Plugin module is empty - indicates import error`);
+  }
+  
+  if (!loadedModule.default && !loadedModule.component) {
+    throw new Error(`Plugin must export default component`);
+  }
+  
+  return loadedModule;
+} catch (importError) {
+  throw new Error(`Failed to import plugin: ${importError.message}`);
+}
+
+// ❌ WRONG: Assume import success means module is valid
+const loadedModule = await import(moduleUrl);
+return loadedModule; // May return empty object
+```
+- **Performance**: Prevents silent failures that waste debugging time
+- **Prevention**: Add module validation checks after all dynamic imports
+- **Documentation**: Enhanced plugin manager error handling
+
 ### Settings Validation Pattern (2024-07-06)
 - **Problem**: Configuration errors causing runtime failures
 - **Root Cause**: Missing or invalid Zod schema validation

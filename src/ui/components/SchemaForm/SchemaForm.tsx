@@ -12,6 +12,7 @@ import { Button } from '../Button/Button.js';
 import { Badge } from '../Badge/Badge.js';
 import { Card } from '../Card/Card.js';
 import { introspectSchema } from './schema-introspection.js';
+// import { usePersistedForm } from '../../hooks/useConfigPersistence.js'; // TODO: Re-enable when persistence is integrated
 import styles from './SchemaForm.module.css';
 
 export interface SchemaFormField {
@@ -48,6 +49,13 @@ export interface SchemaFormProps {
   mode?: SchemaFormMode;
   defaultMode?: 'form' | 'json';
   compact?: boolean;
+  // Configuration persistence options
+  persistenceOptions?: {
+    pluginId: string;
+    formId: string;
+    autoSave?: boolean;
+    debounceMs?: number;
+  };
 }
 
 export function SchemaForm({
@@ -67,8 +75,13 @@ export function SchemaForm({
   realTimeValidation = true,
   mode = 'form',
   defaultMode = 'form',
-  compact = false
+  compact = false,
+  persistenceOptions: _persistenceOptions // TODO: Use this for form persistence
 }: SchemaFormProps) {
+  // Use persistent form if persistence options are provided
+  // Note: Persistence integration commented out for now to fix build
+  // TODO: Integrate persistence hooks properly
+  
   const [values, setValues] = useState<Record<string, any>>(initialValues);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [hasChanges, setHasChanges] = useState(false);

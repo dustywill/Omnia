@@ -11,7 +11,8 @@
     "clear-logs": "node scripts/clear-logs.js",
     "build": "tsc -p tsconfig.build.json && tsc -p tsconfig.plugins.json && node scripts/copy-assets.js && node scripts/process-css-modules.js && node scripts/fix-plugin-imports.js",
     "electron": "npm run clear-logs && npm run build && electron dist/electron-main.js",
-    "dev": "node --loader ts-node/esm --loader ./loaders/css-loader.js src/index.ts",
+    "dev": "npm run build && node --loader ./loaders/css-loader.js dist/index.js",
+    "dev:watch": "npm run build && node --loader ./loaders/css-loader.js dist/index.js",
     "start": "node --loader ./loaders/css-loader.js dist/index.js"
   },
   "devDependencies": {
@@ -43,16 +44,18 @@
   },
   "dependencies": {
     "@playwright/test": "^1.53.1",
+    "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-tabs": "^1.1.12",
     "axios": "^1.10.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "framer-motion": "^12.0.0",
     "handlebars": "^4.7.8",
     "jsdom": "^26.1.0",
     "lucide-react": "^0.525.0",
     "shadcn-ui": "^0.9.5",
     "tailwind-merge": "^3.3.1",
-    "ts-node": "^10.9.2",
-    "framer-motion": "^12.0.0"
+    "ts-node": "^10.9.2"
   }
 }

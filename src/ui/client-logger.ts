@@ -53,7 +53,7 @@ export class ClientLogger {
 
   private async sendLog(level: string, message: string): Promise<void> {
     try {
-      if (window.electronAPI?.logMessage) {
+      if (typeof window !== 'undefined' && window.electronAPI?.logMessage) {
         await window.electronAPI.logMessage(level, this.component, message);
       }
     } catch (error) {
@@ -109,29 +109,35 @@ export class ClientLogger {
   }
 
   private setupErrorCapture(): void {
-    // Capture uncaught JavaScript errors
-    window.addEventListener('error', (event) => {
-      const message = `Uncaught Error: ${event.error?.message || event.message}\n` +
-                     `File: ${event.filename}:${event.lineno}:${event.colno}\n` +
-                     `Stack: ${event.error?.stack || 'N/A'}`;
-      this.sendLog('error', `[UNCAUGHT ERROR] ${message}`);
-    });
+    // Only set up error capture if window is available (browser/Electron renderer environment)
+    if (typeof window !== 'undefined') {
+      // Capture uncaught JavaScript errors
+      window.addEventListener('error', (event) => {
+        const message = `Uncaught Error: ${event.error?.message || event.message}\n` +
+                       `File: ${event.filename}:${event.lineno}:${event.colno}\n` +
+                       `Stack: ${event.error?.stack || 'N/A'}`;
+        this.sendLog('error', `[UNCAUGHT ERROR] ${message}`);
+      });
+    }
   }
 
   private setupUnhandledRejectionCapture(): void {
-    // Capture unhandled promise rejections
-    window.addEventListener('unhandledrejection', (event) => {
-      const reason = event.reason;
-      let message = 'Unhandled Promise Rejection: ';
-      
-      if (reason instanceof Error) {
-        message += `${reason.message}\nStack: ${reason.stack}`;
-      } else {
-        message += String(reason);
-      }
-      
-      this.sendLog('error', `[UNHANDLED REJECTION] ${message}`);
-    });
+    // Only set up unhandled rejection capture if window is available (browser/Electron renderer environment)
+    if (typeof window !== 'undefined') {
+      // Capture unhandled promise rejections
+      window.addEventListener('unhandledrejection', (event) => {
+        const reason = event.reason;
+        let message = 'Unhandled Promise Rejection: ';
+        
+        if (reason instanceof Error) {
+          message += `${reason.message}\nStack: ${reason.stack}`;
+        } else {
+          message += String(reason);
+        }
+        
+        this.sendLog('error', `[UNHANDLED REJECTION] ${message}`);
+      });
+    }
   }
 
   // Method to manually log messages

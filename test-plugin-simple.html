@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Simple Plugin</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+    <script>
+        console.log('Testing simple plugin loading...');
+        
+        // Test if the simple plugin loads without errors
+        async function testPlugin() {
+            try {
+                const plugin = await import('./dist/plugins/test-simple/index.js');
+                console.log('Plugin loaded successfully:', plugin);
+                console.log('Plugin exports:', Object.keys(plugin));
+                
+                const Component = plugin.default;
+                if (Component) {
+                    console.log('Component found:', Component);
+                    
+                    // Try to render it
+                    const root = ReactDOM.createRoot(document.getElementById('root'));
+                    root.render(React.createElement(Component));
+                    
+                    console.log('Component rendered successfully');
+                } else {
+                    console.error('No default export found');
+                }
+            } catch (error) {
+                console.error('Error loading plugin:', error);
+            }
+        }
+        
+        testPlugin();
+    </script>
+</body>
+</html>

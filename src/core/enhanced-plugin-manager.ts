@@ -255,7 +255,23 @@ export class EnhancedPluginManager {
         const { loadNodeModule } = await import('../ui/node-module-loader.js');
         const pathToFileURL = await loadNodeModule<typeof import('url')>('url');
         const moduleUrl = pathToFileURL.pathToFileURL(compiledModulePath).href;
-        const loadedModule = await import(moduleUrl);
+        let loadedModule;
+        try {
+          loadedModule = await import(moduleUrl);
+        } catch (importError) {
+          throw new Error(`Failed to import plugin module: ${importError instanceof Error ? importError.message : String(importError)}`);
+        }
+        
+        // Validate that the module has the expected structure
+        const moduleKeys = Object.keys(loadedModule);
+        if (moduleKeys.length === 0) {
+          throw new Error(`Plugin module ${manifest.id} loaded but is empty - this usually indicates an import error`);
+        }
+        
+        // Validate that the module has at least a default export or component
+        if (!loadedModule.default && !loadedModule.component) {
+          throw new Error(`Plugin module ${manifest.id} must export a default component or named component`);
+        }
         
         plugin.module = loadedModule;
         
@@ -275,6 +291,9 @@ export class EnhancedPluginManager {
       } catch (error) {
         plugin.status = PluginStatus.ERROR;
         plugin.error = error instanceof Error ? error.message : String(error);
+        
+        // Clear the empty module object for failed plugins to prevent UI confusion
+        plugin.module = null as any;
         
         this.logger.error(`Failed to load plugin ${manifest.id}: ${error}`);
         this.eventBus.publish('plugin:error' as any, { 
@@ -475,6 +494,17 @@ export class EnhancedPluginManager {
   async loadPluginModule(pluginId: string): Promise<any> {
     const plugin = this.plugins.get(pluginId);
     if (plugin) {
+      
+      // Check if plugin has errors
+      if (plugin.status === PluginStatus.ERROR) {
+        throw new Error(`Plugin ${pluginId} failed to load: ${plugin.error}`);
+      }
+      
+      // Check if module is null or empty (indicates loading failure)
+      if (!plugin.module || (typeof plugin.module === 'object' && Object.keys(plugin.module).length === 0)) {
+        throw new Error(`Plugin ${pluginId} module is empty - this usually indicates an import error`);
+      }
+      
       return plugin.module;
     }
 
@@ -708,20 +738,14 @@ export class EnhancedPluginManager {
   private async readManifest(manifestPath: string): Promise<PluginManifest> {
     try {
       const content = await this.fs.readFile(manifestPath, 'utf8');
-      console.log(`[readManifest] Reading manifest from: ${manifestPath}`);
-      console.log(`[readManifest] Content (first 200 chars): ${content.substring(0, 200)}`);
       
       const { loadNodeModule } = await import('../ui/node-module-loader.js');
       const JSON5 = await loadNodeModule<typeof import('json5')>('json5');
-      console.log(`[readManifest] JSON5 module loaded:`, JSON5);
       
       const manifest = await JSON5.parse(content) as PluginManifest;
-      console.log(`[readManifest] Parsed manifest:`, manifest);
-      console.log(`[readManifest] Manifest fields - id: ${manifest.id}, name: ${manifest.name}, version: ${manifest.version}, type: ${manifest.type}, main: ${manifest.main}`);
 
       // Validate required fields
       if (!manifest.id || !manifest.name || !manifest.version || !manifest.type || !manifest.main) {
-        console.error(`[readManifest] Validation failed for manifest:`, manifest);
         throw new Error('Manifest missing required fields: id, name, version, type, main');
       }
 

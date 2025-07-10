@@ -20,7 +20,7 @@ async function copyAssets() {
   // Copy all CSS files from components
   const componentDirs = [
     'AppHeader', 'AppNavigation', 'AppSettings', 'Card', 'PluginCard',
-    'PluginSettings', 'SchemaForm', 'SettingsForm', 'SettingsPage', 'Sidebar', 'JsonEditor', 'StatusBar', 'ToggleSwitch', 'NotificationSystem'
+    'PluginSettings', 'SchemaForm', 'SettingsForm', 'SettingsPage', 'Sidebar', 'JsonEditor', 'StatusBar', 'ToggleSwitch', 'NotificationSystem', 'FileTree'
   ];
   
   // Copy Shadcn UI components (no CSS modules, just ensure directory structure)

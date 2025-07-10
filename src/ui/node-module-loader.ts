@@ -59,6 +59,22 @@ export const loadNodeModule = async <T = unknown>(name: string): Promise<T> => {
           writeFile: async (filePath: string, data: string) => {
             return (window as any).electronAPI.writeFile(filePath, data);
           },
+          appendFile: async (filePath: string, data: string, _options?: any) => {
+            // For Electron renderer, we need to read the file, append data, and write it back
+            // Or we could add a specific IPC handler for appendFile
+            try {
+              let existingContent = '';
+              try {
+                existingContent = await (window as any).electronAPI.readFile(filePath, 'utf8');
+              } catch {
+                // File doesn't exist, that's okay
+              }
+              return (window as any).electronAPI.writeFile(filePath, existingContent + data);
+            } catch (error) {
+              console.error(`Failed to append to file ${filePath}:`, error);
+              throw error;
+            }
+          },
           mkdir: async (dirPath: string, options?: any) => {
             return (window as any).electronAPI.mkdir(dirPath, options);
           },
