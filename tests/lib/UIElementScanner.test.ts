@@ -6,12 +6,12 @@ class MockLocator {
 }
 
 describe('findElements', () => {
-  it('selects interactive elements using page.locator', () => {
+  it('selects interactive elements using page.locator', async () => {
     const allResult = [new MockLocator('a'), new MockLocator('b')];
     const mockLocator = { all: jest.fn(() => allResult) };
     const mockPage = { locator: jest.fn(() => mockLocator) } as any;
 
-    const result = findElements(mockPage);
+    const result = await findElements(mockPage);
 
     expect(mockPage.locator).toHaveBeenCalledWith(
       'button, a, input, [role="button"], [data-testid]'

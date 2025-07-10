@@ -8,7 +8,7 @@ test.describe('Visual regression', () => {
     const indexPath = path.join(testInfo.config.rootDir, 'index.html');
     await page.goto('file://' + indexPath);
 
-    const elements = findElements(page);
+    const elements = await findElements(page);
     for (const locator of elements) {
       await captureSnapshot(locator, 'default', testInfo);
     }
@@ -18,7 +18,7 @@ test.describe('Visual regression', () => {
     const indexPath = path.join(testInfo.config.rootDir, 'index.html');
     await page.goto('file://' + indexPath);
 
-    const elements = findElements(page);
+    const elements = await findElements(page);
     for (const locator of elements) {
       await compareSnapshots(locator, 'default', testInfo);
     }
