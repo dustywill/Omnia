@@ -82,11 +82,11 @@ This section covers tasks from `docs/testing/UI_COMPONENT_TEST_PLAN.md`.
   - [X] Review tests for `SettingsPage`. (Missing: No `SettingsPage.test.tsx` found)
 
 ### 2.2: Implement Missing Component Tests
-- [ ] **For each component identified with missing coverage in the audit:**
-  - [ ] Create a new branch for the component's test improvements.
-  - [ ] Write a new failing test case in the component's spec file (e.g., `Button.test.tsx`).
-  - [ ] If applicable, update the component to make the test pass.
-  - [ ] Refactor the tests for clarity and ensure all conditions from the component matrix are met.
+- [X] **For each component identified with missing coverage in the audit:**
+  - [X] Create a new branch for the component's test improvements.
+  - [X] Write a new failing test case in the component's spec file (e.g., `Button.test.tsx`).
+  - [X] If applicable, update the component to make the test pass.
+  - [X] Refactor the tests for clarity and ensure all conditions from the component matrix are met.
 
 - [X] **Implement `Button` Tests (`tests/ui/components/Button.test.tsx`):**
   - [X] Renders text/children.
@@ -180,8 +180,8 @@ This section covers tasks from `docs/testing/UI_COMPONENT_TEST_PLAN.md`.
 - [X] **Update `package.json` for Combined Test Runs:**
   - [X] Ensure a script exists for unit tests, e.g., `"test:unit": "jest"`.
   - [X] Modify the main `"test"` script to: `"npm run test:unit && npm run test:e2e"`.
-- [ ] **Configure CI Workflow:**
-  - [ ] Locate the CI configuration file (e.g., in `.github/workflows/`).
-  - [ ] Add a step to install Playwright dependencies (`npx playwright install`).
-  - [ ] Modify the testing step in the CI pipeline to run the new combined `"test"` command.
-  - [ ] Add a step to upload the Playwright HTML report as a build artifact on test failure.
+- [X] **Configure CI Workflow:**
+  - [X] Locate the CI configuration file (e.g., in `.github/workflows/`).
+  - [X] Add a step to install Playwright dependencies (`npx playwright install`).
+  - [X] Modify the testing step in the CI pipeline to run the new combined `"test"` command.
+  - [X] Add a step to upload the Playwright HTML report as a build artifact on test failure.
